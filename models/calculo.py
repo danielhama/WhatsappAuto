@@ -18,7 +18,7 @@ def calcular_juros(valor_avaliacao, valor_emprestimo, vencimento, prazo):
     taxa = 0.0199
     mora = 1/100
     taxa_diaria = taxa / 30
-    tarifa = valor_avaliacao * 0.9/100
+    tarifa = round((valor_avaliacao * 0.9/100),2)
     # iof = valor_emprestimo * IOF
     juros = []
     if ultima_renovacao < alteracao_taxa:
@@ -27,18 +27,18 @@ def calcular_juros(valor_avaliacao, valor_emprestimo, vencimento, prazo):
         taxa_remuneratoria = 0.0199
     for dia in dias:
         if dia == 30:
-            iof = IOF_30 * valor_emprestimo
+            iof = round((IOF_30 * valor_emprestimo), 2)
         elif dia == 60:
-            iof = IOF_60 * valor_emprestimo
+            iof = round((IOF_60 * valor_emprestimo), 2)
         elif dia == 90:
-            iof = IOF_90 * valor_emprestimo
+            iof = round((IOF_90 * valor_emprestimo), 2)
         else:
-            iof = IOF_120 * valor_emprestimo
-        juro = (valor_emprestimo * taxa_diaria * dia) + tarifa + iof
+            iof = round((IOF_120 * valor_emprestimo), 2)
+        juro = round(((valor_emprestimo * taxa_diaria * dia) + tarifa + iof), 2)
         juros.append(juro)
     if atraso > 0:
-        encargos_atraso = (valor_emprestimo * (taxa_remuneratoria/30) * atraso) + (valor_emprestimo * 0.0075) + (
-                valor_emprestimo * mora * atraso / 30)
+        encargos_atraso = round(((valor_emprestimo * (taxa_remuneratoria/30) * atraso) + (valor_emprestimo * 0.0075) + (
+                valor_emprestimo * mora * atraso / 30)),2 )
         for idx, juro in enumerate(juros):
             juro = juros[idx] + encargos_atraso
             juros.pop(idx)
@@ -91,7 +91,7 @@ def calcular_juros_futuros(valor_avaliacao, valor_emprestimo, vencimento, prazo,
     taxa = 0.0199
     mora = 1/100
     taxa_diaria = taxa / 30
-    tarifa = valor_avaliacao * 0.9/100
+    tarifa = round(valor_avaliacao * 0.9/100, 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
         taxa_remuneratoria = 0.021
@@ -106,11 +106,11 @@ def calcular_juros_futuros(valor_avaliacao, valor_emprestimo, vencimento, prazo,
             iof = IOF_90 * valor_emprestimo
         else:
             iof = IOF_120 * valor_emprestimo
-        juro = (valor_emprestimo * taxa_diaria * dia) + tarifa + iof
+        juro = round(((valor_emprestimo * taxa_diaria * dia) + tarifa + iof), 2)
         juros.append(juro)
     if atraso > 0:
-        encargos_atraso = (valor_emprestimo * (taxa_remuneratoria/30) * atraso) + (valor_emprestimo * 0.0075) + (
-                valor_emprestimo * mora * atraso / 30)
+        encargos_atraso = round((valor_emprestimo * (taxa_remuneratoria/30) * atraso) + (valor_emprestimo * 0.0075) + (
+                valor_emprestimo * mora * atraso / 30),2)
         for idx, juro in enumerate(juros):
             juro = juros[idx] + encargos_atraso
             juros.pop(idx)
@@ -146,7 +146,7 @@ def calcular_margem(valor_avaliacao, valor_emprestimo, vencimento, prazo, limite
     taxa = 0.0199
     mora = 1 / 100
     taxa_diaria = taxa / 30
-    tarifa = valor_avaliacao * 0.9 / 100
+    tarifa = round((valor_avaliacao * 0.9 / 100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
         taxa_remuneratoria = 0.021
