@@ -1,31 +1,30 @@
+import locale
 import os
 import time
 from os import mkdir, remove
 
+from kivy.app import App
+from kivy.clock import Clock
 from kivy.config import Config
+from kivy.lang import Builder
+from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.properties import StringProperty
+from kivy.uix.behaviors import FocusBehavior
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
 from models.calculo import *
 from models.enviar import *
 from models.formata import *
 from models.utils2 import tempo_execucao, leia_texto, salva_texto, filtra_vencimento, filtra_data
 from models.vCARD import csv_para_vcf
-
-from kivy.uix.label import Label
-from kivy.clock import Clock
-from kivy.lang import Builder
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty
-from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.properties import BooleanProperty, ObjectProperty
-from kivy.uix.behaviors import FocusBehavior
-from kivy.uix.recycleview.layout import LayoutSelectionBehavior
-import locale
 
 locale.setlocale(locale.LC_MONETARY, 'pt_BR.UTF-8')
 Config.set('graphics', 'width', '1280')
@@ -998,10 +997,10 @@ class RV(BoxLayout):
             logging.exception(str(e))
 
     def search(self, pesquisa: str):
-        if ".213."not in self.rv.data[0]['text']:
-        #     # self.populate_contratos()
-        #     pass
-        # else:
+        if ".213." not in self.rv.data[0]['text']:
+            #     # self.populate_contratos()
+            #     pass
+            # else:
             self.populate()
         lista = []
         nome = pesquisa.upper()
@@ -1410,9 +1409,7 @@ class RVCalculo(BoxLayout):
             logging.exception(str(e))
 
 
-
 class RVCalculoLiquidacao(BoxLayout):
-
 
     def populate_liquidacao(self):
         try:
@@ -1437,7 +1434,6 @@ class RVCalculoLiquidacao(BoxLayout):
         nome = nome[0].split(" ")
         for telefone in telefones:
             whats.envia_msg.send_whatsapp_msg(cpf=cpf, texto=self.mensagem, nome=nome[0], numero=telefone, header=False)
-
 
     def lista_calculo_liquidacao(self):
         """
@@ -1489,6 +1485,7 @@ class RVCalculoLiquidacao(BoxLayout):
             return calculos
         except Exception as e:
             logging.exception(str(e))
+
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
@@ -1866,7 +1863,6 @@ class Whats(App, ProgBar):
         self.contador = 0
 
         self.somente_teste()
-
 
     def somente_teste(self, dt=None):
         """Faz o teste dos telefones importados verificando se o número possui whatsapp pelo campo de envia mensagem, caso o número não possua whatsapp é apresentado
