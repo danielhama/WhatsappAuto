@@ -38,7 +38,11 @@ class EnviaMensagem:
 
     def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
-            self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+            numero = str(numero)
+            if len(numero) == 13:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+            else:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         except:
             return
         try:

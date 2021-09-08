@@ -209,7 +209,7 @@ def listar_contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < date('now','-1 day') GROUP BY telefones.numero")
+        "SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < date('now','-2 day') GROUP BY telefones.numero")
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
