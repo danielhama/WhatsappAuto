@@ -1,4 +1,4 @@
-from models.utils import listar, listar_telefones_por_cpf
+from models.utils_old import listar, listar_telefones_por_cpf
 from csv import writer
 from random import choice
 from os import path

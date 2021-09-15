@@ -7,12 +7,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import invisibility_of_element_located
 from qrcode import make
 import psutil
-from models.utils import *
+from models.utils_old import *
 # from models.manipular import retorna_lista_sem_whats, salva_lista_sem_whats
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from models.utils import inserir_sem_whats, deletar_sem_whats
+from models.utils_old import inserir_sem_whats, deletar_sem_whats
 
 
 class EnviaMensagem:
@@ -41,8 +41,10 @@ class EnviaMensagem:
             numero = str(numero)
             if len(numero) == 13:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+                # sleep(5)
             else:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+                # sleep(5)
         except:
             return
         try:
@@ -52,13 +54,18 @@ class EnviaMensagem:
             pass
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
-            self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 10)  #/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]
-            txt_box = self.driver.find_element(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]')
+            # sleep(5)
+            # self.element_presence(By.XPATH, '/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/div/div[2]/div[1]/div/div[2]', 10)  #/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]
+            sleep(5)#                                     /html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/div/div[2]/div[1]/div/div[2]
+            txt_box = self.driver.find_element(By.CSS_SELECTOR, "._1LbR4 > div:nth-child(2)")#'/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/div/div[2]/div[1]/div/div[2]')
             nome = nome.capitalize()
             if header == True:
+                # sleep(5)
                 txt_box.send_keys(f'Prezado(a) {nome}')
+                # sleep(.5)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             for msg in texto:
+                # sleep(.5)
                 txt_box.send_keys(msg)
                 # press SHIFT + ENTER (for new line)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()

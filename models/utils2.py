@@ -1,6 +1,6 @@
 import datetime
 import logging
-from models.utils import listar_clientes_telefone, listar_contratos_vencidos
+from models.utils_old import listar_clientes_telefone, listar_contratos_vencidos
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 

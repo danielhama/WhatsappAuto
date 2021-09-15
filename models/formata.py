@@ -1,4 +1,4 @@
-from models.utils import *
+from models.utils_old import *
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 
