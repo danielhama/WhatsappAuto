@@ -1,4 +1,6 @@
+models/__pycache__/
 .idea
 geckodriver
 geckodriver.log
-models/__pycache__/
+
+

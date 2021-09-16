@@ -240,49 +240,69 @@ def lista_telefones(whatsapp):
 
 def filtra_calculo_margem():
     """
-            Função para listar os contratos do cliente
+            Função para listar clientes com margem acima de R$ 500,00
             """
     # data30, data60, data90, data120 = calcular_data()
 
     try:
         conn = conectar()
         cursor = conn.cursor()
-        calculos = []
         clientes1 = []
-        # hoje = datetime.datetime.today()
-        d30 = 0
-
         cursor.execute(
-            f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.limite, clientes.nome, clientes.cpf from contratos, clientes where contratos.id_cliente = clientes.id')
+            f'SELECT clientes.id, clientes.cpf, clientes.nome FROM clientes')
         clientes = cursor.fetchall()
-        if len(clientes) > 0:
-            for cliente in clientes:
-                vencimento = cliente[1].split(' ')
-                vencimento = datetime.datetime.strptime(vencimento[0], '%Y-%m-%d')
-                prazo = cliente[4]
-                total_avaliacao = cliente[2]
-                total_emprestimo = cliente[3]
-                limite = cliente[5]
-                d30_t, d60_t, d90_t, d120_t = calcular_margem(total_avaliacao, total_emprestimo,
-                                                              vencimento, prazo, limite, 0)
-                if d30_t < 0 and d30_t < -500:
-                    telefones = listar_telefones_por_cpf(cliente[7])
+
+        for cliente in clientes:
+            id = cliente[0]
+            d30 = 0
+            d60 = 0
+            d90 = 0
+            d120 = 0
+            total_emprestimo = 0
+            cursor.execute(
+                f'select SUM(contratos.valor_avaliacao) as total from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+            total = cursor.fetchone()
+            total = total[0]
+            cursor.execute(
+                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.limite, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+            contratos = cursor.fetchall()
+            if len(contratos) > 0:
+                for contrato in contratos:
+                    vencimento = datetime.datetime.strptime(contrato[1].split(' ')[0], '%Y-%m-%d')
+                    prazo = contrato[4]
+                    avaliacao = contrato[2]
+                    emprestimo = contrato[3]
+                    limite = contrato[5]
+                    if limite == 100:
+                        total_emprestimo += avaliacao
+                    else:
+                        total_emprestimo += avaliacao * .85
+                    d30_t, d60_t, d90_t, d120_t = calcular_margem(avaliacao, emprestimo,
+                                                                  vencimento, prazo, limite, total)
+                    d30 += d30_t
+                    d60 += d60_t
+                    d90 += d90_t
+                    d120 += d120_t
+                if d30 < -500:
+                    telefones = listar_telefones_por_cpf(cliente[1])
                     sem_whats = lista_telefones("0")
                     if len(telefones) >= 1:
                         for telefone in telefones:
                             if telefone not in sem_whats:
-                                cliente_1 = {'Nome': cliente[6], 'CPF': cliente[7], 'Telefones': telefone,
-                                           'Vencimento': vencimento, 'Margem': d30_t}
-                                clientes1.append(cliente_1)
+                                telefone = str(telefone)
 
-
-
+                                if len(telefone) == 13:
+                                    telefone = telefone[0:4]+telefone[5:13]
+                                    cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
+                                               'Vencimento': vencimento, 'Margem': d30}
+                                    clientes1.append(cliente_1)
         else:
-            print('Cliente sem margem')
+            print('Cliente sem contratos ativos')
         desconectar(conn)
         clientes = pd.DataFrame(clientes1)
         clientes.drop_duplicates(subset='Telefones', inplace=True)
         clientes1 = clientes.to_dict('records')
+
         return clientes1
 
     except Exception as e:

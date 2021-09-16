@@ -161,7 +161,7 @@ def calcular_margem(valor_avaliacao, valor_emprestimo, vencimento, prazo, limite
             iof = IOF_90 * valor_emprestimo1
         else:
             iof = IOF_120 * valor_emprestimo1
-        juro = (valor_emprestimo1 * taxa_diaria * dia) + tarifa + iof -margem
+        juro = (valor_emprestimo1 * taxa_diaria * dia) + tarifa + iof - margem
         juros.append(juro)
     if atraso > 0:
         encargos_atraso = (valor_emprestimo * (taxa_remuneratoria / 30) * atraso) + (valor_emprestimo * 0.0075) + (
