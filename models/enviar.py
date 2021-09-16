@@ -12,7 +12,9 @@ from models.utils import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from models.utils import inserir_sem_whats, deletar_sem_whats
+# from models.utils import inserir_sem_whats, deletar_sem_whats
+import models.Seletores as sel
+
 
 
 class EnviaMensagem:
@@ -53,10 +55,8 @@ class EnviaMensagem:
             pass
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
-            # self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 15)  #/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]
-            sleep(7)
-
-            txt_box = self.driver.find_element(By.CSS_SELECTOR, '._1LbR4 > div:nth-child(2)')
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+            txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
             nome = nome.capitalize()
             if header == True:
                 txt_box.send_keys(f'Prezado(a) {nome}')
@@ -66,7 +66,7 @@ class EnviaMensagem:
                 # press SHIFT + ENTER (for new line)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(.5)
-            # txt_box.send_keys(Keys.RETURN)
+            txt_box.send_keys(Keys.RETURN)
             sleep(.5)
 
         except Exception as e:
@@ -79,11 +79,11 @@ class EnviaMensagem:
                 return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
     def element_presence(self, by, xpath, time):  # Define espera para a presença de determinado elemento
-        element_present = EC.presence_of_element_located((By.XPATH, xpath))
+        element_present = EC.presence_of_element_located((by, xpath))
         WebDriverWait(self.driver, time).until(element_present)
 
     def element_not_presence(self, by, id, time):  # Defina espera para a não presença de determinado elemento
-        element_not_present = invisibility_of_element_located((By.NAME, id))
+        element_not_present = invisibility_of_element_located((by, id))
         WebDriverWait(self.driver, time).until(element_not_present)
 
     def is_connected(self):  # Testa se existe conexão
@@ -100,25 +100,25 @@ class EnviaMensagem:
         except:
             return
         try:
-            self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 15)
+            self.element_presence(By.CSS_SELECTOR, sel.ok, 15)
 
         except Exception as e:
             try:
-                self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 10)
+                self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
                 deletar_sem_whats(numero_celular)
                 self.excluidos += 1
             except:
-                return self.testa(numero_celular=numero_celular)
+                return self.testa(numero_celular=numero_celular, id_sem=0)
 
     def teste(self, numero_celular, cpf):
 
         self.driver.get(f"https://web.whatsapp.com/send?phone={numero_celular}&source=&data=#")
         try:
-            self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 10)
+            self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
 
         except Exception as e:
             try:
-                self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
+                self.element_presence(By.CSS_SELECTOR, sel.ok, 5)
                 inserir_sem_whats(numero_celular)
                 self.sem_whats.append(numero_celular)
             except:
