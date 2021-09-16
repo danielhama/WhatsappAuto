@@ -1308,16 +1308,16 @@ class RVCalculo(BoxLayout):
 
                 msg_vazia = " "
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 30 dias {locale.currency(d30, grouping=True)} - Vencimento {data30}'
+                msg = f'Renovação para 30 dias {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 60 dias {locale.currency(d60, grouping=True)} - Vencimento {data60}'
+                msg = f'Renovação para 60 dias {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 90 dias {locale.currency(d90, grouping=True)} - Vencimento {data90}'
+                msg = f'Renovação para 90 dias {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 120 dias {locale.currency(d120, grouping=True)} - Vencimento {data120}'
+                msg = f'Renovação para 120 dias {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
 
@@ -1385,16 +1385,16 @@ class RVCalculo(BoxLayout):
 
                 msg_vazia = " "
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Vencimento {data30}'
+                msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Vencimento {data60}'
+                msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Vencimento {data90}'
+                msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
-                msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Vencimento {data120}'
+                msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
                 self.mensagem.append(msg)
                 self.mensagem.append(msg_vazia)
 

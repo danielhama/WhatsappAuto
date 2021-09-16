@@ -53,7 +53,9 @@ class EnviaMensagem:
             pass
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
-            self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 10)  #/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]
+            self.element_presence(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]', 15)  #/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]
+            sleep(1)
+
             txt_box = self.driver.find_element(By.XPATH, '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]/div/div[2]')
             nome = nome.capitalize()
             if header == True:
