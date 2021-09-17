@@ -14,7 +14,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 import models.Seletores as sel
 from selenium.webdriver.firefox.webdriver import FirefoxProfile
-from selenium.webdriver.chrome.webdriver import
+from selenium.webdriver.chrome.webdriver import *
 
 
 class EnviaMensagem:
@@ -34,13 +34,14 @@ class EnviaMensagem:
         options.add_argument(
             r"user-data-dir={}".format(profile))
 
-        self.profile = FirefoxProfile("/home/daniel/.mozilla/firefox/l4nddl6a.Whatsapp")
+        # self.profile = FirefoxProfile("/home/daniel/.mozilla/firefox/l4nddl6a.Whatsapp")
         if head == True:
             options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Firefox(executable_path="geckodriver", options=options, firefox_profile=self.profile)
+            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
         else:
-            self.driver = webdriver.Firefox(executable_path="geckodriver", firefox_profile=self.profile)
+            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
+
         self.driver.get("https://web.whatsapp.com")
 
     def fecha_driver(self):

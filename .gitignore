@@ -3,5 +3,5 @@ models/__pycache__/
 geckodriver
 geckodriver.log
 qrcode.jpg
-
+profile/
 
