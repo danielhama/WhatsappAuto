@@ -1533,7 +1533,6 @@ class Whats(App, ProgBar):
         clientes_importados = self.clientes
 
     def chama(self):
-        self.root.ids.right_content.text = 'Escaneie o código QR'
         try:
             self.envia_msg.fecha_driver()
         except Exception as e:
@@ -1541,7 +1540,12 @@ class Whats(App, ProgBar):
             pass
         try:
             self.envia_msg.chama_driver(self.headless)
-            Clock.schedule_once(self.code, 5)
+            if self.envia_msg.verifica_login():
+                self.root.ids.right_content.text = "Logado"
+            else:
+                self.root.ids.right_content.text = 'Escaneie o código QR'
+                if self.headless:
+                    Clock.schedule_once(self.code, 0.5)
         except Exception as erro_chama:
             logging.exception(str(erro_chama))
             self.root.ids.right_content.text = str(erro_chama)

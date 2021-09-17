@@ -12,6 +12,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 import models.Seletores as sel
+from selenium.webdriver.firefox.webdriver import FirefoxProfile
 
 
 class EnviaMensagem:
@@ -23,17 +24,28 @@ class EnviaMensagem:
         self.sem_whats = []
 
 
+
     def chama_driver(self, head: bool = True) -> None:
+        self.profile = FirefoxProfile("/home/daniel/.mozilla/firefox/l4nddl6a.Whatsapp")
         if head == True:
             options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Firefox(executable_path="geckodriver", options=options)
+            self.driver = webdriver.Firefox(executable_path="geckodriver", options=options, firefox_profile=self.profile)
         else:
-            self.driver = webdriver.Firefox(executable_path="geckodriver")
+            self.driver = webdriver.Firefox(executable_path="geckodriver", firefox_profile=self.profile)
         self.driver.get("https://web.whatsapp.com")
 
     def fecha_driver(self):
         self.driver.quit()
+
+    def verifica_login(self) -> bool:
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "._2UwZ_ > canvas:nth-child(3)")))
+            return False
+        except Exception as e:
+            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
+            return True
 
     def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
