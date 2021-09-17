@@ -1,3 +1,4 @@
+import os
 import socket
 from time import sleep
 from selenium import webdriver
@@ -13,6 +14,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 import models.Seletores as sel
 from selenium.webdriver.firefox.webdriver import FirefoxProfile
+from selenium.webdriver.chrome.webdriver import
 
 
 class EnviaMensagem:
@@ -26,6 +28,12 @@ class EnviaMensagem:
 
 
     def chama_driver(self, head: bool = True) -> None:
+        dir_path = os.getcwd()
+        profile = os.path.join(dir_path, "profile", "wpp")
+        options = webdriver.ChromeOptions()
+        options.add_argument(
+            r"user-data-dir={}".format(profile))
+
         self.profile = FirefoxProfile("/home/daniel/.mozilla/firefox/l4nddl6a.Whatsapp")
         if head == True:
             options = Options()

@@ -2,5 +2,6 @@ models/__pycache__/
 .idea
 geckodriver
 geckodriver.log
+qrcode.jpg
 
 
