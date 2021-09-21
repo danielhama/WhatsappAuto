@@ -11,9 +11,7 @@ import psutil
 from models.utils import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
 import models.Seletores as sel
-from selenium.webdriver.firefox.webdriver import FirefoxProfile
 from selenium.webdriver.chrome.webdriver import *
 
 
@@ -33,8 +31,6 @@ class EnviaMensagem:
         options = webdriver.ChromeOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
-
-        # self.profile = FirefoxProfile("/home/daniel/.mozilla/firefox/l4nddl6a.Whatsapp")
         if head == True:
             options = Options()
             options.add_argument("-headless")
@@ -50,22 +46,24 @@ class EnviaMensagem:
     def verifica_login(self) -> bool:
         try:
             WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "._2UwZ_ > canvas:nth-child(3)")))
-            return False
-        except Exception as e:
-            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
+                EC.visibility_of_element_located((By.CSS_SELECTOR, sel.desconectar)))
             return True
+        except:
+            try:
+                WebDriverWait(self.driver, 10).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "._2UwZ_ > canvas:nth-child(3)")))
+                return False
+            except Exception as e:
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
+                return True
 
     def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
             numero = str(numero)
             if len(numero) == 13:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
-                # sleep(5)
             else:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
-                # sleep(5)
-
         except:
             return
         try:
@@ -103,7 +101,7 @@ class EnviaMensagem:
         WebDriverWait(self.driver, time).until(element_present)
 
     def element_not_presence(self, by, id, time):  # Defina espera para a não presença de determinado elemento
-        element_not_present = invisibility_of_element_located((by, id))
+        element_not_present = EC.invisibility_of_element_located((by, id))
         WebDriverWait(self.driver, time).until(element_not_present)
 
     def is_connected(self):  # Testa se existe conexão
@@ -114,42 +112,55 @@ class EnviaMensagem:
         except:
             self.is_connected()
 
-    def testa(self, numero_celular, id_sem):
+    def testa(self, numero) -> bool:
         try:
-            self.driver.get(f"https://web.whatsapp.com/send?phone={numero_celular}&source=&data=#")
+            numero = str(numero)
+            if len(numero) == 13:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4] + numero[5:13]}&source=&data=#")
+            else:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         except:
             return
         try:
-            self.element_presence(By.CSS_SELECTOR, sel.ok, 15)
-
+            sleep(4)
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            print('Não possui whatsapp')
+            return True
         except Exception as e:
+            print("Não encontrei o botão ok, testando campo de msg")
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
-                deletar_sem_whats(numero_celular)
+                deletar_sem_whats(numero)
                 self.excluidos += 1
+                return False
             except:
-                return self.testa(numero_celular=numero_celular, id_sem=0)
+                return self.testa(numero=numero)
 
-    def teste(self, numero_celular, cpf):
+    def teste(self, numero, cpf):
 
-        self.driver.get(f"https://web.whatsapp.com/send?phone={numero_celular}&source=&data=#")
+        numero = str(numero)
+        if len(numero) == 13:
+            self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4] + numero[5:13]}&source=&data=#")
+        else:
+            self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         try:
             self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
 
         except Exception as e:
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.ok, 5)
-                inserir_sem_whats(numero_celular)
-                self.sem_whats.append(numero_celular)
-            except:
-                return self.teste(numero_celular, cpf)
+                inserir_sem_whats(numero)
+                self.sem_whats.append(numero)
+            except Exception as e:
+                print(e)
+                return self.teste(numero, cpf)
 
     def code(self):
         """ Cria um qrcode a partir dos dados obtidos do campo 'data=ref' """
         try:
             self.element_presence(By.XPATH, '//*[@id="app"]', 5)
             data = self.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-            # self.tmp = tempfile.NamedTemporaryFile(delete=True)
             self.img = make(data)
             self.img.show()
             self.img.save(stream='qrcode.jpg')

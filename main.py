@@ -1822,11 +1822,14 @@ class Whats(App, ProgBar):
                 return
             if self.qtd_inicial > 0:
                 try:
-                    id_sem = pesquisa_id_por_telefone(self.numero)
-                    self.envia_msg.testa(numero_celular=self.numero, id_sem=id_sem)
+                    # id_sem = pesquisa_id_por_telefone(self.numero)
+                    self.tem_whats = self.envia_msg.testa(numero=self.numero)
                     self.contador += 1
                     self.root.ids.progbar.value += self.value
-                    self.root.ids.right_content.text = f"Testando o número {self.numero}\n{self.contador}/{self.qtd_inicial}"
+                    if self.tem_whats:
+                        self.root.ids.right_content.text = f"{self.numero} não tem whatsapp\n{self.contador}/{self.qtd_inicial}"
+                    else:
+                        self.root.ids.right_content.text = f"{self.numero} tem whatsapp\n{self.contador}/{self.qtd_inicial}"
 
                 except Exception as erro_teste:
                     self.root.ids.right_content.text = str(erro_teste)
