@@ -5,7 +5,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.expected_conditions import invisibility_of_element_located
 from qrcode import make
 import psutil
 from models.utils import *
@@ -125,6 +124,7 @@ class EnviaMensagem:
             sleep(4)
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            sleep(.5)
             print('Não possui whatsapp')
             return True
         except Exception as e:
