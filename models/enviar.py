@@ -124,7 +124,7 @@ class EnviaMensagem:
             sleep(4)
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
-            sleep(.5)
+            sleep(.1)
             print('Não possui whatsapp')
             return True
         except Exception as e:
