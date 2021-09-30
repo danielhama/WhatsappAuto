@@ -407,6 +407,45 @@ BoxLayout:
             height: self.minimum_height
             orientation: 'vertical'
             
+<RVTelefonesEnviar>:
+    canvas:
+        Color:
+            rgba: 0.3, 0.3, 0.3, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    rv_telefone: rv_telefone
+    orientation: 'vertical'
+    
+    GridLayout:
+        cols: 4
+        rows: 1
+        size_hint_y: None
+        height: dp(50)
+        padding: dp(8)
+        spacing: dp(16)
+        
+        
+        BoxLayout:
+            spacing: dp(8)
+            Button:
+                text: 'Enviar'
+                on_press: root.enviar_mensagem()
+            
+    
+    RecycleView:
+        id: rv_telefone
+        scroll_type: ['content']
+        scroll_wheel_distance: dp(114)
+        # bar_width: dp(10)
+        viewclass: 'Row1'
+        SelectableRecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+
 <RVContratos>:
     canvas:
         Color:
@@ -774,6 +813,8 @@ class Row1(RecycleDataViewBehavior, Label):
         if is_selected:
             global indice_1
             indice_1 = self.index
+            global telefone_enviar
+            telefone_enviar = rv.data[index]['text']
 
 
 class Row2(RecycleDataViewBehavior, Label):
@@ -802,7 +843,6 @@ class Row2(RecycleDataViewBehavior, Label):
         if is_selected:
             contrato = " ".join((rv.data[index]['text']).split()).split(" ")
             lista_de_contratos.append(contrato)
-            print(lista_de_contratos)
 
         else:
             if len(lista_de_contratos) != 0:
@@ -822,7 +862,7 @@ class RVTelefonesEnviar(BoxLayout):
             logging.basicConfig(filename='app.log', level=logging.INFO)
 
     def enviar_mensagem(self):
-
+        whats.envia_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefone_enviar)
 
     def listar_exibicao_telefones(self):
         """
@@ -1199,16 +1239,23 @@ class RVCalculo(BoxLayout):
             logging.exception(str(e))
 
     def enviar_cliente(self):
-        telefones = listar_telefones_por_cpf(cpf)
-        nome = listar_nome(cpf)
-        nome = nome[0].split(" ")
-        for telefone in telefones:
-            whats.envia_msg.send_whatsapp_msg(cpf=cpf, texto=self.mensagem, nome=nome[0], numero=telefone, header=False)
+        content = RVTelefonesEnviar()
+        popup = Popup.content
+        self._popup = Popup(title="Selecione o telefone para enviar", content=content,
+                            size_hint=(0.4, 0.3))
+        self._popup.open()
+        content.populate()
+        # telefones = listar_telefones_por_cpf(cpf)
+        # nome = listar_nome(cpf)
+        # nome = nome[0].split(" ")
+        # for telefone in telefones:
+        #     whats.envia_msg.send_whatsapp_msg(cpf=cpf, texto=self.mensagem, nome=nome[0], numero=telefone, header=False)
 
     def calcula_juros_selecionados(self):
 
         calculos = []
-        self.mensagem = []
+        global mensagem
+        mensagem = []
         d30 = 0
         d60 = 0
         d90 = 0
@@ -1241,19 +1288,19 @@ class RVCalculo(BoxLayout):
         calculos.append(calculo)
 
         msg_vazia = " "
-        self.mensagem.append(msg_vazia)
+        mensagem.append(msg_vazia)
         msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Vencimento {data30}'
-        self.mensagem.append(msg)
-        self.mensagem.append(msg_vazia)
+        mensagem.append(msg)
+        mensagem.append(msg_vazia)
         msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Vencimento {data60}'
-        self.mensagem.append(msg)
-        self.mensagem.append(msg_vazia)
+        mensagem.append(msg)
+        mensagem.append(msg_vazia)
         msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Vencimento {data90}'
-        self.mensagem.append(msg)
-        self.mensagem.append(msg_vazia)
+        mensagem.append(msg)
+        mensagem.append(msg_vazia)
         msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Vencimento {data120}'
-        self.mensagem.append(msg)
-        self.mensagem.append(msg_vazia)
+        mensagem.append(msg)
+        mensagem.append(msg_vazia)
 
         return calculos
 
@@ -1899,7 +1946,7 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = 'Abra o web.whatsapp e escaneie o código QR antes de tentar enviar'
             return
         try:
-            print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
+            # print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
             self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome[0], self.cliente['CPF'])
             self.contador += 1
             self.root.ids.progbar.value += self.value

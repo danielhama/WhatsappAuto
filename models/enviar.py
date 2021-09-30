@@ -89,11 +89,39 @@ class EnviaMensagem:
         except Exception as e:
             try:
                 self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
-                print("Número de telefone não tem zap:" + str(numero))
                 self.sem_whats.append(numero)
                 inserir_sem_whats(numero)
             except:
                 return self.send_whatsapp_msg(numero, texto, nome, cpf)
+
+    def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
+        try:
+            numero = str(numero)
+            if len(numero) == 13:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+            else:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+        except:
+            return
+        try:
+            sleep(0.5)
+            self.driver.switch_to.alert().accept()
+        except Exception as e:
+            pass
+        # Testa se existe o campo de mensagem na página e envia as mensagens
+        try:
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+            txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+            for msg in texto:
+                txt_box.send_keys(msg)
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+            sleep(.5)
+            # txt_box.send_keys(Keys.RETURN)
+            sleep(.5)
+
+        except Exception as e:
+            pass
 
     def element_presence(self, by, xpath, time):  # Define espera para a presença de determinado elemento
         element_present = EC.presence_of_element_located((by, xpath))
@@ -125,10 +153,8 @@ class EnviaMensagem:
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
             sleep(.1)
-            print('Não possui whatsapp')
             return True
         except Exception as e:
-            print("Não encontrei o botão ok, testando campo de msg")
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
                 deletar_sem_whats(numero)
