@@ -309,6 +309,17 @@ def filtra_calculo_margem():
         print(e)
         pass
 
+def consulta_prazo(contrato):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"SELECT prazo FROM contratos WHERE contratos.numero = '{contrato}'")
+        prazo = cursor.fetchall()
+        desconectar(conn)
+        return prazo[0][0]
+    except:
+        desconectar(conn)
+
 
 # DELETAR
 def deletar_contrato(numero):

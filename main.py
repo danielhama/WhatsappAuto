@@ -254,7 +254,13 @@ BoxLayout:
         Rectangle:
             size: self.size
             pos: self.pos
-
+<Row2>:
+    canvas.before:
+        Color:
+            rgb: utils.get_color_from_hex('#0270af') if self.selected else (0.2, 0.2, 0.2, 1)
+        Rectangle:
+            size: self.size
+            pos: self.pos
 <RV>:
     canvas:
         Color:
@@ -438,12 +444,15 @@ BoxLayout:
         scroll_wheel_distance: dp(114)
         # bar_width: dp(10)
         viewclass: 'Row2'
-        RecycleBoxLayout:
+        SelectableRecycleBoxLayout:
             default_size: None, dp(56)
             default_size_hint: 1, None
             size_hint_y: None
             height: self.minimum_height
             orientation: 'vertical'
+            pos_hint: {'x': 0.0, 'y': 0.5}
+            multiselect: True
+            touch_multiselect: True                        
     GridLayout:
         cols:5
         rows:1
@@ -452,10 +461,10 @@ BoxLayout:
         padding: dp(8)
         spacing: dp(16)
         Button:
-            text: 'Calcular Juros'
+            text: 'Calcular Juros Todos'
             on_press: root.calcular()
         Button:
-            text: 'Calcular Juros Vencidos'
+            text: 'Calcular Selecionados'
             on_press: root.calcular1()
         Button:
             text: 'Calcular Margem'
@@ -641,22 +650,22 @@ BoxLayout:
             Label:
                 id: valor_total
 
-<Row2@RecycleKVIDsDataViewBehavior+BoxLayout>:
-    canvas.before:
-        Color:
-            rgba: 0.3, 0.3, 0.3, 1
-        Rectangle:
-            size: self.size
-            pos: self.pos
-    value: ''
-    Label:
-        id: contrato
-    Label:
-        id: avaliacao
-    Label:
-        id: emprestimo    
-    Label:
-        id: vencimento
+# <Row2@RecycleKVIDsDataViewBehavior+BoxLayout>:
+#     # canvas.before:
+#     #     Color:
+#     #         rgba: 0.3, 0.3, 0.3, 1
+#     #     Rectangle:
+#     #         size: self.size
+#     #         pos: self.pos
+#     value: ''
+#     Label:
+#         id: contrato
+#     Label:
+#         id: avaliacao
+#     Label:
+#         id: emprestimo    
+#     Label:
+#         id: vencimento
 
     
 <Row3@RecycleKVIDsDataViewBehavior+BoxLayout>:
@@ -739,9 +748,6 @@ class Row(RecycleDataViewBehavior, Label):
             indice = self.index
             cpf = rv.data[index]['text'].split('|')[1]
             cpf = cpf.strip()
-            print("selection changed to {0}".format(rv.data[index]))
-        else:
-            print("selection removed for {0}".format(rv.data[index]))
 
 
 class Row1(RecycleDataViewBehavior, Label):
@@ -768,11 +774,76 @@ class Row1(RecycleDataViewBehavior, Label):
         if is_selected:
             global indice_1
             indice_1 = self.index
-            # cpf = rv.data[index]['text'].split(',')[1]
-            print("selection changed to {0}".format(rv.data[index]))
-        else:
-            print("selection removed for {0}".format(rv.data[index]))
 
+
+class Row2(RecycleDataViewBehavior, Label):
+    index = None
+    selected = BooleanProperty(False)
+    selectable = BooleanProperty(True)
+    global lista_de_contratos
+    lista_de_contratos = []
+
+    def refresh_view_attrs(self, rv, index, data):
+        ''' Catch and handle the view changes '''
+        self.index = index
+        return super(Row2, self).refresh_view_attrs(
+            rv, index, data)
+
+    def on_touch_down(self, touch):
+        ''' Add selection on touch down '''
+        if super(Row2, self).on_touch_down(touch):
+            return True
+        if self.collide_point(*touch.pos) and self.selectable:
+            return self.parent.select_with_touch(self.index, touch)
+
+    def apply_selection(self, rv, index, is_selected):
+        ''' Respond to the selection of items in the view. '''
+        self.selected = is_selected
+        if is_selected:
+            contrato = " ".join((rv.data[index]['text']).split()).split(" ")
+            lista_de_contratos.append(contrato)
+            print(lista_de_contratos)
+
+        else:
+            if len(lista_de_contratos) != 0:
+                contrato = " ".join((rv.data[index]['text']).split()).split(" ")
+                try:
+                    lista_de_contratos.remove(contrato)
+                except Exception as e:
+                    print(e)
+
+
+class RVTelefonesEnviar(BoxLayout):
+
+    def populate(self):
+        try:
+            self.rv_telefone.data = self.listar_exibicao_telefones()
+        except Exception as e:
+            logging.basicConfig(filename='app.log', level=logging.INFO)
+
+    def enviar_mensagem(self):
+
+
+    def listar_exibicao_telefones(self):
+        """
+        Função para listar os clientes com telefone
+        """
+        id = pesquisa_id(cpf)
+        conn = conectar()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            f'SELECT t.numero, t.id_cliente, c.id, c.cpf FROM telefones as t, clientes as c where c.id = id_cliente and c.id = {id}')
+        clientes = cursor.fetchall()
+        lista_clientes = []
+        if len(clientes) > 0:
+            for cliente in clientes:
+                cliente = {'text': str(cliente[0])}
+                lista_clientes.append(cliente)
+        else:
+            print('Não existem clientes cadastrados.')
+        desconectar(conn)
+        return lista_clientes
 
 class RVTelefones(BoxLayout):
 
@@ -846,13 +917,16 @@ class RVContratos(BoxLayout):
             lista_clientes = []
             if len(clientes) > 0:
                 for cliente in clientes:
+                    char = 50 - len(str(locale.currency(cliente[1])))
+                    char1 = 50 - len(str(locale.currency(cliente[2])))
                     vencimento = datetime.datetime.strftime(
                         datetime.datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
+                    cliente_exibicao = {'text': str(cliente[0]) + (" " * char) + locale.currency(cliente[1], grouping=True) + (" " * char1) +  locale.currency(cliente[2], grouping=True) + (" " * char) + vencimento}
 
-                    cliente_exibicao = {'contrato.text': str(cliente[0]),
-                                        'avaliacao.text': locale.currency(cliente[1], grouping=True),
-                                        'emprestimo.text': locale.currency(cliente[2], grouping=True),
-                                        'vencimento.text': vencimento}
+                    # cliente_exibicao = {'contrato.text': str(cliente[0]),
+                    #                     'avaliacao.text': locale.currency(cliente[1], grouping=True),
+                    #                     'emprestimo.text': locale.currency(cliente[2], grouping=True),
+                    #                     'vencimento.text': vencimento}
                     lista_clientes.append(cliente_exibicao)
             else:
                 print('Não existem contratos cadastrados para esse cliente.')
@@ -877,7 +951,11 @@ class RVContratos(BoxLayout):
 
     def calcular2(self, data):
         global data_futura_1
-        data_futura_1 = data
+        if '/' in data:
+            data_futura_1 = data
+        elif len(data) == 8 and "/" not in data:
+            data_futura_1 = data[0:2] + '/' + data[2:4] + '/' + data[4::]
+
         content_calculo = RVCalculo()
         self._popup = Popup(title="Cálculo de Juros", content=content_calculo, size_hint=(0.6, 0.5))
 
@@ -940,6 +1018,8 @@ class RV(BoxLayout):
         content1.populate()
 
     def exibir_contratos(self):
+        global lista_de_contratos
+        lista_de_contratos = []
         content = RVContratos()
         self._popup = Popup(title="Contratos", content=content,
                             size_hint=(0.9, 0.7))
@@ -1074,7 +1154,9 @@ class RVCalculo(BoxLayout):
 
     def populate1(self):
         try:
-            self.rv_calculo.data = self.lista_calculo_vencidos()
+            # self.rv_calculo.data = self.lista_calculo_vencidos()
+            self.rv_calculo.data = self.calcula_juros_selecionados()
+
         except Exception as e:
             logging.exception(str(e))
 
@@ -1122,6 +1204,58 @@ class RVCalculo(BoxLayout):
         nome = nome[0].split(" ")
         for telefone in telefones:
             whats.envia_msg.send_whatsapp_msg(cpf=cpf, texto=self.mensagem, nome=nome[0], numero=telefone, header=False)
+
+    def calcula_juros_selecionados(self):
+
+        calculos = []
+        self.mensagem = []
+        d30 = 0
+        d60 = 0
+        d90 = 0
+        d120 = 0
+
+        data30, data60, data90, data120 = calcular_data()
+
+        for contrato in lista_de_contratos:
+            valor_avaliacao = float(contrato[2].replace(".", '').replace(",", "."))
+            valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
+
+            d30_t, d60_t, d90_t, d120_t = calcular_juros(valor_avaliacao, valor_emprestimo,
+                                                     datetime.datetime.strptime(contrato[5], '%d/%m/%Y'), consulta_prazo(contrato[0]))
+            d30 += d30_t
+            d60 += d60_t
+            d90 += d90_t
+            d120 += d120_t
+
+        calculo = {'prazo.text': '30 dias', 'valor.text': locale.currency(d30, grouping=True),
+                   'vencimento.text': data30 or '00/00/0000'}
+        calculos.append(calculo)
+        calculo = {'prazo.text': '60 dias', 'valor.text': locale.currency(d60, grouping=True),
+                   'vencimento.text': data60 or ' 00/00/0000'}
+        calculos.append(calculo)
+        calculo = {'prazo.text': '90 dias', 'valor.text': locale.currency(d90, grouping=True),
+                   'vencimento.text': data90 or '00/00/0000'}
+        calculos.append(calculo)
+        calculo = {'prazo.text': '120 dias', 'valor.text': locale.currency(d120, grouping=True),
+                   'vencimento.text': data120 or '00/00/0000'}
+        calculos.append(calculo)
+
+        msg_vazia = " "
+        self.mensagem.append(msg_vazia)
+        msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Vencimento {data30}'
+        self.mensagem.append(msg)
+        self.mensagem.append(msg_vazia)
+        msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Vencimento {data60}'
+        self.mensagem.append(msg)
+        self.mensagem.append(msg_vazia)
+        msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Vencimento {data90}'
+        self.mensagem.append(msg)
+        self.mensagem.append(msg_vazia)
+        msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Vencimento {data120}'
+        self.mensagem.append(msg)
+        self.mensagem.append(msg_vazia)
+
+        return calculos
 
     def lista_calculo(self):
         """
