@@ -1239,20 +1239,18 @@ class RVCalculo(BoxLayout):
             logging.exception(str(e))
 
     def enviar_cliente(self):
-        content = RVTelefonesEnviar()
-        popup = Popup.content
-        self._popup = Popup(title="Selecione o telefone para enviar", content=content,
-                            size_hint=(0.4, 0.3))
-        self._popup.open()
-        content.populate()
-        # telefones = listar_telefones_por_cpf(cpf)
-        # nome = listar_nome(cpf)
-        # nome = nome[0].split(" ")
-        # for telefone in telefones:
-        #     whats.envia_msg.send_whatsapp_msg(cpf=cpf, texto=self.mensagem, nome=nome[0], numero=telefone, header=False)
+        telefones = listar_telefones_por_cpf(cpf)
+        if len(telefones) > 1:
+            content = RVTelefonesEnviar()
+            self._popup = Popup(title="Selecione o telefone para enviar", content=content,
+                                size_hint=(0.4, 0.3))
+            self._popup.open()
+            content.populate()
+        else:
+            whats.envia_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
+
 
     def calcula_juros_selecionados(self):
-
         calculos = []
         global mensagem
         mensagem = []
