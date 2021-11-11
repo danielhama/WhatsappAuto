@@ -1681,11 +1681,12 @@ class RVCalculo(BoxLayout):
             d120 = 0
             self.total_emprestimo = 0
             cursor.execute(
-                f'select SUM(contratos.valor_avaliacao) as total from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
-            total = cursor.fetchone()
-            total = total[0]
+                f'select SUM(contratos.valor_avaliacao) as total, clientes.limite from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+            cliente = cursor.fetchall()
+            total = cliente[0][0]
+            self.limite = cliente[0][1]
             cursor.execute(
-                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.limite, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
@@ -1694,7 +1695,7 @@ class RVCalculo(BoxLayout):
                     prazo = cliente[4]
                     self.avaliacao = cliente[2]
                     self.emprestimo = cliente[3]
-                    self.limite = cliente[5]
+                    # self.limite = cliente[5]
                     if self.limite == 100:
                         self.total_emprestimo += self.avaliacao
                     else:

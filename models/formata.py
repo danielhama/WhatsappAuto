@@ -35,11 +35,11 @@ def importacao(relatorio):
 
         clientes = []
         for idx, linha in dados.iterrows():
-            inserir_cliente(linha['Nome'], linha['CPF'])
+            inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
             vencimento = linha['Vencimento'].split(' ')
             vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
             id_cliente = pesquisa_id(linha['CPF'])
-            inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'], linha['Limite'], linha['Prazo'], id_cliente, linha['Atualizado em'])
+            inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'], linha['Prazo'], id_cliente, linha['Atualizado em'])
         dados.drop_duplicates(subset='CPF', inplace=True)
         for idx, linha in dados.iterrows():
             cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
@@ -56,11 +56,11 @@ def importacao(relatorio):
             dados.dropna(inplace=True)
             clientes = []
             for idx, linha in dados.iterrows():
-                inserir_cliente(linha['Nome'], linha['CPF'])
+                inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
                 vencimento = linha['Vencimento'].split(' ')
                 vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
                 id_cliente = pesquisa_id(linha['CPF'])
-                inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'], linha['Limite'],
+                inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'],
                                  linha['Prazo'], id_cliente, linha['Atualizado em'])
 
             dados.drop_duplicates(subset='CPF', inplace=True)

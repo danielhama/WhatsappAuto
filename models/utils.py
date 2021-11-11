@@ -18,6 +18,7 @@ def conectar():
         "id"	INTEGER NOT NULL,
         "nome"	TEXT NOT NULL,
         "cpf"	TEXT NOT NULL UNIQUE,
+        "limite" INTEGER NOT NULL,
         PRIMARY KEY("id" AUTOINCREMENT));""")
 
     conn.execute("""CREATE TABLE IF NOT EXISTS  "contratos" (
@@ -27,7 +28,6 @@ def conectar():
         "valor_emprestimo"	REAL NOT NULL,
         "valor_avaliacao"	REAL NOT NULL,
         "data_atualizacao"	TEXT NOT NULL,
-        "limite"	INTEGER NOT NULL,
         "prazo"	INTEGER NOT NULL,    
         "id_cliente"	INTEGER NOT NULL,
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"),
@@ -56,11 +56,11 @@ def desconectar(conn):
 
 # INSERIR
 
-def inserir_cliente(nome, cpf):
+def inserir_cliente(nome, cpf, limite):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"INSERT INTO clientes (nome, cpf) VALUES ('{nome}', '{cpf}')")
+        cursor.execute(f"INSERT INTO clientes (nome, cpf, limite) VALUES ('{nome}', '{cpf}', {limite})")
         conn.commit()
     except:
         pass
@@ -86,7 +86,7 @@ def inserir_sem_whats(telefone):
     desconectar(conn)
 
 
-def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, limite, prazo, id_cliente, data):
+def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data):
     conn = conectar()
     cursor = conn.cursor()
     hoje = datetime.datetime.today()
@@ -94,7 +94,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, limi
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, limite, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {limite}, {prazo}, {id_cliente}, '{data}')")
+        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {prazo}, {id_cliente}, '{data}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")
@@ -249,7 +249,7 @@ def filtra_calculo_margem():
         cursor = conn.cursor()
         clientes1 = []
         cursor.execute(
-            f'SELECT clientes.id, clientes.cpf, clientes.nome FROM clientes')
+            f'SELECT clientes.id, clientes.cpf, clientes.nome, clientes.limite FROM clientes')
         clientes = cursor.fetchall()
 
         for cliente in clientes:
@@ -259,12 +259,14 @@ def filtra_calculo_margem():
             d90 = 0
             d120 = 0
             total_emprestimo = 0
+            limite = cliente[3]
             cursor.execute(
-                f'select SUM(contratos.valor_avaliacao) as total from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
-            total = cursor.fetchone()
-            total = total[0]
+                f'select SUM(contratos.valor_avaliacao) as total, clientes.limite from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+            cliente = cursor.fetchall()
+            total = cliente[0]
+            limite = cliente[1]
             cursor.execute(
-                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.limite, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
             contratos = cursor.fetchall()
             if len(contratos) > 0:
                 for contrato in contratos:
@@ -272,7 +274,7 @@ def filtra_calculo_margem():
                     prazo = contrato[4]
                     avaliacao = contrato[2]
                     emprestimo = contrato[3]
-                    limite = contrato[5]
+                    # limite = contrato[5]
                     if limite == 100:
                         total_emprestimo += avaliacao
                     else:
@@ -377,6 +379,7 @@ def atualizar_contrato(numero, vencimento, valor_avaliacao, valor_emprestimo, pr
         atualizado = datetime.datetime.strptime(atualizado.split(' ')[0], '%Y-%m-%d')
     else:
         print("Novo contrato faça a inclusão pelo relatório da bezel")
+        return
     if atualizado <= data:
         cursor.execute(
                 f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}', prazo={prazo} WHERE numero='{numero}'")
