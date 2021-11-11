@@ -117,7 +117,7 @@ class EnviaMensagem:
                 txt_box.send_keys(msg)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(.5)
-            # txt_box.send_keys(Keys.RETURN)
+            txt_box.send_keys(Keys.RETURN)
             sleep(.5)
 
         except Exception as e:

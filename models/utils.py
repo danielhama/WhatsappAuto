@@ -373,7 +373,10 @@ def atualizar_contrato(numero, vencimento, valor_avaliacao, valor_emprestimo, pr
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     atualizado = pesquisa_data_atualizacao(numero)
-    atualizado = datetime.datetime.strptime(atualizado.split(' ')[0], '%Y-%m-%d')
+    if atualizado != None:
+        atualizado = datetime.datetime.strptime(atualizado.split(' ')[0], '%Y-%m-%d')
+    else:
+        print("Novo contrato faça a inclusão pelo relatório da bezel")
     if atualizado <= data:
         cursor.execute(
                 f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}', prazo={prazo} WHERE numero='{numero}'")
@@ -410,7 +413,8 @@ def pesquisa_data_atualizacao(numero_contrato):
     cursor.execute(f"SELECT c.data_atualizacao FROM contratos as c WHERE c.numero='{numero_contrato}'")
     data = cursor.fetchone()
     if data == None:
-        breakpoint()
+        print(f'Contrato novo {numero_contrato} efetuar a inclusão pelo relatório da bezel')
+        return None
     return data[0]
 
 # OUTROS
