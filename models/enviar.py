@@ -1,4 +1,5 @@
 import os
+import random
 import socket
 from time import sleep
 from selenium import webdriver
@@ -117,8 +118,11 @@ class EnviaMensagem:
                 txt_box.send_keys(msg)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(.5)
+            sleep(random.random())
             txt_box.send_keys(Keys.RETURN)
             sleep(.5)
+            sleep(random.random())
+
 
         except Exception as e:
             pass
