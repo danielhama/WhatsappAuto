@@ -221,6 +221,26 @@ def listar_contratos_vencidos():
     desconectar(conn)
     return lista_clientes
 
+def listar_contratos_licitacao(data_de_corte):
+    """
+    Função para listar os contratos vencidos
+    """
+    data = datetime.datetime.strptime(data_de_corte, '%d/%m/%Y')
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(
+        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < '{data}' GROUP BY telefones.numero")
+    clientes = cursor.fetchall()
+    lista_clientes = []
+    if len(clientes) > 0:
+        for cliente in clientes:
+            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
+            lista_clientes.append(cliente)
+    else:
+        print('Não existem clientes cadastrados.')
+    desconectar(conn)
+    return lista_clientes
+
 def lista_telefones(whatsapp):
     """
     Função para listar os telefones

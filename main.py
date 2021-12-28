@@ -159,7 +159,16 @@ BoxLayout:
         Button:
             text: 'Filtrar Margem'
             on_release: app.filtra_margem()
-
+        Button:
+            text: 'Filtrar Licitação'
+            on_release: app.filtra_licitacao()
+        TextInput:
+            id: conteudo_licitacao
+            disabled_color: 0, 0, 0, 0
+            multiline: False
+            on_text_validate: app.filtra_licitacao()
+            on_focus: root.ids.right_content.text: 'Digite uma data para filtrar os contratos'
+            input_type: 'datetime'
         Label:
             text: 'Pesquisar'
             
@@ -931,7 +940,7 @@ class Row2(RecycleDataViewBehavior, Label):
     selected = BooleanProperty(False)
     selectable = BooleanProperty(True)
     global lista_de_contratos
-    lista_de_contratos = []
+    lista_de_contratos = set()
 
     def refresh_view_attrs(self, rv, index, data):
         ''' Catch and handle the view changes '''
@@ -951,7 +960,8 @@ class Row2(RecycleDataViewBehavior, Label):
         self.selected = is_selected
         if is_selected:
             contrato = " ".join((rv.data[index]['text']).split()).split(" ")
-            lista_de_contratos.append(contrato)
+            if contrato not in lista_de_contratos:
+                lista_de_contratos.append(contrato)
 
         else:
             if len(lista_de_contratos) != 0:
@@ -1413,7 +1423,7 @@ class RVCalculo(BoxLayout):
         d120 = 0
 
         data30, data60, data90, data120 = calcular_data()
-
+        # lista_de_contratos = set(lista_de_contratos)
         for contrato in lista_de_contratos:
             valor_avaliacao = float(contrato[2].replace(".", '').replace(",", "."))
             valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
@@ -1750,6 +1760,7 @@ class RVCalculoLiquidacao(BoxLayout):
 
     def populate_liquidacao(self):
         try:
+            self.rv_calculo_liquidacao.data = set(self.rv_calculo_liquidacao.data)
             self.rv_calculo_liquidacao.data = self.lista_calculo_liquidacao()
 
             # if not self.possui_margem:
@@ -2086,7 +2097,7 @@ class Whats(App, ProgBar):
         try:
             self.cliente = next(self.it)
 
-            self.nome = self.cliente['Nome'].split(' ')
+            self.nome = self.cliente['Nome']
         except StopIteration:
             swhats = len(self.envia_msg.sem_whats)
             qtd_enviada = self.contador - swhats
@@ -2102,7 +2113,7 @@ class Whats(App, ProgBar):
             return
         try:
             # print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
-            self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome[0], self.cliente['CPF'])
+            self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF'])
             self.contador += 1
             self.root.ids.progbar.value += self.value
             self.root.ids.right_content.text = f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}\n{self.contador}/{self.qtd}"
@@ -2304,6 +2315,24 @@ class Whats(App, ProgBar):
             # self.imprime_importados()
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com margem maior que os juros para 30 dias\n\nEsta opção filtra apenas os contratos em que o valor da margem é superior ao valor dos juros com valor líquido maior que R$ 500,00\nCaso queira pode importar um relatório de margem da bezel'
 
+        except Exception as e:
+            logging.exception(str(e))
+            self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
+
+    def filtra_licitacao(self):
+        try:
+            try:
+                self.clientes_hoje = None
+                self.clientes_hoje = listar_contratos_licitacao(self.root.ids.conteudo_licitacao.text)
+            except Exception as e:
+                logging.exception(str(e))
+                self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
+                return
+            global clientes_importados
+            clientes_importados = None
+            clientes_importados = self.clientes_hoje
+            # self.imprime_importados()
+            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"

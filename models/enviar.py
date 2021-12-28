@@ -57,35 +57,85 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
                 return True
 
+    # def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
+    #     try:
+    #         numero = str(numero)
+    #         if len(numero) == 13:
+    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+    #         else:
+    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+    #     except:
+    #         return
+    #     try:
+    #         sleep(0.5)
+    #         self.driver.switch_to.alert().accept()
+    #     except Exception as e:
+    #         pass
+    #     # Testa se existe o campo de mensagem na página e envia as mensagens
+    #     try:
+    #
+    #         WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+    #         txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+    #         nome = nome.capitalize()
+    #         if header == True:
+    #             txt_box.send_keys(f'Prezado(a) {nome}')
+    #             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+    #         for msg in texto:
+    #             txt_box.send_keys(msg)
+    #             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+    #         sleep(.5)
+    #         txt_box.send_keys(Keys.RETURN)
+    #         sleep(.5)
+    #
+    #     except Exception as e:
+    #         try:
+    #             self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
+    #             self.sem_whats.append(numero)
+    #             inserir_sem_whats(numero)
+    #         except:
+    #             return self.send_whatsapp_msg(numero, texto, nome, cpf)
+
     def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
+
         try:
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.XPATH, sel.pesquisa_contato)))
+            self.pesquisa_box = self.driver.find_element(By.XPATH, sel.pesquisa_contato)
+            self.pesquisa_box.clear()
             numero = str(numero)
-            if len(numero) == 13:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
-            else:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
-        except:
-            return
-        try:
-            sleep(0.5)
-            self.driver.switch_to.alert().accept()
+            self.pesquisa_box.send_keys(numero[5::])
+            # WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, sel.nome_xpath)))
+            sleep(5)
+            try:
+                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+            except:
+                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
+            sleep(2)
+            if f'{nome}, {cpf}' == self.nome_pesquisado.text:
+                self.nome_pesquisado.click()
+                print('achei')
+
+
         except Exception as e:
-            pass
+            return
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
 
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
             txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-            nome = nome.capitalize()
+            nome = nome.split()
+            nome = nome[0].capitalize()
             if header == True:
                 txt_box.send_keys(f'Prezado(a) {nome}')
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             for msg in texto:
                 txt_box.send_keys(msg)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            sleep(.5)
+            sleep(5)
+            sleep(random.random())
             txt_box.send_keys(Keys.RETURN)
             sleep(.5)
+            self.pesquisa_box.clear()
+            return
 
         except Exception as e:
             try:
@@ -119,8 +169,8 @@ class EnviaMensagem:
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(.5)
             sleep(random.random())
-            txt_box.send_keys(Keys.RETURN)
-            sleep(.5)
+            # txt_box.send_keys(Keys.RETURN)
+            sleep(1)
             sleep(random.random())
 
 
