@@ -103,19 +103,30 @@ class EnviaMensagem:
             self.pesquisa_box.clear()
             numero = str(numero)
             self.pesquisa_box.send_keys(numero[5::])
-            # WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, sel.nome_xpath)))
-            sleep(5)
+            sleep(random.random()*3 + 2)
+            # sleep(2)
+
             try:
                 self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
             except:
-                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
-            sleep(2)
+                try:
+                    self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
+                except:
+                    print("não encontrado")
+                    self.sem_whats.append(numero)
+                    inserir_sem_whats(numero)
+                    return
+
+            # sleep(.5)
+            sleep(random.random()*3+2)
+
             if f'{nome}, {cpf}' == self.nome_pesquisado.text:
                 self.nome_pesquisado.click()
                 print('achei')
 
 
         except Exception as e:
+            print(e)
             return
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
@@ -130,20 +141,13 @@ class EnviaMensagem:
             for msg in texto:
                 txt_box.send_keys(msg)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            sleep(5)
-            sleep(random.random())
+            sleep(random.random()*3 + .5)
             txt_box.send_keys(Keys.RETURN)
             sleep(.5)
-            self.pesquisa_box.clear()
             return
 
         except Exception as e:
-            try:
-                self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
-                self.sem_whats.append(numero)
-                inserir_sem_whats(numero)
-            except:
-                return self.send_whatsapp_msg(numero, texto, nome, cpf)
+            return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
     def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
@@ -172,6 +176,10 @@ class EnviaMensagem:
             # txt_box.send_keys(Keys.RETURN)
             sleep(1)
             sleep(random.random())
+            sleep(random.random())
+            sleep(random.random())
+            self.pesquisa_box.clear()
+            return
 
 
         except Exception as e:
