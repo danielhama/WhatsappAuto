@@ -27,13 +27,5 @@ def csv_para_vcf():
             escritor.writerow({'END:VCARD'})
 
 
-# def clientes_vcard():
-#     try:
-#         csv_para_vcf('whatsrelatorios/Clientes.csv')
-#     except:
-#         pass
-# def clientes_com_whats_vcard():
-#     csv_para_vcf('whatsrelatorios/Clientes_com_whats.csv')
-#
-#
+
 

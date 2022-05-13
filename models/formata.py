@@ -68,6 +68,7 @@ def importacao(relatorio):
                 cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
                            'Vencimento': linha['Vencimento'].split(' ')}
                 clientes.append(cliente)
+            deletar_contrato_desatualizado(linha['Atualizado em'])
             return clientes
 
 def importacao_relatorio_margem(relatorio):

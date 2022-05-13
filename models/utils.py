@@ -279,12 +279,11 @@ def filtra_calculo_margem():
             d90 = 0
             d120 = 0
             total_emprestimo = 0
-            limite = cliente[3]
             cursor.execute(
                 f'select SUM(contratos.valor_avaliacao) as total, clientes.limite from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
-            cliente = cursor.fetchall()
-            total = cliente[0]
-            limite = cliente[1]
+            cliente_limite = cursor.fetchall()
+            total = cliente_limite[0][0]
+            limite = cliente_limite[0][1]
             cursor.execute(
                 f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
             contratos = cursor.fetchall()
@@ -354,6 +353,15 @@ def deletar_contrato(numero):
         pass
     conn.close()
 
+def deletar_contrato_desatualizado(data):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM 'contratos' WHERE data_atualizacao!='{data}'")
+        conn.commit()
+    except:
+        pass
+    conn.close()
 def deletar_telefone(telefone):
     conn = conectar()
     cursor = conn.cursor()

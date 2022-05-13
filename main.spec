@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-from kivy.deps import sdl2, glew
+from kivy_deps import sdl2, glew
 import win32timezone
 
 block_cipher = None
