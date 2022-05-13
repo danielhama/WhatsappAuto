@@ -357,6 +357,7 @@ def deletar_contrato_desatualizado(data):
     conn = conectar()
     cursor = conn.cursor()
     try:
+        data = datetime.datetime.strftime(datetime.datetime.strptime(data.split()[0], '%d/%m/%Y'), '%Y-%m-%d %H:%M:%S')
         cursor.execute(f"DELETE FROM 'contratos' WHERE data_atualizacao!='{data}'")
         conn.commit()
     except:
