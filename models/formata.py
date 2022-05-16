@@ -30,22 +30,15 @@ def importacao(relatorio):
             dados = pd.read_csv(relatorio, sep=';', header=0)
         except KeyError as e:
             dados = pd.read_csv(relatorio, sep=',', header=0)
-        if dados['Vencimento'] is not None:
-            dados.dropna(inplace=True)
 
         clientes = []
         for idx, linha in dados.iterrows():
-            inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
-            vencimento = linha['Vencimento'].split(' ')
-            vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
-            id_cliente = pesquisa_id(linha['CPF'])
-            inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'], linha['Prazo'], id_cliente, linha['Atualizado em'])
-        dados.drop_duplicates(subset='CPF', inplace=True)
+            inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['cpf / cnpj'])
+        dados.drop_duplicates(subset='cpf / cnpj', inplace=True)
         for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
-                       'Vencimento': linha['Vencimento'].split(' ')}
+            cliente = {'Nome': linha['NOME CONTATO NO CELULAR'], 'CPF': linha['cpf / cnpj'], 'Telefones': linha['TELEFONES']}
             clientes.append(cliente)
-        deletar_contrato_desatualizado(linha['Atualizado em'])
+        # deletar_contrato_desatualizado(linha['Atualizado em'])
         return clientes
     except KeyError as e:
         try:
@@ -55,22 +48,21 @@ def importacao(relatorio):
             dados = pd.read_csv(relatorio, sep=',', header=0)
         if dados['Vencimento'] is not None:
             dados.dropna(inplace=True)
-            clientes = []
             for idx, linha in dados.iterrows():
-                inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
-                vencimento = linha['Vencimento'].split(' ')
-                vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
-                id_cliente = pesquisa_id(linha['CPF'])
-                inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'],
-                                 linha['Prazo'], id_cliente, linha['Atualizado em'])
+                inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['cpf / cnpj'])
+                # vencimento = linha['Vencimento'].split(' ')
+                # vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
+                # id_cliente = pesquisa_id(linha['CPF'])
+                # inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'],
+                #                  linha['Prazo'], id_cliente, linha['Atualizado em'])
 
             dados.drop_duplicates(subset='CPF', inplace=True)
             for idx, linha in dados.iterrows():
-                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
-                           'Vencimento': linha['Vencimento'].split(' ')}
+                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']
+                           }
                 clientes.append(cliente)
-            deletar_contrato_desatualizado(linha['Atualizado em'])
-            return clientes
+            # deletar_contrato_desatualizado(linha['Atualizado em'])
+            return
 
 def importacao_relatorio_margem(relatorio):
     try:
@@ -94,7 +86,7 @@ def importacao_relatorio_margem(relatorio):
 def formata_telefone(clientes):
     try:
         for idx1, cliente in enumerate(clientes):
-            lista = cliente['Telefones'].split('-')
+            lista = cliente['Telefones'].split(',')
             lista_telefones = []
             for i in lista:
                 if type(i) == float:
@@ -102,8 +94,8 @@ def formata_telefone(clientes):
                 else:
                     try:
                         i = i.strip()
-                        if i[0] == "(" and (i[5] == '9' or i[5] == '8'):
-                            lista_telefones.append("55" + i[1:3] + i[5::])
+                        if i[2] == i[2] == '9' or i[2] == '8':
+                            lista_telefones.append("55" + i)
                     except Exception as e:
                         pass
 

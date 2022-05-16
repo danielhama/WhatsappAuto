@@ -11,26 +11,13 @@ def conectar():
     """
     Função para conectar ao servidor
     """
-    conn = sqlite3.connect(path.join(path.expanduser('~'), 'whatsrelatorios\\whats.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+    conn = sqlite3.connect(path.join(path.expanduser('~'), 'cobranca\whatscobranca.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
 
     conn.execute("""CREATE TABLE IF NOT EXISTS "clientes" (
         "id"	INTEGER NOT NULL,
         "nome"	TEXT NOT NULL,
         "cpf"	TEXT NOT NULL UNIQUE,
-        "limite" INTEGER NOT NULL,
-        PRIMARY KEY("id" AUTOINCREMENT));""")
-
-    conn.execute("""CREATE TABLE IF NOT EXISTS  "contratos" (
-        "id"	INTEGER NOT NULL,
-        "numero"	TEXT NOT NULL UNIQUE,
-        "vencimento"	TEXT NOT NULL,
-        "valor_emprestimo"	REAL NOT NULL,
-        "valor_avaliacao"	REAL NOT NULL,
-        "data_atualizacao"	TEXT NOT NULL,
-        "prazo"	INTEGER NOT NULL,    
-        "id_cliente"	INTEGER NOT NULL,
-        FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"),
         PRIMARY KEY("id" AUTOINCREMENT));""")
 
     conn.execute("""
@@ -43,8 +30,6 @@ def conectar():
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
                  )
 
-
-
     return conn
 
 
@@ -56,14 +41,14 @@ def desconectar(conn):
 
 # INSERIR
 
-def inserir_cliente(nome, cpf, limite):
+def inserir_cliente(nome, cpf):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"INSERT INTO clientes (nome, cpf, limite) VALUES ('{nome}', '{cpf}', {limite})")
+        cursor.execute(f"INSERT INTO clientes (nome, cpf) VALUES ('{nome}', '{cpf}')")
         conn.commit()
-    except:
-        pass
+    except Exception as e:
+        print(e)
     conn.close()
 
 def inserir_telefone(telefone, id):
@@ -86,31 +71,31 @@ def inserir_sem_whats(telefone):
     desconectar(conn)
 
 
-def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data):
-    conn = conectar()
-    cursor = conn.cursor()
-    hoje = datetime.datetime.today()
-    data = datetime.datetime.strptime(data.split(' ')[0], '%d/%m/%Y')
-    valor_avaliacao = convert_to_float(valor_avaliacao)
-    valor_emprestimo = convert_to_float(valor_emprestimo)
-    try:
-        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {prazo}, {id_cliente}, '{data}')")
-        conn.commit()
-        if cursor.rowcount == 1:
-            print("Contrato incluído com sucesso")
-    except Exception as e:
-        atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
-        if atualizado < data:
-
-            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}'")
-            conn.commit()
-            if cursor.rowcount == 1:
-                print('Contrato Atualizado com Sucesso!')
-            else:
-                print('Erro na atualização')
-        else:
-            print('Data do relatório mais antiga que a base de dados')
-    conn.close()
+# def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data):
+#     conn = conectar()
+#     cursor = conn.cursor()
+#     hoje = datetime.datetime.today()
+#     data = datetime.datetime.strptime(data.split(' ')[0], '%d/%m/%Y')
+#     valor_avaliacao = convert_to_float(valor_avaliacao)
+#     valor_emprestimo = convert_to_float(valor_emprestimo)
+#     try:
+#         cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {prazo}, {id_cliente}, '{data}')")
+#         conn.commit()
+#         if cursor.rowcount == 1:
+#             print("Contrato incluído com sucesso")
+#     except Exception as e:
+#         atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
+#         if atualizado < data:
+#
+#             cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}'")
+#             conn.commit()
+#             if cursor.rowcount == 1:
+#                 print('Contrato Atualizado com Sucesso!')
+#             else:
+#                 print('Erro na atualização')
+#         else:
+#             print('Data do relatório mais antiga que a base de dados')
+#     conn.close()
 
 
 # LISTAR
@@ -140,12 +125,12 @@ def listar_clientes_telefone():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE cli.id = contratos.id_cliente and telefones.id_cliente = cli.id and telefones.whatsapp = 1 GROUP BY telefones.numero')
+    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero FROM telefones, clientes as cli WHERE telefones.id_cliente = cli.id and telefones.whatsapp = 1 GROUP BY telefones.numero')
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
         for cliente in clientes:
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones':cliente[2], 'Vencimento':cliente[4]}
+            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones':cliente[2]}
             lista_clientes.append(cliente)
     else:
         print('Não existem clientes cadastrados.')
