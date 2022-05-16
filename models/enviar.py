@@ -126,6 +126,9 @@ class EnviaMensagem:
             if f'{nome}' in self.nome_pesquisado.text:
                 self.nome_pesquisado.click()
                 print('achei')
+                sleep(.5)
+            else:
+                self.nome_pesquisado = None
 
 
         except Exception as e:
@@ -147,6 +150,8 @@ class EnviaMensagem:
             sleep(random.random()*3 + .5)
             # txt_box.send_keys(Keys.RETURN)
             sleep(.5)
+            deletar_telefone(numero)
+            deletar_cliente(cpf)
             return
 
         except Exception as e:
