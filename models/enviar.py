@@ -123,6 +123,9 @@ class EnviaMensagem:
             if f'{nome}, {cpf}' == self.nome_pesquisado.text:
                 self.nome_pesquisado.click()
                 print('achei')
+            else:
+                self.nome_pesquisado = None
+
 
 
         except Exception as e:
