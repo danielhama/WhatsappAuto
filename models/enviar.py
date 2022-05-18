@@ -148,10 +148,11 @@ class EnviaMensagem:
                 txt_box.send_keys(msg)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(random.random()*3 + .5)
-            # txt_box.send_keys(Keys.RETURN)
+            txt_box.send_keys(Keys.RETURN)
             sleep(.5)
             deletar_telefone(numero)
             deletar_cliente(cpf)
+            self.nome_pesquisado = None
             return
 
         except Exception as e:
