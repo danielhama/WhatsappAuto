@@ -98,8 +98,12 @@ class EnviaMensagem:
     def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = False) -> None:  # Faz a chamada de contato pelo número de telefone.
 
         try:
-            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.XPATH, sel.pesquisa_contato)))
-            self.pesquisa_box = self.driver.find_element(By.XPATH, sel.pesquisa_contato)
+            try:
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, sel.pesquisa_contato)))
+                self.pesquisa_box = self.driver.find_element(By.XPATH, sel.pesquisa_contato)
+            except:
+                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+                self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
             numero = str(numero)
             self.pesquisa_box.send_keys(nome)
