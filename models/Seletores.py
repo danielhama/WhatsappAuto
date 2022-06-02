@@ -18,3 +18,9 @@ nome_xpath2 ="/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[2]/
 bota_anexar ="/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div/div/ul/li[4]/button"
 
 botao_clip_css = "_26lC3"
+
+botao_clip = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._3HQNh._1un-p > div._2jitM > div > div"
+
+botao_doc = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._3HQNh._1un-p > div._2jitM > div > span > div > div > ul > li:nth-child(4) > button"
+
+botao_enviar = "#app > div > div > div._3ArsE > div.ldL67._3sh5K > span > div > span > div > div > div.KPJpj._2M_x0 > div > div._1HI4Y > div._33pCO > div > div"
