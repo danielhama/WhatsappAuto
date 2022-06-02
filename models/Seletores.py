@@ -14,3 +14,7 @@ nome_xpath1 = "/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[1]
 nome_xpath = '/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[2]/div/div/div[2]/div[1]/div/span'
 
 nome_xpath2 ="/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[2]/div/div/div[2]/div[1]/div[1]/span"
+
+bota_anexar ="/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div/div/ul/li[4]/button"
+
+botao_clip_css = "_26lC3"
