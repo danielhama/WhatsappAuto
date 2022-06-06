@@ -24,3 +24,5 @@ botao_clip = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-c
 botao_doc = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._3HQNh._1un-p > div._2jitM > div > span > div > div > ul > li:nth-child(4) > button"
 
 botao_enviar = "#app > div > div > div._3ArsE > div.ldL67._3sh5K > span > div > span > div > div > div.KPJpj._2M_x0 > div > div._1HI4Y > div._33pCO > div > div"
+
+botao_enviar1 = "#app > div > div > div._3ArsE > div.ldL67._3sh5K > span > div > span > div > div > div.KPJpj._2M_x0 > div > div._1HI4Y > div._33pCO > div > div"

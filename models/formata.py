@@ -33,10 +33,10 @@ def importacao(relatorio):
 
         clientes = []
         for idx, linha in dados.iterrows():
-            inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['cpf / cnpj'])
-        dados.drop_duplicates(subset='cpf / cnpj', inplace=True)
+            inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['CPF / CNPJ'])
+        dados.drop_duplicates(subset='CPF / CNPJ', inplace=True)
         for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['NOME CONTATO NO CELULAR'], 'CPF': linha['cpf / cnpj'], 'Telefones': linha['TELEFONES']}
+            cliente = {'Nome': linha['NOME CONTATO NO CELULAR'], 'CPF': linha['CPF / CNPJ'], 'Telefones': linha['TELEFONES']}
             clientes.append(cliente)
         # deletar_contrato_desatualizado(linha['Atualizado em'])
         return clientes
@@ -49,7 +49,7 @@ def importacao(relatorio):
         if dados['Vencimento'] is not None:
             dados.dropna(inplace=True)
             for idx, linha in dados.iterrows():
-                inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['cpf / cnpj'])
+                inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['CPF / CNPJ'])
                 # vencimento = linha['Vencimento'].split(' ')
                 # vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
                 # id_cliente = pesquisa_id(linha['CPF'])
