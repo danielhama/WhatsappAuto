@@ -105,8 +105,8 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
-            numero = str(numero)
-            self.pesquisa_box.send_keys(numero[5::])
+            # numero = str(numero)
+            self.pesquisa_box.send_keys(nome)
             sleep(random.random()*3 + 2)
             # sleep(2)
 
@@ -124,7 +124,7 @@ class EnviaMensagem:
             # sleep(.5)
             sleep(random.random()*3+2)
 
-            if f'{nome}, {cpf}' == self.nome_pesquisado.text:
+            if nome == self.nome_pesquisado.text.split(',')[0]:
                 self.nome_pesquisado.click()
                 print('achei')
             else:
