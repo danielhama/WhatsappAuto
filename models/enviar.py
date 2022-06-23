@@ -12,9 +12,7 @@ from models.utils import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
-from selenium.webdriver.chrome.webdriver import *
-import pyautogui
-import pyperclip
+
 
 class EnviaMensagem:
     def __init__(self):
@@ -33,7 +31,7 @@ class EnviaMensagem:
         options.add_argument(
             r"user-data-dir={}".format(profile))
         if head == True:
-            options = Options()
+            # options = Options()
             options.add_argument("-headless")
             self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
         else:
@@ -130,10 +128,12 @@ class EnviaMensagem:
 
             if f'{nome}' in self.nome_pesquisado.text:
                 self.nome_pesquisado.click()
+                sleep(0.5)
                 print('achei')
                 sleep(.5)
             else:
                 self.nome_pesquisado = None
+                return
 
 
         except Exception as e:
@@ -141,24 +141,25 @@ class EnviaMensagem:
             return
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
-
-            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-            txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-            nome = nome.split()
-            # nome = nome[0].capitalize()
-            if header == True:
-                txt_box.send_keys(f'Prezado(a) Cliente')
-                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            for msg in texto:
-                txt_box.send_keys(msg)
-                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            sleep(random.random()*3 + .5)
-            txt_box.send_keys(Keys.RETURN)
-            sleep(.5)
-            deletar_telefone(numero)
-            deletar_cliente(cpf)
-            self.nome_pesquisado = None
-            return
+            selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+            if selecionado == nome:
+                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+                if header == True:
+                    txt_box.send_keys(f'Prezado(a) Cliente')
+                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                for msg in texto:
+                    txt_box.send_keys(msg)
+                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                sleep(random.random()*3 + .5)
+                txt_box.send_keys(Keys.RETURN)
+                sleep(.5)
+                deletar_telefone(numero)
+                deletar_cliente(cpf)
+                self.nome_pesquisado = None
+                return
+            else:
+                return
 
         except Exception as e:
             print(e)

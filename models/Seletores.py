@@ -26,3 +26,5 @@ botao_doc = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-ch
 botao_enviar = "#app > div > div > div._3ArsE > div.ldL67._3sh5K > span > div > span > div > div > div.KPJpj._2M_x0 > div > div._1HI4Y > div._33pCO > div > div"
 
 botao_enviar1 = "#app > div > div > div._3ArsE > div.ldL67._3sh5K > span > div > span > div > div > div.KPJpj._2M_x0 > div > div._1HI4Y > div._33pCO > div > div"
+
+barra_superior = '#main > header > div._24-Ff > div > div > span'
