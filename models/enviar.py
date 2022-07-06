@@ -105,7 +105,7 @@ class EnviaMensagem:
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
             numero = str(numero)
-            self.pesquisa_box.send_keys(nome)
+            self.pesquisa_box.send_keys(numero[3::])
             sleep(random.random()*3 + 2)
             # sleep(2)
 
@@ -116,7 +116,7 @@ class EnviaMensagem:
                     self.nome_pesquisado = self.driver.find_element(By.XPATH, sel.nome_xpath)
                 except:
                     try:
-                        self.nome_pesquisado = self.driver.find_element(By.XPATH, sel.nome_xpath2)
+                        self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.resultado_pesquisa)
                     except:
                         print("não encontrado")
                         self.sem_whats.append(numero)
@@ -142,7 +142,7 @@ class EnviaMensagem:
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
             selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-            if selecionado == nome:
+            if nome in selecionado:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                 if header == True:
@@ -152,11 +152,11 @@ class EnviaMensagem:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                txt_box.send_keys(Keys.RETURN)
-                sleep(.5)
-                deletar_telefone(numero)
-                deletar_cliente(cpf)
-                self.nome_pesquisado = None
+                # txt_box.send_keys(Keys.RETURN)
+                # sleep(.5)
+                # deletar_telefone(numero)
+                # deletar_cliente(cpf)
+                # self.nome_pesquisado = None
                 return
             else:
                 return

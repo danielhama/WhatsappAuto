@@ -10,6 +10,7 @@ nome_CSS = '#pane-side > div:nth-child(1) > div > div > div:nth-child(2) > div >
 nome_CSS1 = '#pane-side > div:nth-child(1) > div > div > div:nth-child(1) > div > div > div > div._3OvU8 > div._3vPI2 > div.zoWT4 > span > span'
 pesquisa_contato = '/html/body/div[1]/div[1]/div[1]/div[3]/div/div[1]/div/label/div/div[2]'
 
+resultado_pesquisa = "#main > header > div._24-Ff > div > div > span"
 nome_xpath1 = "/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[1]/div/div/div[2]/div[1]/div/span"
 nome_xpath = '/html/body/div[1]/div/div/div[3]/div/div[2]/div[1]/div/div/div[2]/div/div/div[2]/div[1]/div/span'
 

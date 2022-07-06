@@ -86,39 +86,47 @@ def importacao_relatorio_margem(relatorio):
 def formata_telefone(clientes):
     try:
         for idx1, cliente in enumerate(clientes):
-            lista = cliente['Telefones'].split(',')
-            lista_telefones = []
-            for i in lista:
-                if type(i) == float:
-                    lista.remove(i)
-                else:
+            if type(cliente['Telefones'])  == str:
+                lista = cliente['Telefones'].split(',')
+                lista_telefones = []
+                for i in lista:
+                    if type(i) == float:
+                        lista.remove(i)
+                    else:
+                        try:
+                            i = i.strip()
+                            if i[2] == i[2] == '9' or i[2] == '8':
+                                lista_telefones.append("55" + i)
+                        except Exception as e:
+                            pass
+
+
+                for idx, i in enumerate(lista_telefones):
+                    j = i
+                    if len(str(i)) == 12:
+                        i = str(i)
+                        x = i[0:4]
+                        i = x + '9' + i[4:12]
+                        lista_telefones.remove(j)
+                        lista_telefones.insert(idx, i)
+
+                    lista_telefones = set(lista_telefones)
+                    lista_telefones = list(lista_telefones)
+
                     try:
-                        i = i.strip()
-                        if i[2] == i[2] == '9' or i[2] == '8':
-                            lista_telefones.append("55" + i)
-                    except Exception as e:
+                        id_cliente = pesquisa_id(clientes[idx1]['CPF'])
+                        if len(lista_telefones) > 0:
+                            for telefone in lista_telefones:
+                                inserir_telefone(telefone, id_cliente)
+                    except:
                         pass
+                clientes[idx1]['Telefones'] = lista_telefones
+            elif type(cliente['Telefones']) == int:
+                telefone = str(cliente['Telefones'])
+                telefone = "55"+telefone
+                id_cliente = pesquisa_id(cliente['CPF'])
+                inserir_telefone(telefone, id_cliente)
 
-            for idx, i in enumerate(lista_telefones):
-                j = i
-                if len(str(i)) == 12:
-                    i = str(i)
-                    x = i[0:4]
-                    i = x + '9' + i[4:12]
-                    lista_telefones.remove(j)
-                    lista_telefones.insert(idx, i)
-
-                lista_telefones = set(lista_telefones)
-                lista_telefones = list(lista_telefones)
-
-                try:
-                    id_cliente = pesquisa_id(clientes[idx1]['CPF'])
-                    if len(lista_telefones) > 0:
-                        for telefone in lista_telefones:
-                            inserir_telefone(telefone, id_cliente)
-                except:
-                    pass
-            clientes[idx1]['Telefones'] = lista_telefones
         clientes = exclui_sem_whats(clientes)
         return clientes
     except Exception as e:
