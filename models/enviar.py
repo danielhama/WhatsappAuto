@@ -94,7 +94,7 @@ class EnviaMensagem:
     #         except:
     #             return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
-    def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = False) -> None:  # Faz a chamada de contato pelo número de telefone.
+    def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
 
         try:
             try:
@@ -105,7 +105,7 @@ class EnviaMensagem:
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
             numero = str(numero)
-            self.pesquisa_box.send_keys(numero[3::])
+            self.pesquisa_box.send_keys(numero[-8::])
             sleep(random.random()*3 + 2)
             # sleep(2)
 
@@ -113,7 +113,7 @@ class EnviaMensagem:
                 self.nome_pesquisado = self.driver.find_element(By.XPATH, sel.nome_xpath1)
             except:
                 try:
-                    self.nome_pesquisado = self.driver.find_element(By.XPATH, sel.nome_xpath)
+                    self.nome_pesquisado = self.driver.find_element(By.XPATH, "#pane-side > div:nth-child(1) > div > div > div:nth-child(2) > div > div > div > div._3OvU8 > div._3vPI2 > div.zoWT4 > span > span")
                 except:
                     try:
                         self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.resultado_pesquisa)
@@ -146,17 +146,17 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                 if header == True:
-                    txt_box.send_keys(f'Prezado(a) Cliente')
+                    txt_box.send_keys(f'Olá {nome}')
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 for msg in texto:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                # txt_box.send_keys(Keys.RETURN)
-                # sleep(.5)
-                # deletar_telefone(numero)
-                # deletar_cliente(cpf)
-                # self.nome_pesquisado = None
+                txt_box.send_keys(Keys.RETURN)
+                sleep(.5)
+                deletar_telefone(numero)
+                deletar_cliente(cpf)
+                self.nome_pesquisado = None
                 return
             else:
                 return
