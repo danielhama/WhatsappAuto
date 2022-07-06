@@ -110,10 +110,10 @@ class EnviaMensagem:
             # sleep(2)
 
             try:
-                self.nome_pesquisado = self.driver.find_element(By.XPATH, sel.nome_xpath1)
+                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
             except:
                 try:
-                    self.nome_pesquisado = self.driver.find_element(By.XPATH, "#pane-side > div:nth-child(1) > div > div > div:nth-child(2) > div > div > div > div._3OvU8 > div._3vPI2 > div.zoWT4 > span > span")
+                    self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, "#pane-side > div:nth-child(1) > div > div > div:nth-child(2) > div > div > div > div._3OvU8 > div._3vPI2 > div.zoWT4 > span > span")
                 except:
                     try:
                         self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.resultado_pesquisa)
@@ -126,7 +126,7 @@ class EnviaMensagem:
             # sleep(.5)
             sleep(random.random()*3+2)
 
-            if f'{nome}' in self.nome_pesquisado.text:
+            if nome in self.nome_pesquisado.text:
                 self.nome_pesquisado.click()
                 sleep(0.5)
                 print('achei')
@@ -143,8 +143,8 @@ class EnviaMensagem:
         try:
             selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
             if nome in selecionado:
-                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg3)))
+                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg3)
                 if header == True:
                     txt_box.send_keys(f'Olá {nome}')
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
