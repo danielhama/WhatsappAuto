@@ -8,7 +8,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\Acer\\Downloads\\Whats3-master\\Whats3-master'],
+             pathex=['C:\\Users\\Acer\\Documents\\WhatsAuto'],
              binaries=[],
              datas=[],
              hiddenimports=['win32timezone'],

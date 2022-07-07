@@ -33,10 +33,10 @@ def importacao(relatorio):
 
         clientes = []
         for idx, linha in dados.iterrows():
-            inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['CPF / CNPJ'])
-        dados.drop_duplicates(subset='CPF / CNPJ', inplace=True)
+            inserir_cliente(linha['Cliente'], linha['CNPJ'])
+        dados.drop_duplicates(subset='CNPJ', inplace=True)
         for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['NOME CONTATO NO CELULAR'], 'CPF': linha['CPF / CNPJ'], 'Telefones': linha['TELEFONES']}
+            cliente = {'Nome': linha['Cliente'], 'CPF': linha['CNPJ'], 'Telefones': linha['TELEFONES']}
             clientes.append(cliente)
         # deletar_contrato_desatualizado(linha['Atualizado em'])
         return clientes
@@ -49,7 +49,7 @@ def importacao(relatorio):
         if dados['Vencimento'] is not None:
             dados.dropna(inplace=True)
             for idx, linha in dados.iterrows():
-                inserir_cliente(linha['NOME CONTATO NO CELULAR'], linha['CPF / CNPJ'])
+                inserir_cliente(linha['Cliente'], linha['CNPJ'])
                 # vencimento = linha['Vencimento'].split(' ')
                 # vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
                 # id_cliente = pesquisa_id(linha['CPF'])
@@ -58,7 +58,7 @@ def importacao(relatorio):
 
             dados.drop_duplicates(subset='CPF', inplace=True)
             for idx, linha in dados.iterrows():
-                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']
+                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefone']
                            }
                 clientes.append(cliente)
             # deletar_contrato_desatualizado(linha['Atualizado em'])
@@ -86,27 +86,28 @@ def importacao_relatorio_margem(relatorio):
 def formata_telefone(clientes):
     try:
         for idx1, cliente in enumerate(clientes):
-            lista = cliente['Telefones'].split(',')
+            lista = cliente['Telefones'].split(' ')
             lista_telefones = []
             for i in lista:
                 if type(i) == float:
                     lista.remove(i)
                 else:
                     try:
+                        i = i.replace("-", '')
                         i = i.strip()
-                        if i[2] == i[2] == '9' or i[2] == '8':
-                            lista_telefones.append("55" + i)
+                        # if i[2] == i[2] == '9' or i[2] == '8':
+                        lista_telefones.append("55" + i)
                     except Exception as e:
                         pass
 
-            for idx, i in enumerate(lista_telefones):
-                j = i
-                if len(str(i)) == 12:
-                    i = str(i)
-                    x = i[0:4]
-                    i = x + '9' + i[4:12]
-                    lista_telefones.remove(j)
-                    lista_telefones.insert(idx, i)
+            # for idx, i in enumerate(lista_telefones):
+            #     j = i
+            #     if len(str(i)) == 12:
+            #         i = str(i)
+            #         x = i[0:4]
+            #         i = x + '9' + i[4:12]
+            #         lista_telefones.remove(j)
+            #         lista_telefones.insert(idx, i)
 
                 lista_telefones = set(lista_telefones)
                 lista_telefones = list(lista_telefones)
