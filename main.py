@@ -149,16 +149,16 @@ BoxLayout:
             on_release: app.enviar_vencimento()
 
         Button:
-            text: 'Filtrar hoje'
+            text: 'Listar Clientes'
             on_release: app.filtra_hoje()
 
         Button:
-            text: 'Filtrar vencidos'
-            on_release: app.filtra_vencidos()
+            text: 'Criar Lista de Envio'
+            on_release: app.criar_lista()
             
         Button:
-            text: 'Filtrar Margem'
-            on_release: app.filtra_margem()
+            text: 'Apagar Lista'
+            on_release: app.apagar_lista()
         Button:
             text: 'Filtrar Licitação'
             on_release: app.filtra_licitacao()
@@ -2271,53 +2271,43 @@ class Whats(App, ProgBar):
     def filtra_hoje(self):
         try:
             self.clientes_hoje = None
-            # clientes = retorna_lista_clientes()
             self.clientes_hoje = filtra_vencimento()
             global clientes_importados
             clientes_importados = None
             clientes_importados = self.clientes_hoje
-            self.root.ids.right_content.text = f"{len(self.clientes_hoje)} clientes com contratos vencendo hoje\nClique em exibir para mostrar os clientes\n\nEsta opção filtra contratos vencendo no dia, e se for segunda-feira os contratos de sábado e domingo também, use relatórios atualizados"
+            self.root.ids.right_content.text = f"{len(self.clientes_hoje)} Números de telefones para envio"
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Base de dados ainda não existe, importe um arquivo da bezel primeiro, relatório de margem da bezel não cria banco de dados"
 
-    def filtra_vencidos(self):
+    def criar_lista(self):
         try:
             try:
                 self.clientes_hoje = None
-                self.clientes_hoje = listar_contratos_vencidos()
+                self.clientes_hoje = criar_lista_envio()
             except Exception as e:
                 logging.exception(str(e))
-                self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
+                self.root.ids.right_content.text = ''
                 return
-            global clientes_importados
-            clientes_importados = None
-            clientes_importados = self.clientes_hoje
-            # self.imprime_importados()
-            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
+            self.root.ids.right_content.text = f'Lista criada'
 
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
 
-    def filtra_margem(self):
+    def apagar_lista(self):
         try:
             try:
-                self.clientes_hoje = None
-                self.clientes_hoje = filtra_calculo_margem()
+               deletar_lista()
             except Exception as e:
                 logging.exception(str(e))
-                self.root.ids.right_content.text = 'Data em Formato desconhecido'
+                self.root.ids.right_content.text = e
                 return
-            global clientes_importados
-            clientes_importados = None
-            clientes_importados = self.clientes_hoje
-            # self.imprime_importados()
-            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com margem maior que os juros para 30 dias\n\nEsta opção filtra apenas os contratos em que o valor da margem é superior ao valor dos juros com valor líquido maior que R$ 500,00\nCaso queira pode importar um relatório de margem da bezel'
+            self.root.ids.right_content.text = f'Lista de Envio apagada'
 
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
+            self.root.ids.right_content.text = e
 
     def filtra_licitacao(self):
         try:

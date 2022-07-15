@@ -1,4 +1,5 @@
-campo_msg = '._1LbR4 > div:nth-child(2)'
+# campo_msg = '._1LbR4 > div:nth-child(2)' #main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._2lMWa > div.p3_M1 > div > div.fd365im1.to2l77zo.bbv8nyr4.mwp4sxku.gfz4du6o.ag5g9lrv > p
+campo_msg = "#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._2lMWa > div.p3_M1"
 ok = "._20C5O"
 campo_pesquisa = "._13NKt"
 nova_conversa = "div._2cNrC:nth-child(2) > div:nth-child(1) > span:nth-child(1)"
@@ -11,3 +12,5 @@ nome_CSS1 = '#pane-side > div:nth-child(1) > div > div > div:nth-child(1) > div 
 pesquisa_contato = '/html/body/div[1]/div[1]/div[1]/div[3]/div/div[1]/div/label/div/div[2]'
 
 barra_superior = '#main > header > div._24-Ff > div > div > span'
+
+bloqueado = '/html/body/div[1]/div/div/div[4]/div/footer/div/text()'

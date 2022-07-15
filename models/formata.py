@@ -9,20 +9,13 @@ def leia_arquivo(arquivo):
     relatorio = arquivo
 
     try:
-        try:
-            relatorio = arquivo
-            clientes = importacao(relatorio)
-            clientes = formata_telefone(clientes)
-            clientes = formata_vencimento(clientes)
-        except:
-            clientes = importacao_relatorio_margem(relatorio)
-            clientes = formata_telefone(clientes)
+        relatorio = arquivo
+        clientes = importacao(relatorio)
+        clientes = formata_telefone(clientes)
+
         return clientes
     except:
-        try:
-            ler_inventario(relatorio)
-        except:
-            pass
+        print("Erro na importação")
 
 def importacao(relatorio):
     try:
@@ -30,22 +23,13 @@ def importacao(relatorio):
             dados = pd.read_csv(relatorio, sep=';', header=0)
         except KeyError as e:
             dados = pd.read_csv(relatorio, sep=',', header=0)
-        if dados['Vencimento'] is not None:
-            dados.dropna(inplace=True)
-
+        dados.drop_duplicates(subset='CPF', inplace=True)
         clientes = []
         for idx, linha in dados.iterrows():
-            inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
-            vencimento = linha['Vencimento'].split(' ')
-            vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
-            id_cliente = pesquisa_id(linha['CPF'])
-            inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'], linha['Prazo'], id_cliente, linha['Atualizado em'])
-        dados.drop_duplicates(subset='CPF', inplace=True)
+            inserir_cliente(linha['Nome'], linha['CPF'])
         for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
-                       'Vencimento': linha['Vencimento'].split(' ')}
+            cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']}
             clientes.append(cliente)
-        deletar_contrato_desatualizado(linha['Atualizado em'])
         return clientes
     except KeyError as e:
         try:
@@ -57,39 +41,12 @@ def importacao(relatorio):
             dados.dropna(inplace=True)
             clientes = []
             for idx, linha in dados.iterrows():
-                inserir_cliente(linha['Nome'], linha['CPF'], linha['Limite'])
-                vencimento = linha['Vencimento'].split(' ')
-                vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
-                id_cliente = pesquisa_id(linha['CPF'])
-                inserir_contrato(linha['Número'], vencimento, linha['Empréstimo'], linha['Avaliação'],
-                                 linha['Prazo'], id_cliente, linha['Atualizado em'])
-
+                inserir_cliente(linha['Nome'], linha['CPF'])
             dados.drop_duplicates(subset='CPF', inplace=True)
             for idx, linha in dados.iterrows():
-                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
-                           'Vencimento': linha['Vencimento'].split(' ')}
+                cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']}
                 clientes.append(cliente)
-            deletar_contrato_desatualizado(linha['Atualizado em'])
             return clientes
-
-def importacao_relatorio_margem(relatorio):
-    try:
-        dados = pd.read_csv(relatorio, sep=';', header=0)
-        dados.drop_duplicates(subset='CPF', inplace=True)
-        clientes = []
-        for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']}
-            clientes.append(cliente)
-        return clientes
-    except:
-
-        dados = pd.read_csv(relatorio, sep=',', header=0)
-        dados.drop_duplicates(subset='CPF', inplace=True)
-        clientes = []
-        for idx, linha in dados.iterrows():
-            cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones']}
-            clientes.append(cliente)
-        return clientes
 
 def formata_telefone(clientes):
     try:
@@ -131,28 +88,6 @@ def formata_telefone(clientes):
         return clientes
     except Exception as e:
         print(e)
-
-def formata_vencimento(clientes):
-    try:
-        for cliente in clientes:
-            cliente['Vencimento'].pop(1)
-            for data in cliente['Vencimento']:
-                cliente['Vencimento'] = str(data)
-        clientes = exclui_sem_whats(clientes)
-        return clientes
-
-    except Exception as e:
-        logging.exception(str(e))
-        try:
-            for cliente in clientes:
-                for data in cliente['Vencimento']:
-                    cliente['Vencimento'] = str(data)
-            clientes = exclui_sem_whats(clientes)
-            return clientes
-        except Exception as e:
-            logging.exception(str(e))
-            return clientes
-
 
 def ler_inventario(arquivo):
     try:

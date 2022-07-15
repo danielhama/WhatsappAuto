@@ -22,6 +22,7 @@ class EnviaMensagem:
         self.lista_sem_whats = lista_telefones(0)
         self.excluidos = 0
         self.sem_whats = []
+        self.tentativa = 0
 
 
 
@@ -105,7 +106,7 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
-            # numero = str(numero)
+            numero = str(numero)
             self.pesquisa_box.send_keys(str(numero)[5::])
             sleep(random.random()*3 + 2)
             # sleep(2)
@@ -154,12 +155,18 @@ class EnviaMensagem:
                 sleep(random.random()*3 + .5)
                 txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
+                id = pesquisa_id(cpf)
+                deletar_enviado(id)
                 return
             else:
                 return
 
         except Exception as e:
-            return self.send_whatsapp_msg(numero, texto, nome, cpf)
+            self.tentativa += 1
+            if self.tentativa < 3:
+                return self.send_whatsapp_msg(numero, texto, nome, cpf)
+            else:
+                return
 
     def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
@@ -223,8 +230,8 @@ class EnviaMensagem:
         except:
             return
         try:
-            sleep(4)
-            WebDriverWait(self.driver, 10).until(
+            sleep(5)
+            WebDriverWait(self.driver, 15).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
             sleep(.1)
             return True

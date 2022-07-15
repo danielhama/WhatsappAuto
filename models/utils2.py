@@ -7,26 +7,9 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 def filtra_vencimento():
     clientes1 = []
     clientes = listar_clientes_telefone()
-    hoje = datetime.datetime.today()
-    hj = datetime.datetime.weekday(hoje)
-    hoje = hoje.strftime('%Y-%m-%d')
-    if hj == 0:
-        hoje = datetime.datetime.today()
-        ontem = hoje - datetime.timedelta(days=1)
-        anteontem = hoje - datetime.timedelta(days=2)
-        hoje = hoje.strftime('%Y-%m-%d')
-        ontem = ontem.strftime('%Y-%m-%d')
-        anteontem = anteontem.strftime('%Y-%m-%d')
-        for cliente in clientes:
-            vencimento = cliente['Vencimento'].split(" ")[0]
-            if vencimento == hoje or vencimento == ontem or vencimento == anteontem:
-                clientes1.append(cliente)
-        return clientes1
-    else:
-        for cliente in clientes:
-            if cliente['Vencimento'].split(' ')[0] == hoje:
-                clientes1.append(cliente)
-        return clientes1
+    for cliente in clientes:
+        clientes1.append(cliente)
+    return clientes1
 
 
 def filtra_data(pesquisa):
