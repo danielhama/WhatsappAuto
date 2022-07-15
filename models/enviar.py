@@ -171,7 +171,7 @@ class EnviaMensagem:
         except:
             return
         try:
-            sleep(0.5)
+            sleep(3)
             self.driver.switch_to.alert().accept()
         except Exception as e:
             pass

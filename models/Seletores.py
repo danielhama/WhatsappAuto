@@ -1,4 +1,4 @@
-campo_msg = '._1LbR4 > div:nth-child(2)'
+campo_msg = '#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._2lMWa > div.p3_M1 > div > div.fd365im1.to2l77zo.bbv8nyr4.mwp4sxku.gfz4du6o.ag5g9lrv'
 ok = "._20C5O"
 campo_pesquisa = "._13NKt"
 nova_conversa = "div._2cNrC:nth-child(2) > div:nth-child(1) > span:nth-child(1)"
