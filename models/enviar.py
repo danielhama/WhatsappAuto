@@ -107,7 +107,7 @@ class EnviaMensagem:
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
             numero = str(numero)
-            self.pesquisa_box.send_keys(str(numero)[5::])
+            self.pesquisa_box.send_keys(str(numero)[-8::])
             sleep(random.random()*3 + 2)
             # sleep(2)
 
@@ -153,7 +153,7 @@ class EnviaMensagem:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                txt_box.send_keys(Keys.RETURN)
+                # txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
                 id = pesquisa_id(cpf)
                 deletar_enviado(id)
