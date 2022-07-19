@@ -109,6 +109,8 @@ class EnviaMensagem:
             numero = str(numero)
             self.pesquisa_box.send_keys(str(numero)[-8::])
             sleep(random.random()*3 + 2)
+            id = pesquisa_id(cpf)
+
             # sleep(2)
 
             try:
@@ -120,6 +122,7 @@ class EnviaMensagem:
                     print("não encontrado")
                     self.sem_whats.append(numero)
                     inserir_sem_whats(numero)
+                    deletar_enviado(id)
                     return
 
             # sleep(.5)
@@ -155,7 +158,6 @@ class EnviaMensagem:
                 sleep(random.random()*3 + .5)
                 # txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
-                id = pesquisa_id(cpf)
                 deletar_enviado(id)
                 return
             else:
