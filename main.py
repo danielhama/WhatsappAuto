@@ -2,6 +2,8 @@ import locale
 import os
 import time
 from os import mkdir, remove
+import threading
+import asyncio
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -2090,7 +2092,12 @@ class Whats(App, ProgBar):
         self.inicio = time.time()
         self.qtd = len(clientes)
         self.envia_msg.sem_whats = []
+        # th_iter = threading.Thread(target=self.envia_lista_per)
         self.envia_lista_per()
+        # th_iter.start()
+        # th_iter.join()
+
+
 
     def envia_lista_per(self, dt=None):
         """Envia a mensagem para lista de clientes importada"""
@@ -2112,11 +2119,17 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = 'Abra o web.whatsapp e escaneie o código QR antes de tentar enviar'
             return
         try:
-            # print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
-            self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF'])
             self.contador += 1
-            self.root.ids.progbar.value += self.value
             self.root.ids.right_content.text = f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}\n{self.contador}/{self.qtd}"
+            # print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
+            # th = threading.Thread(target=self.envia_msg.send_whatsapp_msg, args=(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF']))
+            # self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF'])
+            # th.start()
+            event_loop_envio = asyncio.get_event_loop()
+            event_loop_envio.run_until_complete(self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF']))
+            # event_loop_envio.close()
+            self.root.ids.progbar.value += self.value
+            # th.join()
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = str(e)
@@ -2250,16 +2263,49 @@ class Whats(App, ProgBar):
             pass
             self.evento3 = Clock.schedule_once(self.somente_teste, 0.5)
 
-    def enviar(self):
+
+    async def enviar_async(self):
         try:
-            self.cria_iter(self.clientes)
+            th_envio = threading.Thread(target=self.cria_iter, args=(self.clientes, ))
+            th_envio.start()
+            th_envio.join()
+            # self.cria_iter(self.clientes)
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar"
 
+
+    def enviar(self):
+        try:
+            enviar_loop = asyncio.get_event_loop()
+            enviar_loop.run_until_complete(self.enviar_async())
+            enviar_loop.close()
+        except Exception as e:
+            logging.exception(str(e))
+            self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar"
+
+
+
+    async def enviar_vencimento_async(self):
+        try:
+            th = threading.Thread(target=self.cria_iter, args=(self.clientes_hoje, ))
+            th.start()
+            th.join()
+            # self.cria_iter(self.clientes_hoje)
+        except Exception as e:
+            logging.exception(str(e))
+            self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar, esta opção " \
+                                               "filtra os clientes com contratos vencendo no dia, para funcionar é " \
+                                               "necessária a importação de um relatório com todos os clientes, " \
+                                               "de preferência atualizado.\nNo app Bezel, na aba Gerenciar Contratos " \
+                                               "> Criar CSV "
+
+
     def enviar_vencimento(self):
         try:
-            self.cria_iter(self.clientes_hoje)
+            event_loop = asyncio.get_event_loop()
+            event_loop.run_until_complete(self.enviar_vencimento_async())
+            # self.cria_iter(self.clientes_hoje)s
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar, esta opção " \
@@ -2406,4 +2452,6 @@ class Whats(App, ProgBar):
 
 if __name__ == '__main__':
     whats = Whats()
-    whats.run()
+    run = asyncio.get_running_loop()
+    whats.asyncio.async_run()
+

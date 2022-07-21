@@ -95,7 +95,7 @@ class EnviaMensagem:
     #         except:
     #             return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
-    def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
+    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
 
         try:
             try:
@@ -152,7 +152,7 @@ class EnviaMensagem:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                txt_box.send_keys(Keys.RETURN)
+                # txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
                 return
             else:
