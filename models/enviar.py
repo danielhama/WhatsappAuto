@@ -32,7 +32,7 @@ class EnviaMensagem:
         options.add_argument(
             r"user-data-dir={}".format(profile))
         if head == True:
-            options = Options()
+            # options = Options()
             options.add_argument("-headless")
             self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
         else:
@@ -95,7 +95,7 @@ class EnviaMensagem:
     #         except:
     #             return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
-    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
+    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
 
         try:
             try:
@@ -105,7 +105,6 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
             self.pesquisa_box.clear()
-            # numero = str(numero)
             self.pesquisa_box.send_keys(str(numero)[5::])
             sleep(random.random()*3 + 2)
             # sleep(2)
@@ -119,7 +118,7 @@ class EnviaMensagem:
                     print("não encontrado")
                     self.sem_whats.append(numero)
                     inserir_sem_whats(numero)
-                    return
+                    return False
 
             # sleep(.5)
             sleep(random.random()*3+2)
@@ -152,14 +151,14 @@ class EnviaMensagem:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                # txt_box.send_keys(Keys.RETURN)
+                txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
-                return
+                return True
             else:
-                return
+                return False
 
         except Exception as e:
-            return self.send_whatsapp_msg(numero, texto, nome, cpf)
+            return False
 
     def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:

@@ -1,10 +1,12 @@
 import locale
 import os
-from queue import Queue
+import signal
+
 import time
 from os import mkdir, remove
 import threading
 import asyncio
+import multiprocessing
 
 import kivy
 from kivy.app import App
@@ -60,9 +62,6 @@ BoxLayout:
             text: 'Abrir arquivo'
             on_release: app.show_load()
 
-        Button:
-            text: 'Enviar'
-            on_release: app.enviar()
 
         Button:
             text: 'Parar envio'
@@ -1855,80 +1854,112 @@ class ProgBar(ProgressBar):
 
 class EventLoopWorker(EventDispatcher):
 
-    __events__ = ('whatsapp',)  # defines this EventDispatcher's sole event
+    # __events__ = ('whatsapp',)  # defines this EventDispatcher's sole event
 
     def __init__(self):
-        super().__init__()
+        self.register_event_type("on_envio")
+        super(EventLoopWorker, self).__init__()
         self._thread = threading.Thread(target=self._run_loop)  # note the Thread target here
+        # self._thread_envio = threading.Thread(target=self._run_loop2)
         self._thread.daemon = True
         self.loop = None
+        self.loop_envio = None
+        self.cliente = None
+        self.envio_task = None
+        self.envio_msg = EnviaMensagem()
+        self.msg = None
+        self.dados = asyncio.Queue()
+        self.contador = 0
+        self.clientes = None
+        self.falha = 0
+        self.enviado_sucesso = 0
 
-    def whatsapp(self, *_):
+    def on_envio(self, *_):
         print("Aqui")
         pass
 
-    def _run_loop(self):
+    def _run_loop(self, dt=None):
         self.loop = asyncio.get_event_loop_policy().new_event_loop()
         asyncio.set_event_loop(self.loop)
         # self._restart_pulse()
         # this example doesn't include any cleanup code, see the docs on how
         # to properly set up and tear down an asyncio event loop
-        self.loop.run_forever()
+        self.loop.run_until_complete(self.envio_whatsapp())
+        self.loop.close()
+
+
+    # def _run_loop2(self, func):
+    #     self.loop_envio = asyncio.get_event_loop_policy().new_event_loop()
+    #     asyncio.set_event_loop(self.loop_envio)
+    #     self._restart_pulse()
+    #     # this example doesn't include any cleanup code, see the docs on how
+    #     # to properly set up and tear down an asyncio event loop
+    #     self.loop_envio.run_until_complete(func)
 
     def start(self):
-        self._thread.start()
-        self.envio_whatsapp()
+        try:
+            self._thread.start()
+        except RuntimeError:
+            # self._thread._stop()
+            self.clientes = App.get_running_app().clientes_hoje
+            # self.envio_msg.chama_driver(False)
+            self._restart_pulse(None)
+
+
 
     async def envio_whatsapp(self):
+        if self.envio_msg == None:
+            self.envio_msg = EnviaMensagem()
+            if not self.envio_msg.verifica_login():
+                self.envio_msg.chama_driver(head=False)
         @mainthread
         def kivy_update_status(text):
             texto = App.get_running_app().root.ids.right_content
             texto.text = text
-
-        await asyncio.sleep(1)
         @mainthread
-        def inicia_envio(self, dt=None):
-            """Envia a mensagem para lista de clientes importada"""
-            try:
-                cliente = App.get_running_app().dados.get()
-                nome = self.cliente['Nome']
-                kivy_update_status(f"Enviando mensagem para {cliente['Nome']}, número {cliente['Telefones']}\n{App.get_running_app().contador}/{App.get_running_app().qtd}")
-                App.get_running_app().envia_msg.send_whatsapp_msg(cliente['Telefones'], App.get_running_app().atalho, nome, cliente['CPF'])
-            except StopIteration:
-                swhats = len(self.envia_msg.sem_whats)
-                qtd_enviada = self.contador - swhats
-                falhou = self.qtd - self.contador
-                fim = time.time()
-                horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-                kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, e {falhou} falharam o envio. Tempo de execução {horas}:{minutos}:{segundos}')
-                self.root.ids.progbar.value = 0
-                return
-            except Exception as e:
-                logging.exception(str(e))
-                return
-        inicia_envio()
+        def progbar_runner():
+            valor = 100/len(self.clientes)
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value += valor
+        @mainthread
+        def zera_progbar():
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value = 0
 
-    # def enviar_(self, dt=None):
-    #     try:
-    #         self.contador += 1
-    #         el = asyncio.get_event_loop()
-    #         el.run_until_complete(self.envio(telefone=self.cliente['Telefones'], msg=self.atalho, nome=self.nome, cpf=self.cliente['CPF']))
-    #     except Exception as e:
-    #         logging.exception(str(e))
-    #         self.root.ids.right_content.text = str(e)
-    #         self.envia_msg.is_connected()
-    #     if self.evento4 == False:
-    #         self.evento1.cancel()
-    #         self.evento1 = None
-    #         self.root.ids.right_content.text = 'Envio Parado'
-    #         return
-    #     else:
-    #         self.evento1 = Clock.schedule_once(self.inicia_envio, 2)
-    #
-    # async def envio(self, telefone, msg: str, nome: str, cpf: str):
-    #     await self.envia_msg.send_whatsapp_msg(telefone, msg, nome, cpf)
-    #     App.get_running_app().progbar.value += self.value
 
+        for cliente in self.clientes:
+            kivy_update_status(f"Enviando mensagem para {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
+            await asyncio.sleep(1)
+            sucesso = await self.envio_msg.send_whatsapp_msg(cliente['Telefones'], self.msg, cliente['Nome'], cliente['CPF'])
+            await asyncio.sleep(1)
+            if sucesso == True:
+                self.enviado_sucesso += 1
+                self.contador += 1
+            else:
+                self.falha += 1
+                self.contador += 1
+
+            progbar_runner()
+
+        zera_progbar()
+        swhats = len(self.envio_msg.sem_whats)
+        qtd_enviada = self.contador - swhats - self.falha
+        fim = time.time()
+        horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
+        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        self.envio_msg.fecha_driver()
+
+
+    def _restart_pulse(self, dt=None):
+        """Helper to start/reset the pulse task when the pulse changes."""
+        if self.envio_task is not None:
+            self.envio_task.cancel()
+        self.envio_task = self.loop.create_task(self.envio_whatsapp())
+
+    def parar(self):
+        if self.loop is not None:
+            self.loop.stop()
+            self._thread.join()
 
 
 class Whats(App, ProgBar):
@@ -1943,7 +1974,7 @@ class Whats(App, ProgBar):
     def __init__(self, **kwargs):
         super(Whats, self).__init__(**kwargs)
         self.envia_msg = EnviaMensagem()
-        self.dados = Queue()
+        self.worker = EventLoopWorker()
         # self.texto = self.root.ids.right_content.text
 
     def on_start(self):
@@ -1967,13 +1998,16 @@ class Whats(App, ProgBar):
 
     def chama(self):
         try:
-            self.envia_msg.fecha_driver()
+            self.worker.envio_msg.fecha_driver()
         except Exception as e:
             logging.exception(str(e))
             pass
         try:
-            self.envia_msg.chama_driver(self.headless)
-            if self.envia_msg.verifica_login():
+            if self.worker is None:
+                self.worker = EventLoopWorker()
+            self.worker.envio_msg.chama_driver(self.headless)
+            # self.envia_msg.chama_driver(self.headless)
+            if self.worker.envio_msg.verifica_login():
                 self.root.ids.right_content.text = "Logado"
             else:
                 self.root.ids.right_content.text = 'Escaneie o código QR'
@@ -2057,7 +2091,7 @@ class Whats(App, ProgBar):
 
     def set_atalho(self):
         self.msgs = self.root.ids.left_content.text
-        self.atalho = self.msgs.split('\n')
+        self.worker.msg = self.msgs.split('\n')
         self.root.ids.right_content.text = 'Mensagem definida!'
 
     def limpar(self):
@@ -2148,60 +2182,23 @@ class Whats(App, ProgBar):
         except Exception as e:
             self.root.ids.right_content.text = "Não existe arquivo de clientes ainda, importe a base de dados primeiro."
 
-    # def cria_iter(self, clientes, dt=None):
-    #     """Cria um iterável a partir da lista de clientes, e inicializa as váriaveis entes do envio da mensagens"""
-    #     if not self.atalho:
-    #         self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão antes de enviar"
-    #         return
-    #
-    #     if self.evento1 is not None:
-    #         self.evento1.cancel()
-    #         self.evento1 = None
-    #     try:
-    #         self.it = iter(clientes)
-    #
-    #     except Exception as e:
-    #         logging.exception(str(e))
-    #         self.root.ids.right_content.text = "Escolha um arquivo com base de clientes"
-    #         return
-    #     if self.envia_msg.driver == None:
-    #         self.root.ids.right_content.text = 'Escaneie o código QR e clique enviar novamente'
-    #         self.chama()
-    #         return
-    #     self.evento4 = True
-    #     self.puopen()
-    #     self.progress_bar.value = 0
-    #     self.value = 100 / len(clientes)
-    #     self.contador = 0
-    #     self.inicio = time.time()
-    #     self.qtd = len(clientes)
-    #     self.envia_msg.sem_whats = []
-    #     # th_iter = threading.Thread(target=self.inicia_envio)
-    #     self.inicia_envio()
-    #     # th_iter.start()
-    #     # th_iter.join()
 
     def cria_iter(self, clientes, dt=None):
         """Cria um iterável a partir da lista de clientes, e inicializa as váriaveis entes do envio da mensagens"""
-        if not self.atalho:
+        if not self.worker.msg:
+            self.set_atalho()
             self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão antes de enviar"
             return
 
-        if self.evento1 is not None:
-            self.evento1.cancel()
-            self.evento1 = None
         try:
-            for cliente in clientes:
-                self.dados.put(cliente)
-
+            self.worker.clientes = clientes
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Escolha um arquivo com base de clientes"
             return
-        if self.envia_msg.driver == None:
-            # self.root.ids.right_content.text = 'Escaneie o código QR e clique enviar novamente'
-            self.chama()
-            return
+        if self.worker.envio_msg.driver == None:
+            self.worker.envio_msg.chama_driver(False)
+
         self.evento4 = True
         self.puopen()
         self.progress_bar.value = 0
@@ -2210,14 +2207,19 @@ class Whats(App, ProgBar):
         self.inicio = time.time()
         self.qtd = len(clientes)
         self.envia_msg.sem_whats = []
-        worker = EventLoopWorker()
-        worker.start()
+        try:
+            th_id = self.worker.start()
+        except AssertionError as e:
+            self.root.ids.right_content.text = "Processo iniciado aguarde"
 
-
+    # def restart_worker(self, dt=None):
+    #     self.worker._thread.join()
+    #     self.worker = None
+    #     self.worker = EventLoopWorker()
     # def inicia_envio(self, dt=None):
     #     """Envia a mensagem para lista de clientes importada"""
     #     try:
-    #         self.cliente = self.dados.get()
+    #         self.cliente = self.worker.dados.get()
     #         self.nome = self.cliente['Nome']
     #         self.root.ids.right_content.text = f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}\n{self.contador}/{self.qtd}"
     #         Clock.schedule_once(self.enviar_, 1)
@@ -2402,10 +2404,8 @@ class Whats(App, ProgBar):
 
     def enviar_vencimento(self):
         try:
-            # self.cria_iter(self.clientes_hoje)
-            th = threading.Thread(target=self.cria_iter, args=(self.clientes_hoje, ))
-            th.start()
-            th.join()
+            self.cria_iter(self.clientes_hoje)
+            # self.clientes_hoje
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar, esta opção " \
@@ -2502,7 +2502,10 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = "Base de dados ainda não existe, importe uma base de dados primeiro"
 
     def parar(self):
-        self.evento4 = False
+        self.worker.parar()
+        self.root.ids.right_content.text = "Envio Cancelado"
+        self.worker = None
+        self.worker = EventLoopWorker()
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -2529,7 +2532,7 @@ class Whats(App, ProgBar):
             return
 
     def on_stop(self):
-        self.envia_msg.fecha_driver()
+        self.worker.envio_msg.fecha_driver()
         try:
             remove('qrcode.jpg')
         except Exception as e:
@@ -2549,9 +2552,6 @@ class Whats(App, ProgBar):
         self._popup.open()
         content.populate_contratos()
 
-    # async def main():
-    #     whats = Whats()
-    #     await whats.async_run()
 
 if __name__ == '__main__':
     whats = Whats()
