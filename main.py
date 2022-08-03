@@ -2113,7 +2113,9 @@ class Whats(App, ProgBar):
             return
         try:
             # print(f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}")
-            self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF'])
+            enviado = self.envia_msg.send_whatsapp_msg(self.cliente['Telefones'], self.atalho, self.nome, self.cliente['CPF'])
+            if enviado == False:
+                self.envia_msg.falha_envio.append(self.cliente)
             self.contador += 1
             self.root.ids.progbar.value += self.value
             self.root.ids.right_content.text = f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}\n{self.contador}/{self.qtd}"
