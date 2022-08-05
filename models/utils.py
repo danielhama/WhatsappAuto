@@ -11,7 +11,7 @@ def conectar():
     """
     Função para conectar ao servidor
     """
-    conn = sqlite3.connect(path.join(path.expanduser('~'), 'PF.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+    conn = sqlite3.connect(path.join(path.expanduser('~'), 'cartoespreaprovados.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
 
     conn.execute("""CREATE TABLE IF NOT EXISTS "clientes" (

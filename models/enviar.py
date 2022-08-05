@@ -28,7 +28,7 @@ class EnviaMensagem:
 
     def chama_driver(self, head: bool = True) -> None:
         dir_path = os.getcwd()
-        profile = os.path.join(dir_path, "profile", "wpp")
+        profile = os.path.join(dir_path, "profile", "PF")
         options = webdriver.ChromeOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
@@ -111,24 +111,28 @@ class EnviaMensagem:
             sleep(random.random()*3 + 2)
             id = pesquisa_id(cpf)
 
-            # sleep(2)
+            sleep(1)
 
             try:
-                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS2)
             except:
                 try:
                     self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
                 except:
-                    print("não encontrado")
-                    self.sem_whats.append(numero)
-                    inserir_sem_whats(numero)
-                    deletar_enviado(id)
-                    return
+                    try:
+                        self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+                    except:
+                        print("não encontrado")
+                        self.sem_whats.append(numero)
+                        # inserir_sem_whats(numero)
+                        self.testa(numero)
+                        # deletar_enviado(id)
+                        return
 
             # sleep(.5)
             sleep(random.random()*3+2)
 
-            if nome == self.nome_pesquisado.text.split(',')[0]:
+            if nome.strip() == self.nome_pesquisado.text.split(',')[0]:
                 self.nome_pesquisado.click()
                 print('achei')
                 sleep(.5)
@@ -145,18 +149,18 @@ class EnviaMensagem:
         try:
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
             selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-            if selecionado == nome:
+            if selecionado == nome.strip():
                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                 nome = nome.split()
                 nome = nome[0].capitalize()
                 if header == True:
-                    txt_box.send_keys(f'Prezado(a) {nome}')
+                    txt_box.send_keys(f'Olá {nome}')
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 for msg in texto:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
-                # txt_box.send_keys(Keys.RETURN)
+                txt_box.send_keys(Keys.RETURN)
                 sleep(.5)
                 deletar_enviado(id)
                 return
@@ -236,6 +240,10 @@ class EnviaMensagem:
             WebDriverWait(self.driver, 15).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
             sleep(.1)
+            try:
+                inserir_sem_whats(numero)
+            except:
+                pass
             return True
         except Exception as e:
             try:
