@@ -45,12 +45,12 @@ class EnviaMensagem:
 
     def verifica_login(self) -> bool:
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 3).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.desconectar)))
             return True
         except:
             try:
-                WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 2).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, "._2UwZ_ > canvas:nth-child(3)")))
                 return False
             except Exception as e:
@@ -99,8 +99,8 @@ class EnviaMensagem:
         if self.verifica_login():
             try:
                 try:
-                    WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, sel.pesquisa_contato)))
-                    self.pesquisa_box = self.driver.find_element(By.XPATH, sel.pesquisa_contato)
+                    WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+                    self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
                 except:
                     WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                     self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
