@@ -28,6 +28,7 @@ def conectar():
         "valor_emprestimo"	REAL NOT NULL,
         "valor_avaliacao"	REAL NOT NULL,
         "data_atualizacao"	TEXT NOT NULL,
+        "situacao" TEXT NOT NULL,
         "prazo"	INTEGER NOT NULL,    
         "id_cliente"	INTEGER NOT NULL,
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"),
@@ -86,7 +87,7 @@ def inserir_sem_whats(telefone):
     desconectar(conn)
 
 
-def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data):
+def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data):
     conn = conectar()
     cursor = conn.cursor()
     hoje = datetime.datetime.today()
@@ -94,7 +95,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, praz
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {prazo}, {id_cliente}, '{data}')")
+        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', '{situacao}', {prazo}, {id_cliente}, '{data}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")
@@ -102,7 +103,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, praz
         atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
         if atualizado < data:
 
-            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}'")
+            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}' situacao='{situacao}'")
             conn.commit()
             if cursor.rowcount == 1:
                 print('Contrato Atualizado com Sucesso!')
@@ -221,15 +222,16 @@ def listar_contratos_vencidos():
     desconectar(conn)
     return lista_clientes
 
-def listar_contratos_licitacao(data_de_corte):
+#
+
+def listar_contratos_licitacao():
     """
     Função para listar os contratos vencidos
     """
-    data = datetime.datetime.strptime(data_de_corte, '%d/%m/%Y')
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < '{data}' GROUP BY telefones.numero")
+        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.situacao LIKE '%LICI%'  GROUP BY telefones.numero")
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:

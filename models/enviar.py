@@ -227,6 +227,7 @@ class EnviaMensagem:
             sleep(4)
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
             sleep(.1)
             inserir_sem_whats(numero)
             return True

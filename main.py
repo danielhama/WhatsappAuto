@@ -2469,7 +2469,7 @@ class Whats(App, ProgBar):
         try:
             try:
                 self.clientes_hoje = None
-                self.clientes_hoje = listar_contratos_licitacao(self.root.ids.conteudo_licitacao.text)
+                self.clientes_hoje = listar_contratos_licitacao()
             except Exception as e:
                 logging.exception(str(e))
                 self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
