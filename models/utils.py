@@ -103,7 +103,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situ
         atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
         if atualizado < data:
 
-            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}' situacao='{situacao}'")
+            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}', situacao='{situacao}' WHERE numero='{numero}'")
             conn.commit()
             if cursor.rowcount == 1:
                 print('Contrato Atualizado com Sucesso!')

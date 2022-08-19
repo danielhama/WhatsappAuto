@@ -105,7 +105,7 @@ class EnviaMensagem:
                     WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                     self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
                 self.pesquisa_box.clear()
-                self.pesquisa_box.send_keys(str(numero)[5::])
+                self.pesquisa_box.send_keys(str(numero)[-8::])
                 sleep(random.random()*3 + 2)
                 # sleep(2)
 
