@@ -117,21 +117,19 @@ class EnviaMensagem:
                     except:
                         print("não encontrado")
                         self.sem_whats.append(numero)
-                        self.testa(numero)
-                        return False
+                        if self.testa(numero):
+                            return False
 
                 # sleep(.5)
                 sleep(random.random()*3+2)
-
                 if nome == self.nome_pesquisado.text.split(',')[0]:
                     self.nome_pesquisado.click()
                     print('achei')
                     sleep(.5)
                 else:
                     self.nome_pesquisado = None
-                    return
-
-
+                    print("Nome divergente do cadastro")
+                    return False
 
             except Exception as e:
                 print(e)
