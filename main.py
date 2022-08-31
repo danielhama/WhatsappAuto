@@ -1881,11 +1881,14 @@ class EventLoopWorker(EventDispatcher):
     def _run_loop(self, dt=None):
         self.loop = asyncio.get_event_loop_policy().new_event_loop()
         asyncio.set_event_loop(self.loop)
-        # self._restart_pulse()
+        self._restart_pulse()
         # this example doesn't include any cleanup code, see the docs on how
         # to properly set up and tear down an asyncio event loop
-        self.loop.run_until_complete(self.envio_whatsapp())
-        self.loop.close()
+        # self.loop.run_until_complete(self.envio_whatsapp())
+        # self.loop.close()
+        self.loop.run_forever()
+        # self.loop.create_task(self.envio_whatsapp())
+
 
 
     # def _run_loop2(self, func):
@@ -1947,7 +1950,7 @@ class EventLoopWorker(EventDispatcher):
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
         kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
-        self.envio_msg.fecha_driver()
+        # self.envio_msg.fecha_driver()
 
 
     def _restart_pulse(self, dt=None):
@@ -1957,9 +1960,9 @@ class EventLoopWorker(EventDispatcher):
         self.envio_task = self.loop.create_task(self.envio_whatsapp())
 
     def parar(self):
-        if self.loop is not None:
-            self.loop.stop()
-            self._thread.join()
+        # if self.loop is not None:
+        self.envio_task.cancel()
+            # self._thread.join()
 
 
 class Whats(App, ProgBar):

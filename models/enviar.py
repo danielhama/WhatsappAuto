@@ -57,43 +57,6 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
                 return True
 
-    # def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
-    #     try:
-    #         numero = str(numero)
-    #         if len(numero) == 13:
-    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
-    #         else:
-    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
-    #     except:
-    #         return
-    #     try:
-    #         sleep(0.5)
-    #         self.driver.switch_to.alert().accept()
-    #     except Exception as e:
-    #         pass
-    #     # Testa se existe o campo de mensagem na página e envia as mensagens
-    #     try:
-    #
-    #         WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-    #         txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-    #         nome = nome.capitalize()
-    #         if header == True:
-    #             txt_box.send_keys(f'Prezado(a) {nome}')
-    #             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-    #         for msg in texto:
-    #             txt_box.send_keys(msg)
-    #             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-    #         sleep(.5)
-    #         txt_box.send_keys(Keys.RETURN)
-    #         sleep(.5)
-    #
-    #     except Exception as e:
-    #         try:
-    #             self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
-    #             self.sem_whats.append(numero)
-    #             inserir_sem_whats(numero)
-    #         except:
-    #             return self.send_whatsapp_msg(numero, texto, nome, cpf)
 
     async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
         if self.verifica_login():
@@ -289,4 +252,40 @@ class EnviaMensagem:
         self.driver.find_element(By.XPATH,"/html//body/div/div[1]/div[1]/div[4]/div[1]/div[3]/div/div/div[2]/div[5]/div/div/div/div[2]/div/span").click()
 
 
+    def read_last_in_message(self):
+        """
+        Reading the last message that you got in from the chatter
+        """
+        message = ""
+        emojis = []
+        for messages in self.driver.find_elements_by_xpath(
+                "//div[contains(@class,'message-in')]"):
+            try:
 
+                message_container = messages.find_element_by_xpath(
+                    ".//div[@class='copyable-text']")
+
+                message = message_container.find_element_by_xpath(
+                    ".//span[contains(@class,'copyable-text')]"
+                ).text
+
+                for emoji in message_container.find_elements_by_xpath(
+                        ".//img[contains(@class,'copyable-text')]"
+                ):
+                    emojis.append(emoji.get_attribute("data-plain-text"))
+
+            except Exception as e:  # In case there are only emojis in the message
+                try:
+                    message = ""
+                    emojis = []
+                    message_container = messages.find_element_by_xpath(
+                        ".//div[contains(@class,'copyable-text')]")
+
+                    for emoji in message_container.find_elements_by_xpath(
+                            ".//img[contains(@class,'copyable-text')]"
+                    ):
+                        emojis.append(emoji.get_attribute("data-plain-text"))
+                except Exception:
+                    pass
+
+        return message, emojis
