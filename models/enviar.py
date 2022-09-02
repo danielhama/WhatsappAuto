@@ -80,8 +80,9 @@ class EnviaMensagem:
                     except:
                         print("não encontrado")
                         self.sem_whats.append(numero)
-                        if self.testa(numero):
-                            return False
+                        # if self.testa(numero):
+                        inserir_sem_whats(numero)
+                        return False
 
                 # sleep(.5)
                 sleep(random.random()*3+2)
