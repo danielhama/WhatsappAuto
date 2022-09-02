@@ -44,7 +44,12 @@ def conectar():
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
                  )
 
-
+    conn.execute("""CREATE TABLE IF NOT EXISTS "envio" (
+            "id"	INTEGER NOT NULL,
+            "id_cliente"	TEXT NOT NULL,
+            PRIMARY KEY("id" AUTOINCREMENT),
+            FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
+                 )
 
     return conn
 
@@ -54,6 +59,46 @@ def desconectar(conn):
     FunÃ§Ã£o para desconectar do servidor.
     """
     conn.close()
+
+# Lista Envio
+
+def inserir_id_envio(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(f"INSERT INTO envio (id_cliente) VALUES ('{id}')")
+    conn.commit()
+
+    desconectar(conn)
+def criar_lista_envio():
+    conn =conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT clientes.id FROM clientes")
+    ids = cursor.fetchall()
+    for id in ids:
+        inserir_id_envio(id[0])
+    desconectar(conn)
+
+def deletar_enviado(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM 'envio' WHERE id_cliente = {id}")
+        conn.commit()
+    except:
+        pass
+    conn.close()
+
+
+def deletar_lista():
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM 'envio'")
+        conn.commit()
+    except:
+        pass
+    conn.close()
+
 
 # INSERIR
 
