@@ -1,10 +1,11 @@
 import datetime
 import logging
-from models.utils import listar_clientes_telefone, listar_contratos_vencidos
+from models.utils import listar_clientes_telefone, pesquisa_id, inserir_id_envio, deletar_lista
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 
 def filtra_vencimento():
+    deletar_lista()
     clientes1 = []
     clientes = listar_clientes_telefone()
     hoje = datetime.datetime.today()
@@ -20,16 +21,21 @@ def filtra_vencimento():
         for cliente in clientes:
             vencimento = cliente['Vencimento'].split(" ")[0]
             if vencimento == hoje or vencimento == ontem or vencimento == anteontem:
+                id = pesquisa_id(cliente["CPF"])
+                inserir_id_envio(id)
                 clientes1.append(cliente)
         return clientes1
     else:
         for cliente in clientes:
             if cliente['Vencimento'].split(' ')[0] == hoje:
+                id = pesquisa_id(cliente["CPF"])
                 clientes1.append(cliente)
+                inserir_id_envio(id)
         return clientes1
 
 
 def filtra_data(pesquisa):
+    deletar_lista()
     clientes = listar_clientes_telefone()
     try:
         if '/' in pesquisa:
@@ -38,6 +44,7 @@ def filtra_data(pesquisa):
                 clientes1 = []
                 for cliente in clientes:
                     if cliente['Vencimento'] == str(data):
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
                         clientes1.append(cliente)
                 return clientes1
             except Exception as e:
@@ -45,6 +52,7 @@ def filtra_data(pesquisa):
                 clientes1 = []
                 for cliente in clientes:
                     if cliente['Vencimento'] == data:
+
                         clientes1.append(cliente)
                 return clientes1
         else:
@@ -53,12 +61,14 @@ def filtra_data(pesquisa):
                 clientes1 = []
                 for cliente in clientes:
                     if pesquisa in cliente['Nome']:
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
                         clientes1.append(cliente)
                 return clientes1
             except:
                 clientes1 = []
                 for cliente in clientes:
                     if pesquisa in cliente[0]:
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
                         clientes1.append(cliente)
                 return clientes1
     except:

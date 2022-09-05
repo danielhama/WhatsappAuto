@@ -161,6 +161,24 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situ
 
 # LISTAR
 
+def listar_clientes_telefone_envio():
+    """
+    Função para listar os telefones
+    """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, envio.id_cliente, contratos.vencimento FROM telefones, clientes as cli, envio, contratos WHERE envio.id_cliente = cli.id AND telefones.id_cliente = cli.id and telefones.whatsapp = 1 AND contratos.id_cliente =envio.id_cliente GROUP BY telefones.numero')
+    clientes = cursor.fetchall()
+    lista_clientes = []
+    if len(clientes) > 0:
+        for cliente in clientes:
+            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones':cliente[2], 'Vencimento':cliente[4]}
+            lista_clientes.append(cliente)
+    else:
+        print('Não existem clientes cadastrados.')
+    desconectar(conn)
+    return lista_clientes
+
 def listar():
     """
     Função para listar os clientes
@@ -255,17 +273,18 @@ def listar_contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < date('now','-2 day') GROUP BY telefones.numero")
+        "SELECT cli.nome,  contratos.vencimento, cli.id FROM clientes as cli, contratos WHERE contratos.id_cliente = cli.id AND contratos.vencimento < date('now','-2 day') GROUP BY cli.id")
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
         for cliente in clientes:
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
-            lista_clientes.append(cliente)
+            # cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
+            # lista_clientes.append(cliente)
+            inserir_id_envio(cliente[2])
     else:
         print('Não existem clientes cadastrados.')
     desconectar(conn)
-    return lista_clientes
+    # return lista_clientes
 
 #
 
@@ -276,11 +295,12 @@ def listar_contratos_licitacao():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.situacao LIKE '%LICI%'  GROUP BY telefones.numero")
+        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.situacao LIKE '%LICI%'  GROUP BY contratos.id_cliente")
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
         for cliente in clientes:
+            inserir_id_envio(str(cliente[3]))
             cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
             lista_clientes.append(cliente)
     else:
@@ -352,6 +372,7 @@ def filtra_calculo_margem():
                     d90 += d90_t
                     d120 += d120_t
                 if d30 < -500:
+                    inserir_id_envio(id)
                     telefones = listar_telefones_por_cpf(cliente[1])
                     sem_whats = lista_telefones("0")
                     if len(telefones) >= 1:

@@ -81,7 +81,9 @@ class EnviaMensagem:
                         print("não encontrado")
                         self.sem_whats.append(numero)
                         # if self.testa(numero):
+                        id = pesquisa_id(cpf)
                         inserir_sem_whats(numero)
+                        deletar_enviado(id)
                         return False
 
                 # sleep(.5)
@@ -93,6 +95,7 @@ class EnviaMensagem:
                 else:
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
+                    deletar_telefone(numero)
                     return False
 
             except Exception as e:
@@ -115,6 +118,8 @@ class EnviaMensagem:
                     sleep(random.random()*3 + .5)
                     txt_box.send_keys(Keys.RETURN)
                     sleep(.5)
+                    id = pesquisa_id(cpf)
+                    deletar_enviado(id)
                     return True
                 else:
                     return False

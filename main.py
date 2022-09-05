@@ -1950,7 +1950,7 @@ class EventLoopWorker(EventDispatcher):
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
         kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
-        # self.envio_msg.fecha_driver()
+        deletar_lista()
 
 
     def _restart_pulse(self, dt=None):
@@ -2215,52 +2215,7 @@ class Whats(App, ProgBar):
         except AssertionError as e:
             self.root.ids.right_content.text = "Processo iniciado aguarde"
 
-    # def restart_worker(self, dt=None):
-    #     self.worker._thread.join()
-    #     self.worker = None
-    #     self.worker = EventLoopWorker()
-    # def inicia_envio(self, dt=None):
-    #     """Envia a mensagem para lista de clientes importada"""
-    #     try:
-    #         self.cliente = self.worker.dados.get()
-    #         self.nome = self.cliente['Nome']
-    #         self.root.ids.right_content.text = f"Enviando mensagem para {self.cliente['Nome']}, número {self.cliente['Telefones']}\n{self.contador}/{self.qtd}"
-    #         Clock.schedule_once(self.enviar_, 1)
-    #     except StopIteration:
-    #         swhats = len(self.envia_msg.sem_whats)
-    #         qtd_enviada = self.contador - swhats
-    #         falhou = self.qtd - self.contador
-    #         fim = time.time()
-    #         horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-    #         self.root.ids.right_content.text = f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, e {falhou} falharam o envio. Tempo de execução {horas}:{minutos}:{segundos}'
-    #         self.root.ids.progbar.value = 0
-    #         return
-    #     except Exception as e:
-    #         logging.exception(str(e))
-    #         self.root.ids.right_content.text = 'Abra o web.whatsapp e escaneie o código QR antes de tentar enviar'
-    #         return
-    #
-    #
-    # def enviar_(self, dt=None):
-    #     try:
-    #         self.contador += 1
-    #         el = asyncio.get_event_loop()
-    #         el.run_until_complete(self.envio(telefone=self.cliente['Telefones'], msg=self.atalho, nome=self.nome, cpf=self.cliente['CPF']))
-    #     except Exception as e:
-    #         logging.exception(str(e))
-    #         self.root.ids.right_content.text = str(e)
-    #         self.envia_msg.is_connected()
-    #     if self.evento4 == False:
-    #         self.evento1.cancel()
-    #         self.evento1 = None
-    #         self.root.ids.right_content.text = 'Envio Parado'
-    #         return
-    #     else:
-    #         self.evento1 = Clock.schedule_once(self.inicia_envio, 2)
-    #
-    # async def envio(self, telefone, msg: str, nome: str, cpf: str):
-    #     await self.envia_msg.send_whatsapp_msg(telefone, msg, nome, cpf)
-    #     self.root.ids.progbar.value += self.value
+
 
     def cria_iter_sem(self):
         """Cria um iterável com a lista de telefones sem whatsapp a partir do arquivo sem_whats.csv e inicializa as váriavel"""
@@ -2407,6 +2362,7 @@ class Whats(App, ProgBar):
 
     def enviar_vencimento(self):
         try:
+            self.clientes_hoje = listar_clientes_telefone_envio()
             self.cria_iter(self.clientes_hoje)
             # self.clientes_hoje
         except Exception as e:
@@ -2433,8 +2389,10 @@ class Whats(App, ProgBar):
     def filtra_vencidos(self):
         try:
             try:
+                deletar_lista()
+                listar_contratos_vencidos()
                 self.clientes_hoje = None
-                self.clientes_hoje = listar_contratos_vencidos()
+                self.clientes_hoje = listar_clientes_telefone_envio()
             except Exception as e:
                 logging.exception(str(e))
                 self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
@@ -2452,6 +2410,7 @@ class Whats(App, ProgBar):
     def filtra_margem(self):
         try:
             try:
+                deletar_lista()
                 self.clientes_hoje = None
                 self.clientes_hoje = filtra_calculo_margem()
             except Exception as e:
@@ -2471,6 +2430,7 @@ class Whats(App, ProgBar):
     def filtra_licitacao(self):
         try:
             try:
+                deletar_lista()
                 self.clientes_hoje = None
                 self.clientes_hoje = listar_contratos_licitacao()
             except Exception as e:
@@ -2481,7 +2441,7 @@ class Whats(App, ProgBar):
             clientes_importados = None
             clientes_importados = self.clientes_hoje
             # self.imprime_importados()
-            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
+            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos em licitação\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
