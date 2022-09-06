@@ -2228,7 +2228,7 @@ class Whats(App, ProgBar):
             return
         if self.envia_msg.driver == None:
             self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar sem whats novamente'
-            self.chama()
+            self.worker.envio_msg.chama_driver(False)
             return
         self.it = iter(self.lista_sem_whats)
         self.inicio = time.time()
