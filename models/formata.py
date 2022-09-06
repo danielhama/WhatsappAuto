@@ -51,7 +51,7 @@ def importacao(relatorio):
 def formata_telefone(clientes):
     try:
         for idx1, cliente in enumerate(clientes):
-            if type(cliente['Telefones'])  == str:
+            if type(cliente['Telefones']) == str:
                 lista = cliente['Telefones'].split(',')
                 lista_telefones = []
                 for i in lista:
@@ -60,8 +60,8 @@ def formata_telefone(clientes):
                     else:
                         try:
                             i = i.strip()
-                            if i[2] == i[2] == '9' or i[2] == '8':
-                                lista_telefones.append("55" + i)
+                            i = i.replace("(", "").replace(")", "").replace(" ", "").replace("-", "")
+                            lista_telefones.append("55" + i)
                         except Exception as e:
                             pass
 
