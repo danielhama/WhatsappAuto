@@ -151,7 +151,7 @@ class EnviaMensagem:
                 nome = nome.split()
                 nome = nome[0].capitalize()
                 if header == True:
-                    txt_box.send_keys(f'Prezado(a) {nome}')
+                    txt_box.send_keys(f'Olá {nome}')
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 for msg in texto:
                     txt_box.send_keys(msg)
