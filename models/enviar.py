@@ -95,7 +95,7 @@ class EnviaMensagem:
                 else:
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
-                    deletar_telefone(numero)
+                    # deletar_enviado(numero)
                     return False
 
             except Exception as e:
