@@ -13,7 +13,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 class EnviaMensagem:
     def __init__(self):
@@ -34,9 +34,9 @@ class EnviaMensagem:
         if head == True:
             # options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         else:
-            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
         self.driver.get("https://web.whatsapp.com")
 
