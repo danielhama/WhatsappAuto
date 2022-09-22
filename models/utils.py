@@ -140,7 +140,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situ
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', '{situacao}', {prazo}, {id_cliente}, '{data}')")
+        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo}, {id_cliente}, '{data}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")

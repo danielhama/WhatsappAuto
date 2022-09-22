@@ -39,7 +39,7 @@ def importacao(relatorio):
             vencimento = linha['Vencimento'].split(' ')
             vencimento = datetime.datetime.strptime(vencimento[0], '%d/%m/%Y')
             id_cliente = pesquisa_id(linha['CPF'])
-            inserir_contrato(numero=linha['Número'], vencimento=vencimento, valor_emprestimo= linha['Empréstimo'], valor_avaliacao= linha['Avaliação'], situacao=linha["Situação"], prazo= linha['Prazo'], id_cliente= id_cliente, data= linha['Atualizado em'])
+            inserir_contrato(numero=linha['Número'], vencimento=vencimento, valor_emprestimo=linha['Empréstimo'], valor_avaliacao= linha['Avaliação'], situacao=linha["Situação"], prazo=linha['Prazo'], id_cliente=id_cliente, data=linha['Atualizado em'])
         dados.drop_duplicates(subset='CPF', inplace=True)
         for idx, linha in dados.iterrows():
             cliente = {'Nome': linha['Nome'], 'CPF': linha['CPF'], 'Telefones': linha['Telefones'],
