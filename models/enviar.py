@@ -16,6 +16,12 @@ from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
 
 class EnviaMensagem:
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(EnviaMensagem, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
         super().__init__()
         self.driver = None

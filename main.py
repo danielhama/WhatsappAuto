@@ -987,7 +987,7 @@ class RVTelefonesEnviar(BoxLayout):
             logging.basicConfig(filename='app.log', level=logging.INFO)
 
     def enviar_mensagem(self):
-        whats.envia_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefone_enviar)
+        whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefone_enviar)
 
     def listar_exibicao_telefones(self):
         """
@@ -1416,7 +1416,7 @@ class RVCalculo(BoxLayout):
             self._popup.open()
             content.populate()
         else:
-            whats.envia_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
+            whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
 
 
     def calcula_juros_selecionados(self):
@@ -1856,6 +1856,10 @@ class EventLoopWorker(EventDispatcher):
 
     # __events__ = ('whatsapp',)  # defines this EventDispatcher's sole event
 
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(EventLoopWorker, cls).__new__(cls)
+        return cls.instance
     def __init__(self):
         self.register_event_type("on_envio")
         super(EventLoopWorker, self).__init__()
@@ -1879,34 +1883,24 @@ class EventLoopWorker(EventDispatcher):
         pass
 
     def _run_loop(self, dt=None):
-        self.loop = asyncio.get_event_loop_policy().new_event_loop()
-        asyncio.set_event_loop(self.loop)
+        # self.loop = asyncio.get_event_loop_policy().new_event_loop()
+        # asyncio.set_event_loop(self.loop)
         self._restart_pulse()
-        # this example doesn't include any cleanup code, see the docs on how
-        # to properly set up and tear down an asyncio event loop
-        # self.loop.run_until_complete(self.envio_whatsapp())
-        # self.loop.close()
-        self.loop.run_forever()
-        # self.loop.create_task(self.envio_whatsapp())
+        # self.loop.run_forever()
 
 
-
-    # def _run_loop2(self, func):
-    #     self.loop_envio = asyncio.get_event_loop_policy().new_event_loop()
-    #     asyncio.set_event_loop(self.loop_envio)
-    #     self._restart_pulse()
-    #     # this example doesn't include any cleanup code, see the docs on how
-    #     # to properly set up and tear down an asyncio event loop
-    #     self.loop_envio.run_until_complete(func)
 
     def start(self):
         try:
             self._thread.start()
         except RuntimeError:
-            # self._thread._stop()
+            self._thread.join()
             self.clientes = App.get_running_app().clientes_hoje
+            self._thread = threading.Thread(target=self._run_loop)
+            self._thread.start()
+            # self._thread._stop()
             # self.envio_msg.chama_driver(False)
-            self._restart_pulse(None)
+            # self._restart_pulse(None)
 
 
 
@@ -1950,6 +1944,9 @@ class EventLoopWorker(EventDispatcher):
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
         kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        self.contador = 0
+        self.falha = 0
+        self.enviado_sucesso = 0
         deletar_lista()
 
 
@@ -1957,7 +1954,22 @@ class EventLoopWorker(EventDispatcher):
         """Helper to start/reset the pulse task when the pulse changes."""
         if self.envio_task is not None:
             self.envio_task.cancel()
-        self.envio_task = self.loop.create_task(self.envio_whatsapp())
+        # self.loop.stop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except:
+            self.loop = asyncio.get_event_loop_policy().new_event_loop()
+
+        self.envio_task = self.loop.create_task(coro=self.envio_whatsapp())
+        try:
+            self.loop.run_until_complete(self.envio_task)
+        except Exception as e:
+            print(e)
+        # self.loop.run_forever()
+        # await self.envio_task
+
+
+
 
     def parar(self):
         # if self.loop is not None:
@@ -1976,8 +1988,9 @@ class Whats(App, ProgBar):
 
     def __init__(self, **kwargs):
         super(Whats, self).__init__(**kwargs)
-        self.envia_msg = EnviaMensagem()
+        # self.worker.envio_msg = EnviaMensagem()
         self.worker = EventLoopWorker()
+        self.worker.envio_msg = EnviaMensagem()
         # self.texto = self.root.ids.right_content.text
 
     def on_start(self):
@@ -2009,7 +2022,7 @@ class Whats(App, ProgBar):
             if self.worker is None:
                 self.worker = EventLoopWorker()
             self.worker.envio_msg.chama_driver(self.headless)
-            # self.envia_msg.chama_driver(self.headless)
+            # self.worker.envio_msg.chama_driver(self.headless)
             if self.worker.envio_msg.verifica_login():
                 self.root.ids.right_content.text = "Logado"
             else:
@@ -2022,7 +2035,7 @@ class Whats(App, ProgBar):
 
     def code(self, dt=None):
         """ Cria um qrcode a partir dos dados obtidos do campo 'data=ref' """
-        WebDriverWait(self.envia_msg.driver, 20).until(
+        WebDriverWait(self.worker.envio_msg.driver, 20).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, "div[data-ref]")))
         try:
             self.gera_qrcode()
@@ -2035,13 +2048,13 @@ class Whats(App, ProgBar):
 
     def verifica_data(self, dt=None):
         try:
-            self.data1 = self.envia_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
+            self.data1 = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
             if self.data == self.data1:
                 pass
             else:
                 Clock.unschedule(self.verifica_data)
                 self._popup1.dismiss()
-                self.envia_msg.fecha_driver()
+                self.worker.envio_msg.fecha_driver()
                 remove('qrcode.jpg')
                 self.data = None
                 self.root.ids.right_content.text = 'Falha na leitura do QRcode, abra novamente o Web Whats\n\nCaso a falha persista feche e abra o app novamente, e mantenha seu celular conectado à internet'
@@ -2050,9 +2063,9 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             self._popup1.dismiss()
             Clock.unschedule(self.verifica_data)
-            WebDriverWait(self.envia_msg.driver, 20).until(
+            WebDriverWait(self.worker.envio_msg.driver, 20).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, ".two")))
-            self.envia_msg.driver.find_element(By.CSS_SELECTOR, ".two")
+            self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, ".two")
             self.root.ids.right_content.text = 'Logado!\n\n Clique em \"Enviar\" para enviar para toda a base de dados importada em \"Abrir Arquivo\" ou \"Enviar Filtrados\" para enviar as mensagens para os clientes retornados por um dos filtros'
             remove('qrcode.jpg')
 
@@ -2070,7 +2083,7 @@ class Whats(App, ProgBar):
         try:
             remove('qrcode.jpg')
             try:
-                self.data = self.envia_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute(
+                self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute(
                     "data-ref")
                 self.img = make(self.data)
                 self.img.save(stream='qrcode.jpg')
@@ -2080,7 +2093,7 @@ class Whats(App, ProgBar):
                 Clock.unschedule(self.verifica_data)
         except Exception as e:
             logging.exception(str(e))
-            self.data = self.envia_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
+            self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
             self.img = make(self.data)
             self.img.save(stream='qrcode.jpg')
             Clock.schedule_once(self.popupo, 1.0)
@@ -2209,7 +2222,7 @@ class Whats(App, ProgBar):
         self.contador = 0
         self.inicio = time.time()
         self.qtd = len(clientes)
-        self.envia_msg.sem_whats = []
+        self.worker.envio_msg.sem_whats = []
         try:
             th_id = self.worker.start()
         except AssertionError as e:
@@ -2226,7 +2239,7 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             self.root.ids.right_content.text = 'Ainda não existe lista de telefones sem Whatsapp'
             return
-        if self.envia_msg.driver == None:
+        if self.worker.envio_msg.driver == None:
             self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar sem whats novamente'
             self.worker.envio_msg.chama_driver(False)
             return
@@ -2251,14 +2264,14 @@ class Whats(App, ProgBar):
             except StopIteration:
                 fim = time.time()
                 horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-                self.root.ids.right_content.text = f'Foram testados {self.contador} números {self.envia_msg.excluidos} excluídos da lista  em {horas}:{minutos}:{segundos}'
+                self.root.ids.right_content.text = f'Foram testados {self.contador} números {self.worker.envio_msg.excluidos} excluídos da lista  em {horas}:{minutos}:{segundos}'
                 self.root.ids.progbar.value = 0
 
                 return
             if self.qtd_inicial > 0:
                 try:
                     # id_sem = pesquisa_id_por_telefone(self.numero)
-                    self.tem_whats = self.envia_msg.testa(numero=self.numero)
+                    self.tem_whats = self.worker.envio_msg.testa(numero=self.numero)
                     self.contador += 1
                     self.root.ids.progbar.value += self.value
                     if self.tem_whats:
@@ -2268,7 +2281,7 @@ class Whats(App, ProgBar):
 
                 except Exception as erro_teste:
                     self.root.ids.right_content.text = str(erro_teste)
-                    self.envia_msg.is_connected()
+                    self.worker.envio_msg.is_connected()
             if self.evento4 == False:
                 self.evento2.cancel()
                 self.evento2 = None
@@ -2293,7 +2306,7 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             self.root.ids.right_content.text = "Importe um arquivo csv do APP Bezel com os clientes para testar se os telefones tem Whatsapp antes!"
             return
-        if self.envia_msg.driver == None:
+        if self.worker.envio_msg.driver == None:
             self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar Base de Dados novamente'
             self.chama()
             return
@@ -2314,19 +2327,19 @@ class Whats(App, ProgBar):
         except StopIteration:
             fim = time.time()
             horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-            self.envia_msg.sem_whats = []
-            self.root.ids.right_content.text = f'Foram identificados {len(self.envia_msg.sem_whats)} números sem whats, foram testados {self.contador} números, em {horas}:{minutos}:{segundos}'
+            self.worker.envio_msg.sem_whats = []
+            self.root.ids.right_content.text = f'Foram identificados {len(self.worker.envio_msg.sem_whats)} números sem whats, foram testados {self.contador} números, em {horas}:{minutos}:{segundos}'
             self.root.ids.progbar.value = 0
 
             return
         try:
-            self.envia_msg.teste(self.cliente['Telefones'], self.cliente['CPF'])
+            self.worker.envio_msg.teste(self.cliente['Telefones'], self.cliente['CPF'])
             self.contador += 1
             self.root.ids.progbar.value += self.value
             self.root.ids.right_content.text = f"Testando telefone {self.cliente['Telefones']} do cliente {self.cliente['Nome']}\n AGUARDE!!!\n{self.contador} / {len(self.clientes)}"
         except Exception as e:
             logging.exception(str(e))
-            self.envia_msg.is_connected()
+            self.worker.envio_msg.is_connected()
 
         if self.evento4 is False:
             self.evento3.cancel()
