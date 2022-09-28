@@ -5,6 +5,8 @@ import pandas as pd
 from models.calculo import calcular_juros, calcular_data, calcular_margem
 from models.ferramentas import *
 import logging
+
+
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def conectar():
@@ -179,6 +181,7 @@ def listar_clientes_telefone_envio():
     desconectar(conn)
     return lista_clientes
 
+
 def listar():
     """
     Função para listar os clientes
@@ -215,6 +218,7 @@ def listar_clientes_telefone():
         print('Não existem clientes cadastrados.')
     desconectar(conn)
     return lista_clientes
+
 
 
 def listar_telefones_por_cpf(cpf):
@@ -287,7 +291,6 @@ def listar_contratos_vencidos():
     # return lista_clientes
 
 #
-
 def listar_contratos_licitacao():
     """
     Função para listar os contratos vencidos
@@ -307,6 +310,7 @@ def listar_contratos_licitacao():
         print('Não existem clientes cadastrados.')
     desconectar(conn)
     return lista_clientes
+
 
 def lista_telefones(whatsapp):
     """
@@ -516,6 +520,8 @@ def pesquisa_data_atualizacao(numero_contrato):
         print(f'Contrato novo {numero_contrato} efetuar a inclusão pelo relatório da bezel')
         return None
     return data[0]
+
+
 
 # OUTROS
 

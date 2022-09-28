@@ -11,6 +11,7 @@ import multiprocessing
 import kivy
 from kivy.app import App
 from kivy.clock import mainthread
+from models.ferramentas import threaded
 from kivy.event import EventDispatcher
 from kivy.app import App
 from kivy.clock import Clock
@@ -1852,6 +1853,8 @@ class ProgBar(ProgressBar):
         super(ProgBar, self).__init__(**kwa)
         self.progress_bar = ProgressBar()
 
+
+
 class EventLoopWorker(EventDispatcher):
 
     # __events__ = ('whatsapp',)  # defines this EventDispatcher's sole event
@@ -1883,11 +1886,76 @@ class EventLoopWorker(EventDispatcher):
         pass
 
     def _run_loop(self, dt=None):
-        # self.loop = asyncio.get_event_loop_policy().new_event_loop()
-        # asyncio.set_event_loop(self.loop)
         self._restart_pulse()
-        # self.loop.run_forever()
 
+    def start_teste_telefone(self):
+        self.clientes = App.get_running_app().clientes
+        self._run_loop_teste_telefone()
+
+    @threaded
+    def _run_loop_teste_telefone(self):
+        self.cria_task_teste_telefone()
+
+    def cria_task_teste_telefone(self):
+        if self.envio_task is not None:
+            self.envio_task.cancel()
+        # self.loop.stop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except:
+            self.loop = asyncio.get_event_loop_policy().new_event_loop()
+
+        self.envio_task = self.loop.create_task(coro=self.testa_telefone_whats())
+        try:
+            self.loop.run_until_complete(self.envio_task)
+        except Exception as e:
+            print(e)
+
+
+    async def testa_telefone_whats(self):
+        if self.envio_msg == None:
+            self.envio_msg = EnviaMensagem()
+            if not self.envio_msg.verifica_login():
+                self.envio_msg.chama_driver(head=False)
+        @mainthread
+        def kivy_update_status(text):
+            texto = App.get_running_app().root.ids.right_content
+            texto.text = text
+        @mainthread
+        def progbar_runner():
+            valor = 100/len(self.clientes)
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value += valor
+        @mainthread
+        def zera_progbar():
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value = 0
+
+
+        for cliente in self.clientes:
+            kivy_update_status(f" Testando {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
+            await asyncio.sleep(1)
+            sucesso = await self.envio_msg.teste(numero=cliente['Telefones'], cpf=cliente['CPF'])
+            await asyncio.sleep(1)
+            if sucesso == True:
+                self.enviado_sucesso += 1
+                self.contador += 1
+            else:
+                self.falha += 1
+                self.contador += 1
+
+            progbar_runner()
+
+        zera_progbar()
+        swhats = len(self.envio_msg.sem_whats)
+        qtd_enviada = self.contador - swhats - self.falha
+        fim = time.time()
+        horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
+        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        self.contador = 0
+        self.falha = 0
+        self.enviado_sucesso = 0
+        deletar_lista()
 
 
     def start(self):
@@ -1898,10 +1966,6 @@ class EventLoopWorker(EventDispatcher):
             self.clientes = App.get_running_app().clientes_hoje
             self._thread = threading.Thread(target=self._run_loop)
             self._thread.start()
-            # self._thread._stop()
-            # self.envio_msg.chama_driver(False)
-            # self._restart_pulse(None)
-
 
 
     async def envio_whatsapp(self):
@@ -1950,6 +2014,7 @@ class EventLoopWorker(EventDispatcher):
         deletar_lista()
 
 
+
     def _restart_pulse(self, dt=None):
         """Helper to start/reset the pulse task when the pulse changes."""
         if self.envio_task is not None:
@@ -1973,8 +2038,84 @@ class EventLoopWorker(EventDispatcher):
 
     def parar(self):
         # if self.loop is not None:
+        texto = App.get_running_app().root.ids.right_content
+        progbar = App.get_running_app().root.ids.progbar
+        progbar.value = 0
         self.envio_task.cancel()
+
             # self._thread.join()
+
+
+## Teste de numeros marcados como Sem Whatsapp
+    def start_testa_sem_whats(self):
+        self.clientes = App.get_running_app().lista_sem_whats
+        self._run_loop_teste_telefone()
+
+    @threaded
+    def _run_loop_teste_telefone(self):
+        self.cria_task_teste_sem_whats()
+
+    def cria_task_teste_sem_whats(self):
+        if self.envio_task is not None:
+            self.envio_task.cancel()
+        # self.loop.stop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except:
+            self.loop = asyncio.get_event_loop_policy().new_event_loop()
+
+        self.envio_task = self.loop.create_task(coro=self.testa_sem_whats())
+        try:
+            self.loop.run_until_complete(self.envio_task)
+        except Exception as e:
+            print(e)
+
+
+    async def testa_sem_whats(self):
+        if self.envio_msg == None:
+            self.envio_msg = EnviaMensagem()
+            if not self.envio_msg.verifica_login():
+                self.envio_msg.chama_driver(head=False)
+        @mainthread
+        def kivy_update_status(text):
+            texto = App.get_running_app().root.ids.right_content
+            texto.text = text
+        @mainthread
+        def progbar_runner():
+            valor = 100/len(self.clientes)
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value += valor
+        @mainthread
+        def zera_progbar():
+            progbar = App.get_running_app().root.ids.progbar
+            progbar.value = 0
+
+
+        for numero in self.clientes:
+            kivy_update_status(f" Testando {numero}\n{self.contador + 1}/{len(self.clientes)}")
+            await asyncio.sleep(1)
+            sucesso = await self.envio_msg.testa(numero)
+            await asyncio.sleep(1)
+            if sucesso == True:
+                self.enviado_sucesso += 1
+                self.contador += 1
+            else:
+                self.falha += 1
+                self.contador += 1
+
+            progbar_runner()
+
+        zera_progbar()
+        swhats = len(self.envio_msg.sem_whats)
+        qtd_enviada = self.contador - swhats - self.falha
+        fim = time.time()
+        horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
+        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        self.contador = 0
+        self.falha = 0
+        self.enviado_sucesso = 0
+        deletar_lista()
+
 
 
 class Whats(App, ProgBar):
@@ -2023,12 +2164,12 @@ class Whats(App, ProgBar):
                 self.worker = EventLoopWorker()
             self.worker.envio_msg.chama_driver(self.headless)
             # self.worker.envio_msg.chama_driver(self.headless)
-            if self.worker.envio_msg.verifica_login():
-                self.root.ids.right_content.text = "Logado"
-            else:
-                self.root.ids.right_content.text = 'Escaneie o código QR'
-                if self.headless:
-                    Clock.schedule_once(self.code, 0.5)
+            # if self.worker.envio_msg.verifica_login():
+            #     self.root.ids.right_content.text = "Logado"
+            # else:
+            #     self.root.ids.right_content.text = 'Escaneie o código QR'
+            #     if self.headless:
+            #         Clock.schedule_once(self.code, 0.5)
         except Exception as erro_chama:
             logging.exception(str(erro_chama))
             self.root.ids.right_content.text = str(erro_chama)
@@ -2224,7 +2365,7 @@ class Whats(App, ProgBar):
         self.qtd = len(clientes)
         self.worker.envio_msg.sem_whats = []
         try:
-            th_id = self.worker.start()
+            self.worker.start()
         except AssertionError as e:
             self.root.ids.right_content.text = "Processo iniciado aguarde"
 
@@ -2243,7 +2384,6 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar sem whats novamente'
             self.worker.envio_msg.chama_driver(False)
             return
-        self.it = iter(self.lista_sem_whats)
         self.inicio = time.time()
         self.qtd_inicial = len(self.lista_sem_whats)
         self.puopen()
@@ -2251,46 +2391,46 @@ class Whats(App, ProgBar):
         self.value = 100 / self.qtd_inicial
         self.contador = 0
         self.lista = str(self.lista_sem_whats).split(",")
-        self.root.ids.right_content.text = str(self.lista)
-        self.testa_sem()
+        # self.root.ids.right_content.text = str(self.lista)
+        self.worker.start_testa_sem_whats()
 
-    def testa_sem(self, dt=None):
-        """Testa os número sem whatsapp"""
-        if len(self.lista_sem_whats) == 0:
-            self.root.ids.right_content.text = "Ainda não existe arquivo com a lista de telefones sem whatsapp"
-        else:
-            try:
-                self.numero = next(self.it)
-            except StopIteration:
-                fim = time.time()
-                horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-                self.root.ids.right_content.text = f'Foram testados {self.contador} números {self.worker.envio_msg.excluidos} excluídos da lista  em {horas}:{minutos}:{segundos}'
-                self.root.ids.progbar.value = 0
-
-                return
-            if self.qtd_inicial > 0:
-                try:
-                    # id_sem = pesquisa_id_por_telefone(self.numero)
-                    self.tem_whats = self.worker.envio_msg.testa(numero=self.numero)
-                    self.contador += 1
-                    self.root.ids.progbar.value += self.value
-                    if self.tem_whats:
-                        self.root.ids.right_content.text = f"{self.numero} não tem whatsapp\n{self.contador}/{self.qtd_inicial}"
-                    else:
-                        self.root.ids.right_content.text = f"{self.numero} tem whatsapp\n{self.contador}/{self.qtd_inicial}"
-
-                except Exception as erro_teste:
-                    self.root.ids.right_content.text = str(erro_teste)
-                    self.worker.envio_msg.is_connected()
-            if self.evento4 == False:
-                self.evento2.cancel()
-                self.evento2 = None
-                self.root.ids.right_content.text = "Teste parado"
-                self.root.ids.progbar.value = 0
-
-                return
-            else:
-                self.evento2 = Clock.schedule_once(self.testa_sem, 0.5)
+    # def testa_sem(self, dt=None):
+    #     """Testa os número sem whatsapp"""
+    #     if len(self.lista_sem_whats) == 0:
+    #         self.root.ids.right_content.text = "Ainda não existe arquivo com a lista de telefones sem whatsapp"
+    #     else:
+    #         try:
+    #             self.numero = next(self.it)
+    #         except StopIteration:
+    #             fim = time.time()
+    #             horas, minutos, segundos = tempo_execucao(self.inicio, fim)
+    #             self.root.ids.right_content.text = f'Foram testados {self.contador} números {self.worker.envio_msg.excluidos} excluídos da lista  em {horas}:{minutos}:{segundos}'
+    #             self.root.ids.progbar.value = 0
+    #
+    #             return
+    #         if self.qtd_inicial > 0:
+    #             try:
+    #                 # id_sem = pesquisa_id_por_telefone(self.numero)
+    #                 self.tem_whats = self.worker.envio_msg.testa(numero=self.numero)
+    #                 self.contador += 1
+    #                 self.root.ids.progbar.value += self.value
+    #                 if self.tem_whats:
+    #                     self.root.ids.right_content.text = f"{self.numero} não tem whatsapp\n{self.contador}/{self.qtd_inicial}"
+    #                 else:
+    #                     self.root.ids.right_content.text = f"{self.numero} tem whatsapp\n{self.contador}/{self.qtd_inicial}"
+    #
+    #             except Exception as erro_teste:
+    #                 self.root.ids.right_content.text = str(erro_teste)
+    #                 self.worker.envio_msg.is_connected()
+    #         if self.evento4 == False:
+    #             self.evento2.cancel()
+    #             self.evento2 = None
+    #             self.root.ids.right_content.text = "Teste parado"
+    #             self.root.ids.progbar.value = 0
+    #
+    #             return
+    #         else:
+    #             self.evento2 = Clock.schedule_once(self.testa_sem, 0.5)
 
     def cria_iter_importados(self):
         """Cria um iterável a partir da lista de clientes importados e inicializa as variáveis para teste dos telefones importados"""
@@ -2300,15 +2440,15 @@ class Whats(App, ProgBar):
 
         try:
             self.clientes = listar_clientes_telefone()
-            self.qtd_teste = len(self.clientes)
-            self.it_importados = iter(self.clientes)
+            # self.qtd_teste = len(self.clientes)
+            # self.it_importados = iter(self.clientes)
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Importe um arquivo csv do APP Bezel com os clientes para testar se os telefones tem Whatsapp antes!"
             return
         if self.worker.envio_msg.driver == None:
-            self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar Base de Dados novamente'
-            self.chama()
+            # self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar Base de Dados novamente'
+            self.worker.envio_msg.chama_driver()
             return
         self.evento4 = True
         self.puopen()
@@ -2317,7 +2457,7 @@ class Whats(App, ProgBar):
         self.inicio = time.time()
         self.contador = 0
 
-        self.somente_teste()
+        self.worker.start_teste_telefone()
 
     def somente_teste(self, dt=None):
         """Faz o teste dos telefones importados verificando se o número possui whatsapp pelo campo de envia mensagem, caso o número não possua whatsapp é apresentado
@@ -2352,26 +2492,6 @@ class Whats(App, ProgBar):
             self.evento3 = Clock.schedule_once(self.somente_teste, 0.5)
 
 
-    async def enviar_async(self):
-        try:
-            th_envio = threading.Thread(target=self.cria_iter, args=(self.clientes, ))
-            th_envio.start()
-            th_envio.join()
-            # self.cria_iter(self.clientes)
-        except Exception as e:
-            logging.exception(str(e))
-            self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar"
-
-
-    def enviar(self):
-        try:
-            enviar_loop = asyncio.get_event_loop()
-            enviar_loop.run_until_complete(self.enviar_async())
-            enviar_loop.close()
-        except Exception as e:
-            logging.exception(str(e))
-            self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar"
-
 
     def enviar_vencimento(self):
         try:
@@ -2386,6 +2506,7 @@ class Whats(App, ProgBar):
                                                "de preferência atualizado.\nNo app Bezel, na aba Gerenciar Contratos " \
                                                "> Criar CSV "
 
+    @threaded
     def filtra_hoje(self):
         try:
             self.clientes_hoje = None
@@ -2399,6 +2520,8 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             self.root.ids.right_content.text = "Base de dados ainda não existe, importe um arquivo da bezel primeiro, relatório de margem da bezel não cria banco de dados"
 
+
+    @threaded
     def filtra_vencidos(self):
         try:
             try:
@@ -2420,6 +2543,7 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
 
+    @threaded
     def filtra_margem(self):
         try:
             try:

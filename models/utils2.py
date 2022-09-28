@@ -136,3 +136,5 @@ def leia_texto(file):
 
 ##
 
+
+

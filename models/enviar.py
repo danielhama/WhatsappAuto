@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from qrcode import make
 import psutil
 from models.utils import *
+from models.ferramentas import threaded
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
@@ -30,7 +31,7 @@ class EnviaMensagem:
         self.sem_whats = []
 
 
-
+    @threaded
     def chama_driver(self, head: bool = True) -> None:
         dir_path = os.getcwd()
         profile = os.path.join(dir_path, "profile", "wpp")
@@ -45,6 +46,7 @@ class EnviaMensagem:
             self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
         self.driver.get("https://web.whatsapp.com")
+
 
     def fecha_driver(self):
         self.driver.quit()
@@ -106,6 +108,16 @@ class EnviaMensagem:
 
             except Exception as e:
                 print(e)
+            try:
+                bloqueado = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
+                if "bloqueado" in bloqueado.text:
+                    print(bloqueado.text)
+                    inserir_sem_whats(numero)
+                    return False
+
+            except:
+                pass
 
             # Testa se existe o campo de mensagem na página e envia as mensagens
             try:
@@ -187,7 +199,7 @@ class EnviaMensagem:
         except:
             self.is_connected()
 
-    def testa(self, numero) -> bool:
+    async def testa(self, numero) -> bool:
         try:
             numero = str(numero)
             if len(numero) == 13:
@@ -195,7 +207,7 @@ class EnviaMensagem:
             else:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         except:
-            return
+            return False
         try:
             sleep(4)
             WebDriverWait(self.driver, 10).until(
@@ -213,7 +225,7 @@ class EnviaMensagem:
             except:
                 return self.testa(numero=numero)
 
-    def teste(self, numero, cpf):
+    async def teste(self, numero, cpf):
 
         numero = str(numero)
         if len(numero) == 13:
@@ -222,12 +234,14 @@ class EnviaMensagem:
             self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         try:
             self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
+            return True
 
         except Exception as e:
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.ok, 5)
                 inserir_sem_whats(numero)
                 self.sem_whats.append(numero)
+                return False
             except Exception as e:
                 print(e)
                 return self.teste(numero, cpf)
@@ -301,3 +315,4 @@ class EnviaMensagem:
                     pass
 
         return message, emojis
+
