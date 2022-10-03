@@ -96,7 +96,7 @@ class EnviaMensagem:
 
                 # sleep(.5)
                 sleep(random.random()*3+2)
-                if nome == self.nome_pesquisado.text.split(',')[0]:
+                if nome in self.nome_pesquisado.text.split(',')[0]:
                     self.nome_pesquisado.click()
                     print('achei')
                     sleep(.5)
