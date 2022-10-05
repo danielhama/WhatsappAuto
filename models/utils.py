@@ -5,6 +5,8 @@ import pandas as pd
 from models.calculo import calcular_juros, calcular_data, calcular_margem
 from models.ferramentas import *
 import logging
+
+
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def conectar():
