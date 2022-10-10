@@ -2521,7 +2521,7 @@ class Whats(App, ProgBar):
 
 
     @threaded
-    def filtra_vencidos(self):
+    def criar_lista(self):
         try:
             try:
                 self.clientes_hoje = None
