@@ -96,7 +96,7 @@ class EnviaMensagem:
 
                 # sleep(.5)
                 sleep(random.random()*3+2)
-                if nome in self.nome_pesquisado.text.split(',')[0]:
+                if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
                     self.nome_pesquisado.click()
                     print('achei')
                     sleep(.5)
@@ -104,7 +104,7 @@ class EnviaMensagem:
                     print(f"Nome pesquisado {self.nome_pesquisado}")
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
-                    print("Nome de Envio {nome}")
+                    print(f"Nome de Envio {nome}")
                     # deletar_enviado(numero)
                     return False
 
@@ -125,7 +125,7 @@ class EnviaMensagem:
             try:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
                 selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-                if selecionado == nome:
+                if selecionado.split(" ")[0] in nome:
                     txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                     nome = nome.split()
                     nome = nome[0].capitalize()
