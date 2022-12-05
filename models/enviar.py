@@ -76,8 +76,11 @@ class EnviaMensagem:
         except:
             return False
         try:
-            sleep(0.5)
-            self.driver.switch_to.alert().accept()
+            WebDriverWait(self.driver, 5).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
+            inserir_sem_whats(numero)
+            return True
         except Exception as e:
             pass
         # if self.verifica_login():
