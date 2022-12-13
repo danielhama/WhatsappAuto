@@ -66,190 +66,190 @@ class EnviaMensagem:
                 return True
 
 
-    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
-        try:
-            numero = str(numero)
-            if len(numero) == 13:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
-            else:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
-        except:
-            return False
-        try:
-            WebDriverWait(self.driver, 5).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
-            self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
-            inserir_sem_whats(numero)
-            return True
-        except Exception as e:
-            pass
-        # if self.verifica_login():
-        #     try:
-        #         try:
-        #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
-        #             self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-        #         except:
-        #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
-        #             self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-        #         self.pesquisa_box.clear()
-        #         self.pesquisa_box.send_keys(str(numero)[-8::])
-        #         sleep(random.random()*3 + 2)
-        #         # sleep(2)
-        #
-        #         try:
-        #             self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
-        #         except:
-        #             try:
-        #                 self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
-        #             except:
-        #                 print("não encontrado")
-        #                 self.sem_whats.append(numero)
-        #                 # if self.testa(numero):
-        #                 id = pesquisa_id(cpf)
-        #                 inserir_sem_whats(numero)
-        #                 deletar_enviado(id)
-        #                 return False
-        #
-        #         # sleep(.5)
-        #         sleep(random.random()*3+2)
-        #         if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
-        #             self.nome_pesquisado.click()
-        #             print('achei')
-        #             sleep(.5)
-        #         else:
-        #             print(f"Nome pesquisado {self.nome_pesquisado}")
-        #             self.nome_pesquisado = None
-        #             print("Nome divergente do cadastro")
-        #             print(f"Nome de Envio {nome}")
-        #             # deletar_enviado(numero)
-        #             return False
-        #
-        #     except Exception as e:
-        #         print(e)
-        #     try:
-        #         bloqueado = WebDriverWait(self.driver, 2).until(
-        #             EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
-        #         if "bloqueado" in bloqueado.text:
-        #             print(bloqueado.text)
-        #             inserir_sem_whats(numero)
-        #             return False
-        #
-        #     except:
-        #         pass
-
-            # Testa se existe o campo de mensagem na página e envia as mensagens
-            try:
-                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-                # selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-                # if selecionado.split(" ")[0] in nome:
-                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-                nome = nome.split()
-                nome = nome[0].capitalize()
-                if header == True:
-                    txt_box.send_keys(f'Olá {nome}')
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-                # txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-
-                for msg in texto:
-                    txt_box.send_keys(msg)
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-                sleep(random.random()*3 + .5)
-                txt_box.send_keys(Keys.RETURN)
-                sleep(.5)
-                id = pesquisa_id(cpf)
-                deletar_enviado(id)
-                return True
-                # else:
-                #     return False
-
-            except Exception as e:
-                return False
-        else:
-            return False
-
-
     # async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
-    #     if self.verifica_login():
-    #         try:
-    #             try:
-    #                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
-    #                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-    #             except:
-    #                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
-    #                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-    #             self.pesquisa_box.clear()
-    #             self.pesquisa_box.send_keys(str(numero)[-8::])
-    #             sleep(random.random()*3 + 2)
-    #             # sleep(2)
-    #
-    #             try:
-    #                 self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
-    #             except:
-    #                 try:
-    #                     self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
-    #                 except:
-    #                     print("não encontrado")
-    #                     self.sem_whats.append(numero)
-    #                     # if self.testa(numero):
-    #                     id = pesquisa_id(cpf)
-    #                     inserir_sem_whats(numero)
-    #                     deletar_enviado(id)
-    #                     return False
-    #
-    #             # sleep(.5)
-    #             sleep(random.random()*3+2)
-    #             if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
-    #                 self.nome_pesquisado.click()
-    #                 print('achei')
-    #                 sleep(.5)
-    #             else:
-    #                 print(f"Nome pesquisado {self.nome_pesquisado}")
-    #                 self.nome_pesquisado = None
-    #                 print("Nome divergente do cadastro")
-    #                 print(f"Nome de Envio {nome}")
-    #                 # deletar_enviado(numero)
-    #                 return False
-    #
-    #         except Exception as e:
-    #             print(e)
-    #         try:
-    #             bloqueado = WebDriverWait(self.driver, 2).until(
-    #                 EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
-    #             if "bloqueado" in bloqueado.text:
-    #                 print(bloqueado.text)
-    #                 inserir_sem_whats(numero)
-    #                 return False
-    #
-    #         except:
-    #             pass
+    #     try:
+    #         numero = str(numero)
+    #         if len(numero) == 13:
+    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+    #         else:
+    #             self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+    #     except:
+    #         return False
+    #     try:
+    #         WebDriverWait(self.driver, 5).until(
+    #             EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+    #         self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
+    #         inserir_sem_whats(numero)
+    #         return True
+    #     except Exception as e:
+    #         pass
+    #     # if self.verifica_login():
+    #     #     try:
+    #     #         try:
+    #     #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+    #     #             self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+    #     #         except:
+    #     #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+    #     #             self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+    #     #         self.pesquisa_box.clear()
+    #     #         self.pesquisa_box.send_keys(str(numero)[-8::])
+    #     #         sleep(random.random()*3 + 2)
+    #     #         # sleep(2)
+    #     #
+    #     #         try:
+    #     #             self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+    #     #         except:
+    #     #             try:
+    #     #                 self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
+    #     #             except:
+    #     #                 print("não encontrado")
+    #     #                 self.sem_whats.append(numero)
+    #     #                 # if self.testa(numero):
+    #     #                 id = pesquisa_id(cpf)
+    #     #                 inserir_sem_whats(numero)
+    #     #                 deletar_enviado(id)
+    #     #                 return False
+    #     #
+    #     #         # sleep(.5)
+    #     #         sleep(random.random()*3+2)
+    #     #         if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
+    #     #             self.nome_pesquisado.click()
+    #     #             print('achei')
+    #     #             sleep(.5)
+    #     #         else:
+    #     #             print(f"Nome pesquisado {self.nome_pesquisado}")
+    #     #             self.nome_pesquisado = None
+    #     #             print("Nome divergente do cadastro")
+    #     #             print(f"Nome de Envio {nome}")
+    #     #             # deletar_enviado(numero)
+    #     #             return False
+    #     #
+    #     #     except Exception as e:
+    #     #         print(e)
+    #     #     try:
+    #     #         bloqueado = WebDriverWait(self.driver, 2).until(
+    #     #             EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
+    #     #         if "bloqueado" in bloqueado.text:
+    #     #             print(bloqueado.text)
+    #     #             inserir_sem_whats(numero)
+    #     #             return False
+    #     #
+    #     #     except:
+    #     #         pass
     #
     #         # Testa se existe o campo de mensagem na página e envia as mensagens
     #         try:
-    #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-    #             selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-    #             if selecionado.split(" ")[0] in nome:
-    #                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-    #                 nome = nome.split()
-    #                 nome = nome[0].capitalize()
-    #                 if header == True:
-    #                     txt_box.send_keys(f'Olá {nome}')
-    #                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-    #                 for msg in texto:
-    #                     txt_box.send_keys(msg)
-    #                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-    #                 sleep(random.random()*3 + .5)
-    #                 txt_box.send_keys(Keys.RETURN)
-    #                 sleep(.5)
-    #                 id = pesquisa_id(cpf)
-    #                 deletar_enviado(id)
-    #                 return True
-    #             else:
-    #                 return False
+    #             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg_css)))
+    #             # selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+    #             # if selecionado.split(" ")[0] in nome:
+    #             txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+    #             nome = nome.split()
+    #             nome = nome[0].capitalize()
+    #             if header == True:
+    #                 txt_box.send_keys(f'Olá {nome}')
+    #                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+    #             # txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+    #
+    #             for msg in texto:
+    #                 txt_box.send_keys(msg)
+    #                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+    #             sleep(random.random()*3 + .5)
+    #             txt_box.send_keys(Keys.RETURN)
+    #             sleep(.5)
+    #             id = pesquisa_id(cpf)
+    #             deletar_enviado(id)
+    #             return True
+    #             # else:
+    #             #     return False
     #
     #         except Exception as e:
     #             return False
     #     else:
     #         return False
+
+
+    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
+        if self.verifica_login():
+            try:
+                try:
+                    WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+                    self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+                except:
+                    WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+                    self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+                self.pesquisa_box.clear()
+                self.pesquisa_box.send_keys(str(numero)[-8::])
+                sleep(random.random()*3 + 2)
+                # sleep(2)
+
+                try:
+                    self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+                except:
+                    try:
+                        self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
+                    except:
+                        print("não encontrado")
+                        self.sem_whats.append(numero)
+                        # if self.testa(numero):
+                        id = pesquisa_id(cpf)
+                        inserir_sem_whats(numero)
+                        deletar_enviado(id)
+                        return False
+
+                # sleep(.5)
+                sleep(random.random()*3+2)
+                if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
+                    self.nome_pesquisado.click()
+                    print('achei')
+                    sleep(.5)
+                else:
+                    print(f"Nome pesquisado {self.nome_pesquisado}")
+                    self.nome_pesquisado = None
+                    print("Nome divergente do cadastro")
+                    print(f"Nome de Envio {nome}")
+                    # deletar_enviado(numero)
+                    return False
+
+            except Exception as e:
+                print(e)
+            try:
+                bloqueado = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
+                if "bloqueado" in bloqueado.text:
+                    print(bloqueado.text)
+                    inserir_sem_whats(numero)
+                    return False
+
+            except:
+                pass
+
+            # Testa se existe o campo de mensagem na página e envia as mensagens
+            try:
+                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+                selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+                if selecionado.split(" ")[0] in nome:
+                    txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+                    nome = nome.split()
+                    nome = nome[0].capitalize()
+                    if header == True:
+                        txt_box.send_keys(f'Olá {nome}')
+                        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                    for msg in texto:
+                        txt_box.send_keys(msg)
+                        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                    sleep(random.random()*3 + .5)
+                    txt_box.send_keys(Keys.RETURN)
+                    sleep(.5)
+                    id = pesquisa_id(cpf)
+                    deletar_enviado(id)
+                    return True
+                else:
+                    return False
+
+            except Exception as e:
+                return False
+        else:
+            return False
 
     def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
