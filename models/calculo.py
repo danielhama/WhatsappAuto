@@ -27,7 +27,7 @@ def calcular_juros(valor_avaliacao, valor_emprestimo, vencimento, prazo):
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
     alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round((valor_avaliacao * 0.9/100), 2)
+    tarifa = round((valor_avaliacao * 0.97/100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
         taxa_remuneratoria = 0.0199
@@ -90,7 +90,7 @@ def calcular_juros_futuros(valor_avaliacao, valor_emprestimo, vencimento, prazo,
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
     alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round(valor_avaliacao * 0.9/100, 2)
+    tarifa = round(valor_avaliacao * 0.97/100, 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
         taxa_remuneratoria = 0.0199
@@ -138,7 +138,7 @@ def calcular_margem(valor_avaliacao, valor_emprestimo, vencimento, prazo, limite
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
     alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round((valor_avaliacao * 0.9 / 100), 2)
+    tarifa = round((valor_avaliacao * 0.97 / 100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
         taxa_remuneratoria = 0.0199
