@@ -41,6 +41,12 @@ def conectar():
             FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
                  )
 
+    conn.execute("""CREATE TABLE IF NOT EXISTS "falha" (
+            "id"	INTEGER NOT NULL,
+            "id_cliente"	TEXT NOT NULL,
+            PRIMARY KEY("id" AUTOINCREMENT),
+            FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
+                 )
     return conn
 
 
@@ -85,6 +91,14 @@ def inserir_id_envio(id):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(f"INSERT INTO envio (id_cliente) VALUES ('{id}')")
+    conn.commit()
+
+    desconectar(conn)
+
+def inserir_id_falha(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(f"INSERT INTO falha (id_cliente) VALUES ('{id}')")
     conn.commit()
 
     desconectar(conn)

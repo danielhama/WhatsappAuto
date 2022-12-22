@@ -193,6 +193,7 @@ class EnviaMensagem:
                         # if self.testa(numero):
                         id = pesquisa_id(cpf)
                         inserir_sem_whats(numero)
+                        inserir_id_falha(id)
                         deletar_enviado(id)
                         return False
 
@@ -203,11 +204,12 @@ class EnviaMensagem:
                     print('achei')
                     sleep(.5)
                 else:
-                    print(f"Nome pesquisado {self.nome_pesquisado}")
+                    print(f"Nome pesquisado {self.nome_pesquisado.text.split(',')[0]}")
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
                     print(f"Nome de Envio {nome}")
                     # deletar_enviado(numero)
+
                     return False
 
             except Exception as e:
