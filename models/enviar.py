@@ -101,7 +101,7 @@ class EnviaMensagem:
                     print('achei')
                     sleep(.5)
                 else:
-                    print(f"Nome pesquisado {self.nome_pesquisado}")
+                    print(f"Nome pesquisado {self.nome_pesquisado.text.split(',')[0]}")
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
                     print("Nome de Envio {nome}")
