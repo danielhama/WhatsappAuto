@@ -104,7 +104,7 @@ class EnviaMensagem:
                     print(f"Nome pesquisado {self.nome_pesquisado.text.split(',')[0]}")
                     self.nome_pesquisado = None
                     print("Nome divergente do cadastro")
-                    print("Nome de Envio {nome}")
+                    print(f"Nome de Envio {nome}")
                     # deletar_enviado(numero)
                     return False
 

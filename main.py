@@ -1792,7 +1792,7 @@ class RVCalculoLiquidacao(BoxLayout):
             self._popup.open()
             content.populate()
         else:
-            whats.envia_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
+            whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
 
 
 
