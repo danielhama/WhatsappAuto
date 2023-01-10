@@ -2512,10 +2512,12 @@ class Whats(App, ProgBar):
             self.clientes_hoje = None
             # clientes = retorna_lista_clientes()
             self.clientes_hoje = filtra_vencimento()
+            unique_list = [i for n, i in enumerate(self.clientes_hoje) if i not in self.clientes_hoje[n + 1:]]
+
             global clientes_importados
             clientes_importados = None
-            clientes_importados = self.clientes_hoje
-            self.root.ids.right_content.text = f"{len(self.clientes_hoje)} clientes com contratos vencendo hoje\nClique em exibir para mostrar os clientes\n\nEsta opção filtra contratos vencendo no dia, e se for segunda-feira os contratos de sábado e domingo também, use relatórios atualizados"
+            clientes_importados = unique_list
+            self.root.ids.right_content.text = f"{len(clientes_importados)} clientes com contratos vencendo hoje\nClique em exibir para mostrar os clientes\n\nEsta opção filtra contratos vencendo no dia, e se for segunda-feira os contratos de sábado e domingo também, use relatórios atualizados"
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = "Base de dados ainda não existe, importe um arquivo da bezel primeiro, relatório de margem da bezel não cria banco de dados"
