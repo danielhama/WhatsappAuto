@@ -1,4 +1,6 @@
 campo_msg = "#main > footer > div._2lSWV._3cjY2.copyable-area > div > span:nth-child(2) > div > div._1VZX7 > div._3Uu1_ > div > div.fd365im1.to2l77zo.bbv8nyr4.mwp4sxku.gfz4du6o.ag5g9lrv"
+campo_msg2 = '#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._2lMWa > div.p3_M1 > div > div.fd365im1.to2l77zo.bbv8nyr4.mwp4sxku.gfz4du6o.ag5g9lrv'
+
 ok = "._20C5O"
 "#side > div._3gYev > div > div > div._2vDPL > div > div.Er7QU.copyable-text.selectable-text"
 campo_pesquisa2 = "._13NKt"

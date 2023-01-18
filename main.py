@@ -2635,10 +2635,10 @@ class Whats(App, ProgBar):
 
     def on_stop(self):
         self.worker.envio_msg.fecha_driver()
-        try:
-            remove('qrcode.jpg')
-        except Exception as e:
-            logging.exception(str(e))
+        # try:
+        #     remove('qrcode.jpg')
+        # except Exception as e:
+        #     logging.exception(str(e))
 
     def exibir(self):
         content = RV()

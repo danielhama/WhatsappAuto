@@ -49,8 +49,10 @@ class EnviaMensagem:
 
 
     def fecha_driver(self):
-        self.driver.quit()
-
+        try:
+            self.driver.quit()
+        except:
+            pass
     def verifica_login(self) -> bool:
         try:
             WebDriverWait(self.driver, 3).until(
@@ -123,29 +125,33 @@ class EnviaMensagem:
 
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
-            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-            selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-            if selecionado == nome:
-                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-                nome = nome.split()
-                nome = nome[0].capitalize()
-                if header == True:
-                    txt_box.send_keys(f'Prezado(a) {nome}')
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-                for msg in texto:
-                    txt_box.send_keys(msg)
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-                sleep(random.random()*3 + .5)
-                txt_box.send_keys(Keys.RETURN)
-                sleep(.5)
-                id = pesquisa_id(cpf)
-                deletar_enviado(id)
-                return True
-            else:
-                return False
+            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+            # txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
 
-        except Exception as e:
+        except:
+            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg2)))
+
+        selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+        if selecionado == nome:
+            nome = nome.split()
+            nome = nome[0].capitalize()
+            if header == True:
+                self.txt_box.send_keys(f'Prezado(a) {nome}')
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+            for msg in texto:
+                self.txt_box.send_keys(msg)
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+            sleep(random.random()*3 + .5)
+            self.txt_box.send_keys(Keys.RETURN)
+            sleep(.5)
+            id = pesquisa_id(cpf)
+            deletar_enviado(id)
+            return True
+        else:
             return False
+
+        # except Exception as e:
+        #     return False
     # else:
     #     return False
 
