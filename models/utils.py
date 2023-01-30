@@ -324,7 +324,7 @@ def lista_telefones(whatsapp):
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp}")
+    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp} ORDER BY ID DESC")
     telefones = cursor.fetchall()
     lista_telefones = []
     if len(telefones) > 0:
