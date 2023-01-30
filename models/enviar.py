@@ -83,7 +83,7 @@ class EnviaMensagem:
             # sleep(2)
 
             try:
-                self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS)
+                self.nome_pesquisado = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nome_CSS)))
             except:
                 try:
                     self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
