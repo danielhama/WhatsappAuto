@@ -4,4 +4,5 @@ geckodriver
 geckodriver.log
 qrcode.jpg
 profile/
-
+build/
+dist/

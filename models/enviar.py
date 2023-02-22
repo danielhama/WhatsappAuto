@@ -138,11 +138,14 @@ class EnviaMensagem:
             if header == True:
                 self.txt_box.send_keys(f'Prezado(a) {nome}')
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            for msg in texto:
-                self.txt_box.send_keys(msg)
-                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            sleep(random.random()*3 + .5)
-            self.txt_box.send_keys(Keys.RETURN)
+            try:
+                for msg in texto:
+                    self.txt_box.send_keys(msg)
+                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                sleep(random.random()*3 + .5)
+                self.txt_box.send_keys(Keys.RETURN)
+            except:
+                print("erro")
             sleep(.5)
             id = pesquisa_id(cpf)
             deletar_enviado(id)
