@@ -1,10 +1,10 @@
 campo_msg = "._3Uu1_"
-campo_msg2 = "#main > footer > div._2lSWV._3cjY2.copyable-area > div > span:nth-child(2) > div > div._1VZX7 > div._3Uu1_ > div > div.fd365im1.to2l77zo.bbv8nyr4.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt > p"
+campo_msg2 = ".to2l77zo.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt"
 
 ok = "._20C5O"
 "#side > div._3gYev > div > div > div._2vDPL > div > div.Er7QU.copyable-text.selectable-text"
 campo_pesquisa2 = "._13NKt"
-campo_pesquisa = ".Er7QU"
+campo_pesquisa = ".to2l77zo.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt.qh0vvdkp"
 nova_conversa = "div._2cNrC:nth-child(2) > div:nth-child(1) > span:nth-child(1)"
 Scanme = "._2UwZ_ > canvas:nth-child(3)"
 desconectar = ".tvf2evcx"
