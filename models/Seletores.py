@@ -1,10 +1,12 @@
 campo_msg = "._3Uu1_"
 campo_msg2 = ".to2l77zo.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt"
 
-ok = "._20C5O"
+ok = "#app > div > span:nth-child(2) > div > span > div > div > div > div > div > div.p357zi0d.ns59xd2u.kcgo1i74.gq7nj7y3.lnjlmjd6.przvwfww.mc6o24uu.e65innqk.le5p0ye3 > div > div" #._20C5O"
+#app > div > span:nth-child(2) > div > span > div > div > div > div > div > div.p357zi0d.ns59xd2u.kcgo1i74.gq7nj7y3.lnjlmjd6.przvwfww.mc6o24uu.e65innqk.le5p0ye3 > div > div
 "#side > div._3gYev > div > div > div._2vDPL > div > div.Er7QU.copyable-text.selectable-text"
 campo_pesquisa2 = "._13NKt"
 campo_pesquisa = ".to2l77zo.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt.qh0vvdkp"
+cancelar_pesquisa = "#side > div._3gYev > div > div > span > button"
 nova_conversa = "div._2cNrC:nth-child(2) > div:nth-child(1) > span:nth-child(1)"
 Scanme = "._2UwZ_ > canvas:nth-child(3)"
 desconectar = ".tvf2evcx"
