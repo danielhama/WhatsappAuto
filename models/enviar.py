@@ -107,6 +107,7 @@ class EnviaMensagem:
                 self.nome_pesquisado = None
                 print("Nome divergente do cadastro")
                 print(f"Nome de Envio {nome}")
+                self.pesquisa_box.clear()
                 # deletar_enviado(numero)
                 return False
 
