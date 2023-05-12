@@ -42,6 +42,7 @@ def conectar():
         "numero"	INTEGER NOT NULL UNIQUE,
         "whatsapp" INTEGER NOT NULL,
         "id_cliente"	TEXT NOT NULL,
+        "data_alteracao"	TEXT,
         PRIMARY KEY("id" AUTOINCREMENT),
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
                  )
@@ -123,8 +124,9 @@ def inserir_cliente(nome, cpf, limite):
 def inserir_telefone(telefone, id):
     conn = conectar()
     cursor = conn.cursor()
+    hoje = datetime.datetime.today().strftime('%Y-%m-%d')
 
-    cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente) VALUES ('{telefone}', 1, {id})")
+    cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente, data_alteracao) VALUES ('{telefone}', 1, {id},{hoje})")
     conn.commit()
 
     desconectar(conn)
@@ -132,8 +134,10 @@ def inserir_telefone(telefone, id):
 def inserir_sem_whats(telefone):
     conn = conectar()
     cursor = conn.cursor()
+    hoje = datetime.datetime.today().strftime('%Y-%m-%d')
+
     try:
-        cursor.execute(f"UPDATE telefones SET whatsapp=0 WHERE numero={telefone}")
+        cursor.execute(f"UPDATE telefones SET whatsapp=0 data_alteracao ={hoje} WHERE numero={telefone}")
         conn.commit()
     except Exception as e:
         pass
@@ -324,7 +328,7 @@ def lista_telefones(whatsapp):
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp} ORDER BY ID DESC")
+    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp} ORDER BY data_alteracao DESC")
     telefones = cursor.fetchall()
     lista_telefones = []
     if len(telefones) > 0:
