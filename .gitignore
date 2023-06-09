@@ -6,3 +6,6 @@ qrcode.jpg
 profile/
 build/
 dist/
+envio_automatico.py
+auto.py
+importacao.py
