@@ -6,8 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from qrcode import make
-import psutil
+# from qrcode import make
+# import psutil
 from models.utils import *
 from models.ferramentas import threaded
 from selenium.webdriver import ActionChains
@@ -15,6 +15,9 @@ from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+
 
 class EnviaMensagem:
 
@@ -33,17 +36,17 @@ class EnviaMensagem:
 
     @threaded
     def chama_driver(self, head: bool = True) -> None:
-        dir_path = os.getcwd()
-        profile = os.path.join(dir_path, "profile", "wpp")
+
+        profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "wpp")
         options = webdriver.ChromeOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
         if head == True:
-            # options = Options()
+            options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
         else:
-            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 
         self.driver.get("https://web.whatsapp.com")
 
@@ -77,7 +80,10 @@ class EnviaMensagem:
             except:
                 WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa2)))
                 self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-            self.pesquisa_box.clear()
+            try:
+                self.driver.find_element(By.CSS_SELECTOR, sel.apagar_pesquisa).click()
+            except:
+                pass
             self.pesquisa_box.send_keys(str(numero)[-8::])
             sleep(random.random()*3 + 2)
             # sleep(2)
