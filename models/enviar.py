@@ -145,6 +145,7 @@ class EnviaMensagem:
             try:
                 for msg in texto:
                     self.txt_box.send_keys(msg)
+                    sleep(0.2)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
                 sleep(random.random()*3 + .5)
                 self.txt_box.send_keys(Keys.RETURN)
