@@ -6,8 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from qrcode import make
-import psutil
+
 from models.utils import *
 from models.ferramentas import threaded
 from selenium.webdriver import ActionChains
@@ -15,6 +14,7 @@ from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
+import webdriver_manager
 
 class EnviaMensagem:
 
@@ -41,7 +41,7 @@ class EnviaMensagem:
         if head == True:
             options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            self.driver = webdriver.Chrome(service=ChromeDriverManager().install(), options=options)
         else:
             self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
