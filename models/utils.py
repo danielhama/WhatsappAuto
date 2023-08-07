@@ -123,10 +123,11 @@ def inserir_cliente(nome, cpf, limite):
 def inserir_telefone(telefone, id):
     conn = conectar()
     cursor = conn.cursor()
-
-    cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente) VALUES ('{telefone}', 1, {id})")
-    conn.commit()
-
+    try:
+        cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente) VALUES ('{telefone}', 1, {id})")
+        conn.commit()
+    except:
+        pass
     desconectar(conn)
 
 def inserir_sem_whats(telefone):

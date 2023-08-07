@@ -46,7 +46,7 @@ class EnviaMensagem:
             options.add_argument("-headless")
             self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
         else:
-            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
         self.driver.get("https://web.whatsapp.com")
 

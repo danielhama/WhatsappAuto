@@ -20,4 +20,4 @@ ultima_msg = "#main > div._2gzeB > div > div._33LGR > div._3K4-L > div:nth-child
 barra_superior = '._3W2ap'
 #main ._2gzeB ._33LGR ._3K4-L .ItfyB._3nbHh ._22Msk div.copyable-text ._1Gy50 span.i0jNr.selectable-text.copyable-text span
 "._2gzeB ._33LGR ._3K4-L .ItfyB._3nbHh ._22Msk > div.copyable-text > div._1Gy50 > span.i0jNr.selectable-text.copyable-text"
-bloqueado = "._8AbMF"
+bloqueado = "._1alON"
