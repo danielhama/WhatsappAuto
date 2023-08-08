@@ -14,7 +14,7 @@ from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
-import webdriver_manager
+from selenium.webdriver.chrome.service import Service as ChromeService
 
 class EnviaMensagem:
 
@@ -41,9 +41,11 @@ class EnviaMensagem:
         if head == True:
             options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(service=ChromeDriverManager().install(), options=options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+
         else:
-            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+
 
         self.driver.get("https://web.whatsapp.com")
 
@@ -177,7 +179,10 @@ class EnviaMensagem:
                 except:
                     WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
                     self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-                self.pesquisa_box.clear()
+                try:
+                    self.driver.find_element(By.CSS_SELECTOR, ".-Jnba").click()
+                except:
+                    pass
                 self.pesquisa_box.send_keys(str(numero)[-8::])
                 sleep(random.random()*3 + 2)
                 # sleep(2)
