@@ -2137,7 +2137,6 @@ class Whats(App, ProgBar):
         # self.texto = self.root.ids.right_content.text
 
     def on_start(self):
-
         try:
             mkdir(path.join(path.expanduser('~'), 'whatsrelatorios'))
         except Exception as e:
@@ -2175,71 +2174,6 @@ class Whats(App, ProgBar):
         except Exception as erro_chama:
             logging.exception(str(erro_chama))
             self.root.ids.right_content.text = str(erro_chama)
-
-    def code(self, dt=None):
-        """ Cria um qrcode a partir dos dados obtidos do campo 'data=ref' """
-        WebDriverWait(self.worker.envio_msg.driver, 20).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div[data-ref]")))
-        try:
-            self.gera_qrcode()
-        except Exception as e:
-            logging.exception(str(e))
-            self._popup1.dismiss()
-
-    def update(self):
-        Clock.schedule_interval(self.verifica_data, 2)
-
-    def verifica_data(self, dt=None):
-        try:
-            self.data1 = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-            if self.data == self.data1:
-                pass
-            else:
-                Clock.unschedule(self.verifica_data)
-                self._popup1.dismiss()
-                self.worker.envio_msg.fecha_driver()
-                remove('qrcode.jpg')
-                self.data = None
-                self.root.ids.right_content.text = 'Falha na leitura do QRcode, abra novamente o Web Whats\n\nCaso a falha persista feche e abra o app novamente, e mantenha seu celular conectado à internet'
-                return
-        except Exception as e:
-            logging.exception(str(e))
-            self._popup1.dismiss()
-            Clock.unschedule(self.verifica_data)
-            WebDriverWait(self.worker.envio_msg.driver, 20).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, ".two")))
-            self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, ".two")
-            self.root.ids.right_content.text = 'Logado!\n\n Clique em \"Enviar\" para enviar para toda a base de dados importada em \"Abrir Arquivo\" ou \"Enviar Filtrados\" para enviar as mensagens para os clientes retornados por um dos filtros'
-            remove('qrcode.jpg')
-
-    def popupo(self, dt=None):
-        try:
-            self._popup1 = Popup(title='QRCode', content=Image(source='qrcode.jpg'), size_hint=(None, None),
-                                 size=(400, 400), auto_dismiss=True)
-            self._popup1.open()
-            self.update()
-        except Exception as e:
-            logging.exception(str(e))
-            Clock.schedule_once(self.code, 2)
-
-    def gera_qrcode(self):
-        try:
-            remove('qrcode.jpg')
-            try:
-                self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute(
-                    "data-ref")
-                self.img = make(self.data)
-                self.img.save(stream='qrcode.jpg')
-                Clock.schedule_once(self.popupo, 1.0)
-            except Exception as e:
-                logging.exception(str(e))
-                Clock.unschedule(self.verifica_data)
-        except Exception as e:
-            logging.exception(str(e))
-            self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-            self.img = make(self.data)
-            self.img.save(stream='qrcode.jpg')
-            Clock.schedule_once(self.popupo, 1.0)
 
     def next(self, dt):
         if self.root.ids.progbar.value >= 100:
