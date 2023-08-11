@@ -4,10 +4,10 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 
 #Constantes
 
-IOF_30 = 0.0037241537315997
-IOF_60 = 0.0036488274565912
-IOF_90 = 0.0035730309514621
-IOF_120 = 0.0034980290099124
+IOF_30 = 0.00372 #41537315997
+IOF_60 = 0.00364 #88274565912
+IOF_90 = 0.00357 #30309514621
+IOF_120 = 0.00349 #80290099124
 
 #
 # IOF_30 = 0.00373
@@ -15,7 +15,7 @@ IOF_120 = 0.0034980290099124
 # IOF_90 = 0.00357
 # IOF_120 = 0.00349
 
-TAXA = 0.0199
+TAXA = 0.0209
 TAXA_DIARIA = TAXA /30
 MORA = 0.01
 
@@ -25,14 +25,14 @@ def calcular_juros(valor_avaliacao, valor_emprestimo, vencimento, prazo):
     if hoje.weekday() == 0 and atraso <=2 and atraso > 0:
         atraso = 0
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
-    alteracao_taxa = datetime.datetime.strptime('20/03/2020', '%d/%m/%Y')
+    alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round((valor_avaliacao * 0.9/100), 2)
+    tarifa = round((valor_avaliacao * 0.97/100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
-        taxa_remuneratoria = 0.021
-    else:
         taxa_remuneratoria = 0.0199
+    else:
+        taxa_remuneratoria = TAXA
     for dia in dias:
         if dia == 30:
             iof = round((IOF_30 * valor_emprestimo), 2)
@@ -88,14 +88,14 @@ def calcular_juros_futuros(valor_avaliacao, valor_emprestimo, vencimento, prazo,
     if data.weekday() == 0 and atraso <=2 and atraso > 0:
         atraso = 0
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
-    alteracao_taxa = datetime.datetime.strptime('20/03/2020', '%d/%m/%Y')
+    alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round(valor_avaliacao * 0.9/100, 2)
+    tarifa = round(valor_avaliacao * 0.97/100, 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
-        taxa_remuneratoria = 0.021
-    else:
         taxa_remuneratoria = 0.0199
+    else:
+        taxa_remuneratoria = TAXA
     for dia in dias:
         if dia == 30:
             iof = IOF_30 * valor_emprestimo
@@ -136,14 +136,14 @@ def calcular_margem(valor_avaliacao, valor_emprestimo, vencimento, prazo, limite
         valor_emprestimo1 = valor_avaliacao * 0.85
     atraso = (hoje - vencimento).days
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
-    alteracao_taxa = datetime.datetime.strptime('23/03/2020', '%d/%m/%Y')
+    alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
     dias = (30, 60, 90, 120)
-    tarifa = round((valor_avaliacao * 0.9 / 100), 2)
+    tarifa = round((valor_avaliacao * 0.97 / 100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
-        taxa_remuneratoria = 0.021
-    else:
         taxa_remuneratoria = 0.0199
+    else:
+        taxa_remuneratoria = TAXA
     for dia in dias:
         if dia == 30:
             iof = IOF_30 * valor_emprestimo1
@@ -180,12 +180,12 @@ def calcular_liquidacao(valor_emprestimo, vencimento, prazo):
     if hoje.weekday() == 0 and atraso <=2 and atraso > 0:
         atraso = 0
     ultima_renovacao = vencimento - datetime.timedelta(prazo)
-    alteracao_taxa = datetime.datetime.strptime('23/03/2020', '%d/%m/%Y')
+    alteracao_taxa = datetime.datetime.strptime('20/07/2022', '%d/%m/%Y')
 
     if ultima_renovacao < alteracao_taxa:
-        taxa_remuneratoria = 0.021
-    else:
         taxa_remuneratoria = 0.0199
+    else:
+        taxa_remuneratoria = TAXA
 
     if atraso > 0:
         encargos_atraso = round((valor_emprestimo * (taxa_remuneratoria / 30) * atraso) + (valor_emprestimo * 0.0075) + (

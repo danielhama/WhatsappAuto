@@ -5,6 +5,8 @@ import pandas as pd
 from models.calculo import calcular_juros, calcular_data, calcular_margem
 from models.ferramentas import *
 import logging
+
+
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def conectar():
@@ -28,6 +30,7 @@ def conectar():
         "valor_emprestimo"	REAL NOT NULL,
         "valor_avaliacao"	REAL NOT NULL,
         "data_atualizacao"	TEXT NOT NULL,
+        "situacao" TEXT NOT NULL,
         "prazo"	INTEGER NOT NULL,    
         "id_cliente"	INTEGER NOT NULL,
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"),
@@ -39,11 +42,17 @@ def conectar():
         "numero"	INTEGER NOT NULL UNIQUE,
         "whatsapp" INTEGER NOT NULL,
         "id_cliente"	TEXT NOT NULL,
+        "data_alteracao"	TEXT,
         PRIMARY KEY("id" AUTOINCREMENT),
         FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
                  )
 
-
+    conn.execute("""CREATE TABLE IF NOT EXISTS "envio" (
+            "id"	INTEGER NOT NULL,
+            "id_cliente"	TEXT NOT NULL UNIQUE,
+            PRIMARY KEY("id" AUTOINCREMENT),
+            FOREIGN KEY("id_cliente") REFERENCES "clientes"("id"));"""
+                 )
 
     return conn
 
@@ -53,6 +62,52 @@ def desconectar(conn):
     FunÃ§Ã£o para desconectar do servidor.
     """
     conn.close()
+
+# Lista Envio
+
+def inserir_id_envio(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"INSERT INTO envio (id_cliente) VALUES ('{id}')")
+    except sqlite3.IntegrityError as e:
+        pass
+    conn.commit()
+
+    desconectar(conn)
+def criar_lista_envio():
+    conn =conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT clientes.id FROM clientes")
+    ids = cursor.fetchall()
+    for id in ids:
+        try:
+            inserir_id_envio(id[0])
+        except sqlite3.IntegrityError as e:
+            pass
+    desconectar(conn)
+
+def deletar_enviado(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM 'envio' WHERE id_cliente = {id}")
+        conn.commit()
+    except:
+        pass
+    conn.close()
+
+
+def deletar_lista():
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"DELETE FROM 'envio'")
+        conn.commit()
+    except:
+        pass
+    conn.close()
+
 
 # INSERIR
 
@@ -69,8 +124,9 @@ def inserir_cliente(nome, cpf, limite):
 def inserir_telefone(telefone, id):
     conn = conectar()
     cursor = conn.cursor()
+    hoje = datetime.datetime.today().strftime('%Y-%m-%d')
 
-    cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente) VALUES ('{telefone}', 1, {id})")
+    cursor.execute(f"INSERT INTO telefones (numero, whatsapp, id_cliente, data_alteracao) VALUES ('{telefone}', 1, {id},{hoje})")
     conn.commit()
 
     desconectar(conn)
@@ -78,15 +134,17 @@ def inserir_telefone(telefone, id):
 def inserir_sem_whats(telefone):
     conn = conectar()
     cursor = conn.cursor()
+    hoje = datetime.datetime.today().strftime('%Y-%m-%d')
+
     try:
-        cursor.execute(f"UPDATE telefones SET whatsapp=0 WHERE numero={telefone}")
+        cursor.execute(f"UPDATE telefones SET whatsapp=0 data_alteracao ={hoje} WHERE numero={telefone}")
         conn.commit()
     except Exception as e:
         pass
     desconectar(conn)
 
 
-def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data):
+def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data):
     conn = conectar()
     cursor = conn.cursor()
     hoje = datetime.datetime.today()
@@ -94,7 +152,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, praz
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', '{valor_emprestimo}', '{valor_avaliacao}', {prazo}, {id_cliente}, '{data}')")
+        cursor.execute(f"INSERT INTO contratos (numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data_atualizacao) VALUES ('{numero}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo}, {id_cliente}, '{data}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")
@@ -102,7 +160,7 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, praz
         atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
         if atualizado < data:
 
-            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}' WHERE numero='{numero}'")
+            cursor.execute(f"UPDATE contratos SET vencimento='{vencimento}', valor_emprestimo={valor_emprestimo}, valor_avaliacao={valor_avaliacao}, data_atualizacao='{data}', situacao='{situacao}' WHERE numero='{numero}'")
             conn.commit()
             if cursor.rowcount == 1:
                 print('Contrato Atualizado com Sucesso!')
@@ -114,6 +172,25 @@ def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, praz
 
 
 # LISTAR
+
+def listar_clientes_telefone_envio():
+    """
+    Função para listar os telefones
+    """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, envio.id_cliente, contratos.vencimento FROM telefones, clientes as cli, envio, contratos WHERE envio.id_cliente = cli.id AND telefones.id_cliente = cli.id and telefones.whatsapp = 1 AND contratos.id_cliente =envio.id_cliente GROUP BY telefones.numero')
+    clientes = cursor.fetchall()
+    lista_clientes = []
+    if len(clientes) > 0:
+        for cliente in clientes:
+            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones':cliente[2], 'Vencimento':cliente[4]}
+            lista_clientes.append(cliente)
+    else:
+        print('Não existem clientes cadastrados.')
+    desconectar(conn)
+    return lista_clientes
+
 
 def listar():
     """
@@ -140,7 +217,7 @@ def listar_clientes_telefone():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE cli.id = contratos.id_cliente and telefones.id_cliente = cli.id and telefones.whatsapp = 1 GROUP BY telefones.numero')
+    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE cli.id = contratos.id_cliente and telefones.id_cliente = cli.id and telefones.whatsapp = 1') #GROUP BY telefones.numero')
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
@@ -151,6 +228,7 @@ def listar_clientes_telefone():
         print('Não existem clientes cadastrados.')
     desconectar(conn)
     return lista_clientes
+
 
 
 def listar_telefones_por_cpf(cpf):
@@ -209,11 +287,33 @@ def listar_contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.vencimento < date('now','-2 day') GROUP BY telefones.numero")
+        "SELECT cli.nome,  contratos.vencimento, cli.id FROM clientes as cli, contratos WHERE contratos.id_cliente = cli.id AND contratos.vencimento < date('now','-2 day') GROUP BY cli.id")
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:
         for cliente in clientes:
+            # cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
+            # lista_clientes.append(cliente)
+            inserir_id_envio(cliente[2])
+    else:
+        print('Não existem clientes cadastrados.')
+    desconectar(conn)
+    # return lista_clientes
+
+#
+def listar_contratos_licitacao():
+    """
+    Função para listar os contratos vencidos
+    """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(
+        f"SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE telefones.whatsapp == 1 AND cli.id = contratos.id_cliente and telefones.id_cliente = cli.id AND contratos.situacao LIKE '%LICI%'  GROUP BY contratos.id_cliente")
+    clientes = cursor.fetchall()
+    lista_clientes = []
+    if len(clientes) > 0:
+        for cliente in clientes:
+            inserir_id_envio(str(cliente[3]))
             cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
             lista_clientes.append(cliente)
     else:
@@ -221,13 +321,14 @@ def listar_contratos_vencidos():
     desconectar(conn)
     return lista_clientes
 
+
 def lista_telefones(whatsapp):
     """
     Função para listar os telefones
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp}")
+    cursor.execute(f"SELECT * FROM 'telefones' WHERE telefones.whatsapp = {whatsapp} ORDER BY data_alteracao DESC")
     telefones = cursor.fetchall()
     lista_telefones = []
     if len(telefones) > 0:
@@ -259,12 +360,11 @@ def filtra_calculo_margem():
             d90 = 0
             d120 = 0
             total_emprestimo = 0
-            limite = cliente[3]
             cursor.execute(
                 f'select SUM(contratos.valor_avaliacao) as total, clientes.limite from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
-            cliente = cursor.fetchall()
-            total = cliente[0]
-            limite = cliente[1]
+            cliente_limite = cursor.fetchall()
+            total = cliente_limite[0][0]
+            limite = cliente_limite[0][1]
             cursor.execute(
                 f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
             contratos = cursor.fetchall()
@@ -286,6 +386,7 @@ def filtra_calculo_margem():
                     d90 += d90_t
                     d120 += d120_t
                 if d30 < -500:
+                    inserir_id_envio(id)
                     telefones = listar_telefones_por_cpf(cliente[1])
                     sem_whats = lista_telefones("0")
                     if len(telefones) >= 1:
@@ -334,6 +435,17 @@ def deletar_contrato(numero):
         pass
     conn.close()
 
+def deletar_contrato_desatualizado(data):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        data = datetime.datetime.strftime(datetime.datetime.strptime(data.split()[0], '%d/%m/%Y'), '%Y-%m-%d %H:%M:%S')
+        cursor.execute(f"DELETE FROM 'contratos' WHERE data_atualizacao!='{data}'")
+        conn.commit()
+        print("Excluindo contratos liquidados")
+    except:
+        pass
+    conn.close()
 def deletar_telefone(telefone):
     conn = conectar()
     cursor = conn.cursor()
@@ -419,6 +531,8 @@ def pesquisa_data_atualizacao(numero_contrato):
         print(f'Contrato novo {numero_contrato} efetuar a inclusão pelo relatório da bezel')
         return None
     return data[0]
+
+
 
 # OUTROS
 

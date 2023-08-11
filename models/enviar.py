@@ -9,13 +9,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from qrcode import make
 import psutil
 from models.utils import *
+from models.ferramentas import threaded
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 class EnviaMensagem:
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(EnviaMensagem, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
         super().__init__()
         self.driver = None
@@ -24,7 +31,7 @@ class EnviaMensagem:
         self.sem_whats = []
 
 
-
+    @threaded
     def chama_driver(self, head: bool = True) -> None:
         dir_path = os.getcwd()
         profile = os.path.join(dir_path, "profile", "wpp")
@@ -32,68 +39,129 @@ class EnviaMensagem:
         options.add_argument(
             r"user-data-dir={}".format(profile))
         if head == True:
-            options = Options()
+            # options = Options()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         else:
-            self.driver = webdriver.Chrome(executable_path="/home/daniel/Documentos/WhatsappAuto/models/chromedriver", options=options)
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
         self.driver.get("https://web.whatsapp.com")
 
-    def fecha_driver(self):
-        self.driver.quit()
 
+    def fecha_driver(self):
+        try:
+            self.driver.quit()
+        except:
+            pass
     def verifica_login(self) -> bool:
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 3).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.desconectar)))
             return True
         except:
             try:
-                WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 2).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, "._2UwZ_ > canvas:nth-child(3)")))
                 return False
             except Exception as e:
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
                 return True
 
-    def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> None:  # Faz a chamada de contato pelo número de telefone.
+
+    async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
+        # if self.verifica_login():
         try:
-            numero = str(numero)
-            if len(numero) == 13:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4]+numero[5:13]}&source=&data=#")
+            try:
+                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
+                self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+            except:
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa2)))
+                self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+            try:
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.cancelar_pesquisa))).click()
+            except:
+                pass
+            self.pesquisa_box.send_keys(str(numero)[-8::])
+            sleep(random.random()*3 + 2)
+            # sleep(2)
+
+            try:
+                self.nome_pesquisado = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, sel.nome_CLASS)))
+            except:
+                try:
+                    self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
+                except:
+                    print(f"não encontrado {self.nome_pesquisado.text}")
+                    self.sem_whats.append(numero)
+                    # if self.testa(numero):
+                    id = pesquisa_id(cpf)
+                    inserir_sem_whats(numero)
+                    deletar_enviado(id)
+                    return False
+
+            # sleep(.5)
+            sleep(random.random()*3+2)
+            if nome in self.nome_pesquisado.text.split(',')[0]:
+                self.nome_pesquisado.click()
+                print('achei')
+                sleep(.5)
             else:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
-        except:
-            return
-        try:
-            sleep(0.5)
-            self.driver.switch_to.alert().accept()
+                print(f"Nome pesquisado {self.nome_pesquisado.text.split(',')[0]}")
+                self.nome_pesquisado = None
+                print("Nome divergente do cadastro")
+                print(f"Nome de Envio {nome}")
+                self.pesquisa_box.clear()
+                # deletar_enviado(numero)
+                return False
+
         except Exception as e:
+            print(e)
+        try:
+            bloqueado = WebDriverWait(self.driver, 2).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
+            if "bloqueado" in bloqueado.text:
+                print(bloqueado.text)
+                inserir_sem_whats(numero)
+                return False
+
+        except:
             pass
+
         # Testa se existe o campo de mensagem na página e envia as mensagens
         try:
+            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+            # txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
 
-            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-            txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-            nome = nome.capitalize()
+        except:
+            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg2)))
+
+        selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+        if selecionado == nome:
+            nome = nome.split()
+            nome = nome[0].capitalize()
             if header == True:
-                txt_box.send_keys(f'Prezado(a) {nome}')
+                self.txt_box.send_keys(f'Prezado(a) {nome}')
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            for msg in texto:
-                txt_box.send_keys(msg)
-                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
-            sleep(.5)
-            txt_box.send_keys(Keys.RETURN)
-            sleep(.5)
-
-        except Exception as e:
             try:
-                self.element_presence(By.XPATH, '//*[@id="app"]/div[1]/span[2]/div[1]/span[1]/div[1]/div[1]', 5)
-                self.sem_whats.append(numero)
-                inserir_sem_whats(numero)
+                for msg in texto:
+                    self.txt_box.send_keys(msg)
+                    sleep(0.2)
+                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
+                sleep(random.random()*3 + .5)
+                self.txt_box.send_keys(Keys.RETURN)
             except:
-                return self.send_whatsapp_msg(numero, texto, nome, cpf)
+                print("erro")
+            sleep(.5)
+            id = pesquisa_id(cpf)
+            deletar_enviado(id)
+            return True
+        else:
+            return False
+
+        # except Exception as e:
+        #     return False
+    # else:
+    #     return False
 
     def send_whatsapp_msg_valor(self, numero, texto) -> None:  # Faz a chamada de contato pelo número de telefone.
         try:
@@ -105,7 +173,7 @@ class EnviaMensagem:
         except:
             return
         try:
-            sleep(0.5)
+            sleep(3)
             self.driver.switch_to.alert().accept()
         except Exception as e:
             pass
@@ -119,9 +187,13 @@ class EnviaMensagem:
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(.5)
             sleep(random.random())
-            txt_box.send_keys(Keys.RETURN)
-            sleep(.5)
+            # txt_box.send_keys(Keys.RETURN)
+            sleep(1)
             sleep(random.random())
+            sleep(random.random())
+            sleep(random.random())
+            self.pesquisa_box.clear()
+            return
 
 
         except Exception as e:
@@ -143,7 +215,7 @@ class EnviaMensagem:
         except:
             self.is_connected()
 
-    def testa(self, numero) -> bool:
+    async def testa(self, numero) -> bool:
         try:
             numero = str(numero)
             if len(numero) == 13:
@@ -151,12 +223,14 @@ class EnviaMensagem:
             else:
                 self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         except:
-            return
+            return False
         try:
             sleep(4)
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
             sleep(.1)
+            inserir_sem_whats(numero)
             return True
         except Exception as e:
             try:
@@ -167,7 +241,7 @@ class EnviaMensagem:
             except:
                 return self.testa(numero=numero)
 
-    def teste(self, numero, cpf):
+    async def teste(self, numero, cpf):
 
         numero = str(numero)
         if len(numero) == 13:
@@ -176,12 +250,14 @@ class EnviaMensagem:
             self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
         try:
             self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
+            return True
 
         except Exception as e:
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.ok, 5)
                 inserir_sem_whats(numero)
                 self.sem_whats.append(numero)
+                return False
             except Exception as e:
                 print(e)
                 return self.teste(numero, cpf)
@@ -218,4 +294,41 @@ class EnviaMensagem:
         self.driver.find_element(By.XPATH,"/html//body/div/div[1]/div[1]/div[4]/div[1]/div[3]/div/div/div[2]/div[5]/div/div/div/div[2]/div/span").click()
 
 
+    def read_last_in_message(self):
+        """
+        Reading the last message that you got in from the chatter
+        """
+        message = ""
+        emojis = []
+        for messages in self.driver.find_elements_by_xpath(
+                "//div[contains(@class,'message-in')]"):
+            try:
+
+                message_container = messages.find_element_by_xpath(
+                    ".//div[@class='copyable-text']")
+
+                message = message_container.find_element_by_xpath(
+                    ".//span[contains(@class,'copyable-text')]"
+                ).text
+
+                for emoji in message_container.find_elements_by_xpath(
+                        ".//img[contains(@class,'copyable-text')]"
+                ):
+                    emojis.append(emoji.get_attribute("data-plain-text"))
+
+            except Exception as e:  # In case there are only emojis in the message
+                try:
+                    message = ""
+                    emojis = []
+                    message_container = messages.find_element_by_xpath(
+                        ".//div[contains(@class,'copyable-text')]")
+
+                    for emoji in message_container.find_elements_by_xpath(
+                            ".//img[contains(@class,'copyable-text')]"
+                    ):
+                        emojis.append(emoji.get_attribute("data-plain-text"))
+                except Exception:
+                    pass
+
+        return message, emojis
 
