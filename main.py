@@ -1569,7 +1569,7 @@ class Whats(App, ProgBar):
             # self.it_importados = iter(self.clientes)
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Importe um arquivo csv do APP Bezel com os clientes para testar se os telefones tem Whatsapp antes!"
+            self.root.ids.right_content.text = f"Importe um arquivo csv do APP Bezel com os clientes para testar se os telefones tem Whatsapp antes! {e}"
             return
         if self.worker.envio_msg.driver == None:
             # self.root.ids.right_content.text = 'Escaneie o código QR e clique Testar Base de Dados novamente'
@@ -1642,10 +1642,10 @@ class Whats(App, ProgBar):
             global clientes_importados
             clientes_importados = None
             clientes_importados = unique_list
-            self.root.ids.right_content.text = f"{len(clientes_importados)} clientes com contratos vencendo hoje\nClique em exibir para mostrar os clientes\n\nEsta opção filtra contratos vencendo no dia, e se for segunda-feira os contratos de sábado e domingo também, use relatórios atualizados"
+            self.root.ids.right_content.text = f"{len(clientes_importados)} clientes com contratos vencendo hoje"
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Base de dados ainda não existe, importe um arquivo da bezel primeiro, relatório de margem da bezel não cria banco de dados"
+            self.root.ids.right_content.text = f"Erro na filtragem {e}"
 
 
     @threaded
@@ -1664,11 +1664,11 @@ class Whats(App, ProgBar):
             clientes_importados = None
             clientes_importados = self.clientes_hoje
             # self.imprime_importados()
-            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
+            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos'
 
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
+            self.root.ids.right_content.text = f"Erro na filtragem {e}"
 
     @threaded
     def filtra_margem(self):
@@ -1679,7 +1679,7 @@ class Whats(App, ProgBar):
                 self.clientes_hoje = filtra_calculo_margem()
             except Exception as e:
                 logging.exception(str(e))
-                self.root.ids.right_content.text = 'Data em Formato desconhecido'
+                self.root.ids.right_content.text = f'Data em Formato desconhecido {e}'
                 return
             global clientes_importados
             clientes_importados = None
@@ -1689,7 +1689,7 @@ class Whats(App, ProgBar):
 
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
+            self.root.ids.right_content.text = f"Erro ao filtrar clientes com margem {e}"
 
     def filtra_licitacao(self):
         try:
@@ -1705,10 +1705,10 @@ class Whats(App, ProgBar):
             clientes_importados = None
             clientes_importados = self.clientes_hoje
             # self.imprime_importados()
-            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos em licitação\nClique em exibir para mostrar os clientes\n\nEsta opção filtra todos contratos vencidos da base de dados importada, importante atualizar a base de dados pelo menos uma vez por semana importando um relatório com todos os contratos do aplicativo bezel'
+            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos em licitação'
         except Exception as e:
             logging.exception(str(e))
-            self.root.ids.right_content.text = "Banco de dados ainda não existe, importe um arquivo primeiro"
+            self.root.ids.right_content.text = f"Banco de dados ainda não existe, importe um arquivo primeiro {e}"
 
     def filtra_data(self):
         try:

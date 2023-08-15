@@ -119,7 +119,7 @@ class EnviaMensagem:
             bloqueado = self.pesquisa_seletor(sel.bloqueado, 2)
             if "bloqueado" in bloqueado.text:
                 print(bloqueado.text)
-                inserir_sem_whats(numero)
+                inserir_sem_whats(numero[2::])
                 return False
         except:
             pass

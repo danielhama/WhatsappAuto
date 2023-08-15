@@ -12,20 +12,32 @@ BoxLayout:
         text: 'WhatsappAuto'
 
     StackLayout:
+        padding: 10,0,10,0
+        spacing: 10
+
         # Button is a subclass of Label and can be sized
         # to text in the same way
 
+#        Button:
+#            text: 'Abrir arquivo'
+#            on_release: app.show_load()
+#
         Button:
-            text: 'Abrir arquivo'
-            on_release: app.show_load()
+            text: 'Enviar'
+            on_release: app.enviar_vencimento()
 
 
+
         Button:
-            text: 'Parar envio'
+            text: 'Parar'
             on_release: app.parar()
-
+#        Spinner:
+#            text: 'Testes'
+#            size: 100, 50
+#            sync_height: False
+#            values: 'Testa todos telefones', "Testa sem whatsapp"
         Button:
-            text: 'Testa Telefones na Base de dados'
+            text: 'Testa todos'
             on_release: app.cria_iter_importados()
 
         Button:
@@ -49,96 +61,67 @@ BoxLayout:
             text: 'Exibir Clientes'
             on_release: app.exibir()
 
-    GridLayout:
+    BoxLayout:
         id: grid_layout
-        cols: 2
-        height: cm(7)
-        width: cm(10)
-        size_hint_y: None
+        orientation: 'vertical'
+        padding: 20
+#        height: cm(7)
+#        width: cm(10)
+#        size_hint_y: None
 
         HeadingLabel:
             text: "Digite o texto a ser enviado"
-
-        HeadingLabel:
-            text: 'Execução'
+#
+#        HeadingLabel:
+#            text: 'Execução'
 
         TextInput:
             id: left_content
+            size_hint_min_y: 1
             disabled_color: 0, 0, 0, 0
             on_text: app.set_atalho()
+#            padding: 20,10,20,10
             focus: True
 
+
+
+
         ScrollView:
+            size_hint_y: None
+#            size_hint_x: 100
             do_scroll_x: False
             do_scroll_y: True
 
             Label1:
                 id: right_content
                 text_size: self.size
-                padding: dp(6), dp(6)
+#                padding: 20,10,20,10
                 halign: 'center'
                 valign: 'center'
 
-    BoxLayout:
-        canvas:
-            Color:
-                rgba: .1, .1, .1, 1
+        BoxLayout:
+            orientation: 'horizontal'
+            Button:
+                text: 'Filtrar hoje'
+                on_release: app.filtra_hoje()
 
-            Rectangle:
-                size: self.size
-                pos: self.pos
-        orientation: 'horizontal'
-        size_hint_y: .12
-        Button:
-            text: 'Salvar Mensagem'
-            on_release: app.salva_mensagem()
+            Button:
+                text: 'Filtrar vencidos'
+                on_release: app.filtra_vencidos()
 
-        Spinner:
-            text: 'Mensagem'
-            values: 'Vencimento', 'Margem', 'Vencidos', 'Leilao', 'msg2'
-            on_text: app.spinner_mensagem(self.text)
+            Button:
+                text: 'Filtrar Margem'
+                on_release: app.filtra_margem()
+            Button:
+                text: 'Filtrar Licitação'
+                on_release: app.filtra_licitacao()
 
-        Button:
-            text: 'Limpar'
-            on_release: app.limpar()
-
-        Button:
-            text: 'Selecionar Tudo'
-            on_release: app.selecionar()
-        Label:
-
-        Button:
-            text: 'Enviar Filtrados'
-            on_release: app.enviar_vencimento()
-
-        Button:
-            text: 'Filtrar hoje'
-            on_release: app.filtra_hoje()
-
-        Button:
-            text: 'Filtrar vencidos'
-            on_release: app.filtra_vencidos()
-
-        Button:
-            text: 'Filtrar Margem'
-            on_release: app.filtra_margem()
-        Button:
-            text: 'Filtrar Licitação'
-            on_release: app.filtra_licitacao()
-        TextInput:
-            id: conteudo_licitacao
-            disabled_color: 0, 0, 0, 0
-            multiline: False
-            on_text_validate: app.filtra_licitacao()
-            on_focus: root.ids.right_content.text: 'Digite uma data para filtrar os contratos'
-            input_type: 'datetime'
-        Label:
-            text: 'Pesquisar'
 
         TextInput:
             id: middle_content
             disabled_color: 0, 0, 0, 0
             multiline: False
+            size_hint_y: .05
             on_text_validate: app.filtra_data()
             on_focus: root.ids.right_content.text: 'Digite uma data para filtrar os contratos'
             input_type: 'datetime'
