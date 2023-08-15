@@ -23,7 +23,7 @@ def csv_para_vcf():
                 numero = str(numero)
                 i = numero[0:13]
                 tipo = alea()
-                escritor.writerow({f"TEL;{tipo};;CELL:+{i}"})
+                escritor.writerow({f"TEL;{tipo};;CELL:+55{i}"})
             escritor.writerow({'END:VCARD'})
 
 

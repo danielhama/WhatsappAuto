@@ -96,7 +96,7 @@ class EnviaMensagem:
                 print("não encontrado")
                 self.sem_whats.append(numero)
                 id = pesquisa_id(cpf)
-                inserir_sem_whats(numero)
+                inserir_sem_whats(numero[2::])
                 deletar_enviado(id)
                 return False
 

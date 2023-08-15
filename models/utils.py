@@ -247,7 +247,7 @@ def listar_Telefones_por_cpf(cpf):
     cursor = conn.cursor()
     id = pesquisa_id(cpf)
     cursor.execute(
-        f'SELECT Telefones.DDD || Telefones.numero, Clientes.Id FROM Telefones, Clientes WHERE Telefones.ClienteID = {id}')
+        f'SELECT Telefones.DDD || Telefones.numero FROM Telefones WHERE Telefones.ClienteID = {id}')
     Telefones = cursor.fetchall()
     lista_Telefones = []
     if len(Telefones) > 0:
@@ -316,13 +316,13 @@ def listar_Contratos_licitacao():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT cli.nome, cli.cpf, Contratos.CPF, Telefones.DDD || Telefones.numero,  Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE Contratos.situacao LIKE '%LICI%' AND Telefones.whatsapp == 1 AND Telefones.ClienteID = cli.id AND Contratos.CPF = cli.CPF GROUP BY Telefones.Numero")
+        f"SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero,  Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE Contratos.situacao LIKE '%LICI%' AND Telefones.whatsapp == 1 AND Telefones.ClienteID = cli.id AND Contratos.CPF = cli.CPF GROUP BY Telefones.Numero")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
         for cliente in Clientes:
             inserir_id_envio(str(cliente[3]))
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
+            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[3]}
             lista_Clientes.append(cliente)
     else:
         print('Não existem Clientes cadastrados.')

@@ -1620,7 +1620,7 @@ class Whats(App, ProgBar):
 
     def enviar_vencimento(self):
         try:
-            self.clientes_hoje = listar_Clientes_telefone_envio()
+            # self.clientes_hoje = listar_Clientes_telefone_envio()
             self.cria_iter(self.clientes_hoje)
             # self.clientes_hoje
         except Exception as e:
