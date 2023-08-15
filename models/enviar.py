@@ -29,7 +29,7 @@ class EnviaMensagem:
     def __init__(self):
         super().__init__()
         self.driver = None
-        self.lista_sem_whats = lista_telefones(0)
+        self.lista_sem_whats = lista_Telefones(0)
         self.excluidos = 0
         self.sem_whats = []
 

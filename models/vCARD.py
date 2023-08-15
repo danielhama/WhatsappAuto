@@ -1,4 +1,4 @@
-from models.utils import listar, listar_telefones_por_cpf
+from models.utils import listar, listar_Telefones_por_cpf
 from csv import writer
 from random import choice
 from os import path
@@ -14,12 +14,12 @@ def csv_para_vcf():
         escritor = writer(file, delimiter='|')
         clientes = listar()
         for cliente in clientes:
-            telefones = listar_telefones_por_cpf(cliente['CPF'])
+            Telefones = listar_Telefones_por_cpf(cliente['CPF'])
             escritor.writerow({'BEGIN:VCARD'})
             escritor.writerow({'VERSION:2.1'})
             escritor.writerow({f"N:;{cliente['Nome']};;;{cliente['CPF']}"})
             escritor.writerow({f"FN:{cliente['Nome']}"+","+f"{cliente['CPF']}"})
-            for numero in telefones:
+            for numero in Telefones:
                 numero = str(numero)
                 i = numero[0:13]
                 tipo = alea()
