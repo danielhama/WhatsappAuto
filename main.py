@@ -1,21 +1,14 @@
+import asyncio
 import locale
-import os
-import signal
-
 import time
 from os import mkdir, remove
-import threading
-import asyncio
-import multiprocessing
 
 import kivy
 from kivy.app import App
-from kivy.clock import mainthread
-from models.ferramentas import threaded
-from kivy.event import EventDispatcher
-from kivy.app import App
 from kivy.clock import Clock
+from kivy.clock import mainthread
 from kivy.config import Config
+from kivy.event import EventDispatcher
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.properties import StringProperty
@@ -29,6 +22,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
+
 kivy.require('1.10.0')
 from models.calculo import *
 from models.enviar import *
@@ -1392,21 +1386,6 @@ class RVCalculo(BoxLayout):
         except Exception as e:
             logging.exception(str(e))
 
-    # def populate_liquidacao(self):
-    #     try:
-    #         self.rv_calculo.data = self.lista_calculo_margem()
-    #         if not self.possui_margem:
-    #             self.ids.calculo.text = 'Cliente não possui margem, ou não cobre todo o valor dos juros para 30 dias'
-    #         elif 20000 < self.total_emprestimo <= 120000:
-    #             self.ids.calculo.text = 'Serão necessários 2 avaliadores para autorizar a alçada, conforme AL021'
-    #         elif self.total_emprestimo > 120000:
-    #             self.ids.calculo.text = 'Será necessário Comitê de Crédito para autorizar a alçada, conforme AL021'
-    #         else:
-    #             self.ids.calculo.text = ''
-
-
-        except Exception as e:
-            logging.exception(str(e))
 
     def enviar_cliente(self):
         telefones = listar_telefones_por_cpf(cpf)
@@ -2146,7 +2125,7 @@ class Whats(App, ProgBar):
         self.evento2 = None
         self.evento3 = None
         self.evento4 = True
-        return Builder.load_string(_kv_code)
+        return Builder.load_file("layout.kv")
 
     def importa_formata(self, arquivo):
         self.clientes = leia_arquivo(arquivo)
@@ -2220,24 +2199,7 @@ class Whats(App, ProgBar):
             logging.exception(str(e))
             Clock.schedule_once(self.code, 2)
 
-    def gera_qrcode(self):
-        try:
-            remove('qrcode.jpg')
-            try:
-                self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute(
-                    "data-ref")
-                self.img = make(self.data)
-                self.img.save(stream='qrcode.jpg')
-                Clock.schedule_once(self.popupo, 1.0)
-            except Exception as e:
-                logging.exception(str(e))
-                Clock.unschedule(self.verifica_data)
-        except Exception as e:
-            logging.exception(str(e))
-            self.data = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-            self.img = make(self.data)
-            self.img.save(stream='qrcode.jpg')
-            Clock.schedule_once(self.popupo, 1.0)
+
 
     def next(self, dt):
         if self.root.ids.progbar.value >= 100:

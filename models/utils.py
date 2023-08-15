@@ -2,19 +2,20 @@ import sqlite3
 import datetime
 from os import path
 import pandas as pd
-from models.calculo import calcular_juros, calcular_data, calcular_margem
+from models.calculo import calcular_margem
 from models.ferramentas import *
 import logging
 
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
+
 def conectar():
     """
     Função para conectar ao servidor
     """
-    conn = sqlite3.connect(path.join(path.expanduser('~'), 'whats.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-
+    conn = sqlite3.connect(path.join(path.expanduser('~'), 'whats.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.
+                           PARSE_COLNAMES)
 
     conn.execute("""CREATE TABLE IF NOT EXISTS "clientes" (
         "id"	INTEGER NOT NULL,
@@ -64,18 +65,19 @@ def desconectar(conn):
 
 # Lista Envio
 
+
 def inserir_id_envio(id):
     conn = conectar()
     cursor = conn.cursor()
     try:
         cursor.execute(f"INSERT INTO envio (id_cliente) VALUES ('{id}')")
     except sqlite3.IntegrityError as e:
-        pass
+        print(e)
     conn.commit()
 
     desconectar(conn)
 def criar_lista_envio():
-    conn =conectar()
+    conn = conectar()
     cursor = conn.cursor()
     cursor.execute("SELECT clientes.id FROM clientes")
     ids = cursor.fetchall()
@@ -83,7 +85,7 @@ def criar_lista_envio():
         try:
             inserir_id_envio(id[0])
         except sqlite3.IntegrityError as e:
-            pass
+            print(e)
     desconectar(conn)
 
 def deletar_enviado(id):
@@ -214,7 +216,7 @@ def listar_clientes_telefone():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE cli.id = contratos.id_cliente and telefones.id_cliente = cli.id and telefones.whatsapp = 1') #GROUP BY telefones.numero')
+    cursor.execute('SELECT cli.nome, cli.cpf, telefones.numero, contratos.id_cliente, contratos.vencimento FROM telefones, clientes as cli, contratos WHERE cli.id = contratos.id_cliente and telefones.id_cliente = cli.id and telefones.whatsapp = 1')  # GROUP BY telefones.numero')
     clientes = cursor.fetchall()
     lista_clientes = []
     if len(clientes) > 0:

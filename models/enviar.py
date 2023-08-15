@@ -70,44 +70,41 @@ class EnviaMensagem:
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nova_conversa)))
                 return True
 
+    def pesquisa_seletor(self, selector: str, tempo: int):
+        return WebDriverWait(self.driver, tempo).until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+
+    def clica_campo(self, selector: str):
+        try:
+            self.driver.find_element(By.CSS_SELECTOR, selector).click()
+        except:
+            pass
 
     async def send_whatsapp_msg(self, numero, texto, nome: str, cpf, header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
         # if self.verifica_login():
         try:
             try:
-                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa)))
-                self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
+                self.pesquisa_box = self.pesquisa_seletor(sel.campo_pesquisa, 20)
             except:
-                WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_pesquisa2)))
-                self.pesquisa_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_pesquisa)
-            try:
-                self.driver.find_element(By.CSS_SELECTOR, sel.apagar_pesquisa).click()
-            except:
-                pass
+                print("Seletor de campo de pesquisa não encontrado")
+            self.clica_campo(sel.apagar_pesquisa)
             self.pesquisa_box.send_keys(str(numero)[-8::])
-            sleep(random.random()*3 + 2)
-            # sleep(2)
+            sleep(random.random()*3 + 1)
 
             try:
-                self.nome_pesquisado = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.nome_CSS)))
+                self.nome_pesquisado = self.pesquisa_seletor(sel.nome_CSS, 5)
             except:
-                try:
-                    self.nome_pesquisado = self.driver.find_element(By.CSS_SELECTOR, sel.nome_CSS1)
-                except:
-                    print("não encontrado")
-                    self.sem_whats.append(numero)
-                    # if self.testa(numero):
-                    id = pesquisa_id(cpf)
-                    inserir_sem_whats(numero)
-                    deletar_enviado(id)
-                    return False
+                print("não encontrado")
+                self.sem_whats.append(numero)
+                id = pesquisa_id(cpf)
+                inserir_sem_whats(numero)
+                deletar_enviado(id)
+                return False
 
-            # sleep(.5)
-            sleep(random.random()*3+2)
+            sleep(random.random()*3+1)
+
             if nome in self.nome_pesquisado.text.split(',')[0]:
                 self.nome_pesquisado.click()
                 print('achei')
-                sleep(.5)
             else:
                 print(f"Nome pesquisado {self.nome_pesquisado.text.split(',')[0]}")
                 self.nome_pesquisado = None
@@ -119,28 +116,19 @@ class EnviaMensagem:
         except Exception as e:
             print(e)
         try:
-            bloqueado = WebDriverWait(self.driver, 2).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, sel.bloqueado)))
+            bloqueado = self.pesquisa_seletor(sel.bloqueado, 2)
             if "bloqueado" in bloqueado.text:
                 print(bloqueado.text)
                 inserir_sem_whats(numero)
                 return False
-
         except:
             pass
-
-        # Testa se existe o campo de mensagem na página e envia as mensagens
-        try:
-            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
-            # txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
-
-        except:
-            self.txt_box = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg2)))
 
         selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
         if selecionado == nome:
             nome = nome.split()
             nome = nome[0].capitalize()
+            self.txt_box = self.pesquisa_seletor(sel.campo_msg, 5)
             if header == True:
                 self.txt_box.send_keys(f'Prezado(a) {nome}')
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
@@ -149,7 +137,6 @@ class EnviaMensagem:
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(Keys.SHIFT).perform()
             sleep(random.random()*3 + .5)
             self.txt_box.send_keys(Keys.RETURN)
-            sleep(.5)
             id = pesquisa_id(cpf)
             deletar_enviado(id)
             return True
