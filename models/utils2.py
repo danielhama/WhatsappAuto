@@ -1,12 +1,13 @@
 import datetime
 import logging
-from models.utils import listar_clientes_telefone, listar_contratos_vencidos
+from models.utils import listar_Clientes_telefone, pesquisa_id, inserir_id_envio, deletar_lista
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 
 def filtra_vencimento():
-    clientes1 = []
-    clientes = listar_clientes_telefone()
+    deletar_lista()
+    Clientes1 = []
+    Clientes = listar_Clientes_telefone()
     hoje = datetime.datetime.today()
     hj = datetime.datetime.weekday(hoje)
     hoje = hoje.strftime('%Y-%m-%d')
@@ -17,87 +18,97 @@ def filtra_vencimento():
         hoje = hoje.strftime('%Y-%m-%d')
         ontem = ontem.strftime('%Y-%m-%d')
         anteontem = anteontem.strftime('%Y-%m-%d')
-        for cliente in clientes:
+        for cliente in Clientes:
             vencimento = cliente['Vencimento'].split(" ")[0]
             if vencimento == hoje or vencimento == ontem or vencimento == anteontem:
-                clientes1.append(cliente)
-        return clientes1
+                id = pesquisa_id(cliente["CPF"])
+                inserir_id_envio(id)
+                Clientes1.append(cliente)
+        return Clientes1
     else:
-        for cliente in clientes:
+        for cliente in Clientes:
             if cliente['Vencimento'].split(' ')[0] == hoje:
-                clientes1.append(cliente)
-        return clientes1
+                id = pesquisa_id(cliente["CPF"])
+                Clientes1.append(cliente)
+                Clientes1
+                inserir_id_envio(id)
+        return Clientes1
 
 
 def filtra_data(pesquisa):
-    clientes = listar_clientes_telefone()
+    deletar_lista()
+    Clientes = listar_Clientes_telefone()
     try:
         if '/' in pesquisa:
             data = datetime.datetime.strptime(pesquisa, '%d/%m/%Y')
             try:
-                clientes1 = []
-                for cliente in clientes:
+                Clientes1 = []
+                for cliente in Clientes:
                     if cliente['Vencimento'] == str(data):
-                        clientes1.append(cliente)
-                return clientes1
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
+                        Clientes1.append(cliente)
+                return Clientes1
             except Exception as e:
                 logging.exception(str(e))
-                clientes1 = []
-                for cliente in clientes:
+                Clientes1 = []
+                for cliente in Clientes:
                     if cliente['Vencimento'] == data:
-                        clientes1.append(cliente)
-                return clientes1
+
+                        Clientes1.append(cliente)
+                return Clientes1
         else:
             try:
                 pesquisa = pesquisa.upper()
-                clientes1 = []
-                for cliente in clientes:
+                Clientes1 = []
+                for cliente in Clientes:
                     if pesquisa in cliente['Nome']:
-                        clientes1.append(cliente)
-                return clientes1
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
+                        Clientes1.append(cliente)
+                return Clientes1
             except:
-                clientes1 = []
-                for cliente in clientes:
+                Clientes1 = []
+                for cliente in Clientes:
                     if pesquisa in cliente[0]:
-                        clientes1.append(cliente)
-                return clientes1
+                        inserir_id_envio(pesquisa_id(cliente['CPF']))
+                        Clientes1.append(cliente)
+                return Clientes1
     except:
         pass
 
 
 def filtra_nome(pesquisa):
-    clientes = listar_clientes_telefone()
+    Clientes = listar_Clientes_telefone()
     try:
-        clientes1 = []
-        for cliente in clientes:
+        Clientes1 = []
+        for cliente in Clientes:
             telefones = []
             if pesquisa in cliente[0]:
                 for i in cliente[2].split("'"):
                     if len(i) > 10:
                         telefones.append(i)
-                clientes1.append({'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': telefones, 'Vencimento': cliente[3]})
-        return clientes
+                Clientes1.append({'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': telefones, 'Vencimento': cliente[3]})
+        return Clientes
     except:
-        clientes1 = []
-        for cliente in clientes:
+        Clientes1 = []
+        for cliente in Clientes:
             telefones = []
             if pesquisa in cliente[0]:
                 for i in cliente[2].split("'"):
                     if len(i) > 10:
                         telefones.append(i)
-                clientes1.append({'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': telefones, 'Vencimento': cliente[3]})
-        return clientes
+                Clientes1.append({'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': telefones, 'Vencimento': cliente[3]})
+        return Clientes
 
 # def filtra_margem():
-#     clientes = listar_clientes_telefone()
+#     Clientes = listar_Clientes_telefone()
 #     hoje = datetime.datetime.today()
-#     clientes1 = []
-#     for cliente in clientes:
+#     Clientes1 = []
+#     for cliente in Clientes:
 #         if type(cliente['Vencimento']) == str:
 #             data = datetime.datetime.strptime(cliente['Vencimento'], '%d/%m/%Y')
 #             if data < hoje:
-#                 clientes1.append(cliente)
-#     return clientes1
+#                 Clientes1.append(cliente)
+#     return Clientes1
 
 
 
@@ -125,4 +136,6 @@ def leia_texto(file):
         return juncao
 
 ##
+
+
 
