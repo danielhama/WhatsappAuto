@@ -31,8 +31,8 @@ def filtra_vencimento():
         for cliente in Clientes:
             if cliente['Vencimento'].split(' ')[0] == hoje:
                 id = pesquisa_id(cliente["CPF"])
-                Clientes1.append(cliente)
-                Clientes1
+                if not cliente in Clientes1:
+                    Clientes1.append(cliente)
                 inserir_id_envio(id)
         return Clientes1
 
