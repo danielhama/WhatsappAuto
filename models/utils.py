@@ -380,35 +380,35 @@ def filtra_calculo_margem():
                 for contrato in Contratos:
                     vencimento = datetime.datetime.strptime(contrato[1].split(' ')[0], '%Y-%m-%d')
                     prazo = contrato[4]
-                    avaliacao = contrato[2]
-                    emprestimo = contrato[3]
+                    avaliacao = float(contrato[2])
+                    emprestimo = float(contrato[3])
                     # limite = contrato[5]
                     if limite == 100:
                         total_emprestimo += avaliacao
                     else:
                         total_emprestimo += avaliacao * .85
-                    d30_t, d60_t, d90_t, d120_t = calcular_margem(avaliacao, emprestimo,
-                                                                  vencimento, prazo, limite, total)
-                    d30 += d30_t
-                    d60 += d60_t
-                    d90 += d90_t
-                    d120 += d120_t
+                    if total_emprestimo > emprestimo:
+                        d30_t, d60_t, d90_t, d120_t = calcular_margem(avaliacao, emprestimo,
+                                                                      vencimento, prazo, limite, total)
+                        d30 += d30_t
+                        d60 += d60_t
+                        d90 += d90_t
+                        d120 += d120_t
                 if d30 < -500:
                     inserir_id_envio(id)
                     Telefones = listar_Telefones_por_cpf(cliente[1])
-                    sem_whats = lista_Telefones("0")
+                    # sem_whats = lista_Telefones("0")
                     if len(Telefones) >= 1:
                         for telefone in Telefones:
-                            if telefone not in sem_whats:
-                                telefone = str(telefone)
+                            telefone = telefone[0:4]+telefone[5:13]
+                            cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
+                                       'Vencimento': vencimento, 'Margem': d30}
+                            Clientes1.append(cliente_1)
+                        # telefone = telefone[0:4]+telefone[5:13]
+                        # cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
+                        #            'Vencimento': vencimento, 'Margem': d30}
+                        # Clientes1.append(cliente_1)
 
-                                if len(telefone) == 13:
-                                    telefone = telefone[0:4]+telefone[5:13]
-                                    cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
-                                               'Vencimento': vencimento, 'Margem': d30}
-                                    Clientes1.append(cliente_1)
-        else:
-            print('Cliente sem Contratos ativos')
         desconectar(conn)
         Clientes = pd.DataFrame(Clientes1)
         Clientes.drop_duplicates(subset='Telefones', inplace=True)

@@ -7,6 +7,7 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 def filtra_vencimento():
     deletar_lista()
     Clientes1 = []
+    set(Clientes1)
     Clientes = listar_Clientes_telefone()
     hoje = datetime.datetime.today()
     hj = datetime.datetime.weekday(hoje)
@@ -23,7 +24,8 @@ def filtra_vencimento():
             if vencimento == hoje or vencimento == ontem or vencimento == anteontem:
                 id = pesquisa_id(cliente["CPF"])
                 inserir_id_envio(id)
-                Clientes1.append(cliente)
+                if not cliente in Clientes1:
+                    Clientes1.append(cliente)
         return Clientes1
     else:
         for cliente in Clientes:
