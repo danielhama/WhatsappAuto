@@ -156,7 +156,7 @@ class RVTelefonesEnviar(BoxLayout):
         cursor = conn.cursor()
 
         cursor.execute(
-            f'SELECT t.numero, t.id_cliente, c.id, c.cpf FROM telefones as t, clientes as c where c.id = id_cliente and c.id = {id}')
+            f'SELECT t.DDD || t.numero, t.id_cliente, c.id, c.cpf FROM telefones as t, clientes as c where c.id = {id}')
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
@@ -204,7 +204,7 @@ class RVTelefones(BoxLayout):
         cursor = conn.cursor()
 
         cursor.execute(
-            f'SELECT t.numero, t.id_cliente, c.id, c.cpf FROM telefones as t, clientes as c where c.id = id_cliente and c.id = {id}')
+            f'SELECT Telefones.DDD||Telefones.Numero, Telefones.ClienteID, Clientes.Id, Clientes.CPF FROM Telefones, Clientes where Clientes.id = {id} and Telefones.ClienteID = {id}')
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
@@ -235,16 +235,16 @@ class RVContratos(BoxLayout):
             id = pesquisa_id(cpf)
 
             cursor.execute(
-                f'SELECT contratos.numero, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.vencimento FROM contratos, clientes WHERE contratos.id_cliente = clientes.id and clientes.id = {id}')
+                f'SELECT contratos.numero, contratos.valoravaliacao, contratos.valoremprestimo, contratos.vencimento FROM contratos, clientes WHERE contratos.cpf = clientes.cpf and clientes.id = {id}')
             clientes = cursor.fetchall()
             lista_clientes = []
             if len(clientes) > 0:
                 for cliente in clientes:
-                    char = 50 - len(str(locale.currency(cliente[1])))
-                    char1 = 50 - len(str(locale.currency(cliente[2])))
+                    char = 50 - len(str(locale.currency(float(cliente[1]))))
+                    char1 = 50 - len(str(locale.currency(float(cliente[2]))))
                     vencimento = datetime.datetime.strftime(
                         datetime.datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
-                    cliente_exibicao = {'text': str(cliente[0]) + (" " * char) + locale.currency(cliente[1], grouping=True) + (" " * char1) +  locale.currency(cliente[2], grouping=True) + (" " * char) + vencimento}
+                    cliente_exibicao = {'text': str(cliente[0]) + (" " * char) + locale.currency(float(cliente[1]), grouping=True) + (" " * char1) + locale.currency(float(cliente[2]), grouping=True) + (" " * char) + vencimento}
 
 
                     lista_clientes.append(cliente_exibicao)
@@ -632,14 +632,14 @@ class RVCalculo(BoxLayout):
             d90 = 0
             d120 = 0
             cursor.execute(
-                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+                f'select contratos.numero, contratos.vencimento, contratos.valoravaliacao, contratos.valoremprestimo, contratos.prazo, contratos.cpf, clientes.id from contratos, clientes where contratos.cpf = clientes.cpf AND clientes.id = {id}')
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
                     vencimento = datetime.datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
                     prazo = cliente[4]
-                    self.total_avaliacao = cliente[2]
-                    self.total_emprestimo = cliente[3]
+                    self.total_avaliacao = float(cliente[2])
+                    self.total_emprestimo = float(cliente[3])
                     d30_t, d60_t, d90_t, d120_t = calcular_juros(self.total_avaliacao, self.total_emprestimo,
                                                                  vencimento, prazo)
                     d30 += d30_t
@@ -840,20 +840,20 @@ class RVCalculo(BoxLayout):
             d120 = 0
             self.total_emprestimo = 0
             cursor.execute(
-                f'select SUM(contratos.valor_avaliacao) as total, clientes.limite from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+                f'select SUM(contratos.valoravaliacao) as total, clientes.limite from contratos, clientes where contratos.cpf = clientes.cpf AND clientes.id = {id}')
             cliente = cursor.fetchall()
             total = cliente[0][0]
             self.limite = cliente[0][1]
             cursor.execute(
-                f'select contratos.numero, contratos.vencimento, contratos.valor_avaliacao, contratos.valor_emprestimo, contratos.prazo, contratos.id_cliente, clientes.id from contratos, clientes where contratos.id_cliente = clientes.id AND clientes.id = {id}')
+                f'select contratos.numero, contratos.vencimento, contratos.valoravaliacao, contratos.valoremprestimo, contratos.prazo, contratos.cpf, clientes.id from contratos, clientes where contratos.cpf = clientes.cpf AND clientes.id = {id}')
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
                     vencimento = datetime.datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
                     self.vencimento = cliente[1]
                     prazo = cliente[4]
-                    self.avaliacao = cliente[2]
-                    self.emprestimo = cliente[3]
+                    self.avaliacao = float(cliente[2])
+                    self.emprestimo = float(cliente[3])
                     # self.limite = cliente[5]
                     if self.limite == 100:
                         self.total_emprestimo += self.avaliacao

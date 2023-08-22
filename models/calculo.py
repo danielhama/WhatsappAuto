@@ -15,7 +15,7 @@ IOF_120 = 0.00349 #80290099124
 # IOF_90 = 0.00357
 # IOF_120 = 0.00349
 
-TAXA = 0.0209
+TAXA = 0.0219
 TAXA_DIARIA = TAXA /30
 MORA = 0.01
 
@@ -30,7 +30,7 @@ def calcular_juros(valor_avaliacao, valor_emprestimo, vencimento, prazo):
     tarifa = round((valor_avaliacao * 0.97/100), 2)
     juros = []
     if ultima_renovacao < alteracao_taxa:
-        taxa_remuneratoria = 0.0199
+        taxa_remuneratoria = 0.0209
     else:
         taxa_remuneratoria = TAXA
     for dia in dias:
