@@ -295,7 +295,7 @@ def listar_Contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.Nome,  Contratos.Vencimento, cli.id FROM Clientes as cli, Contratos WHERE Contratos.CPF = cli.CPF AND Contratos.Vencimento < date('now','-2 day') GROUP BY cli.Id")
+        "SELECT cli.Nome,  Contratos.Vencimento, cli.id FROM Clientes as cli, Contratos WHERE Contratos.CPF = cli.CPF AND Contratos.Vencimento < date('now','-2 day') AND Contratos.Situacao != 'CONTRATO LIQUIDADO'  GROUP BY cli.Id")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -369,7 +369,7 @@ def filtra_calculo_margem():
             d120 = 0
             total_emprestimo = 0
             cursor.execute(
-                f'select SUM(Contratos.ValorAvaliacao) as total, Clientes.limite from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.id = {id}')
+                f"select SUM(Contratos.ValorAvaliacao) as total, Clientes.limite from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.id = {id} AND Contratos.situacao NOT LIKE  '%LIQUIDADO%'")
             cliente_limite = cursor.fetchall()
             total = cliente_limite[0][0]
             limite = cliente_limite[0][1]
