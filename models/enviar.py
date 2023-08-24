@@ -35,7 +35,7 @@ class EnviaMensagem:
     @threaded
     def chama_driver(self, head: bool = True) -> None:
         dir_path = os.getcwd()
-        profile = os.path.join(dir_path, "profile", "pf")
+        profile = os.path.join(dir_path, "profile", "amabile")
         options = webdriver.ChromeOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
@@ -84,7 +84,7 @@ class EnviaMensagem:
         try:
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
             selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
-            if selecionado.split(" ")[0] in nome:
+            if selecionado.split(" ")[0].upper() in nome.upper():
                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                 nome = nome.split()
                 nome = nome[0].capitalize()
@@ -135,7 +135,7 @@ class EnviaMensagem:
 
                 # sleep(.5)
                 sleep(random.random() * 3 + 2)
-                if nome.split(" ")[0] in self.nome_pesquisado.text.split(',')[0]:
+                if nome.split(" ")[0].upper() in self.nome_pesquisado.text.split(',')[0].upper():
                     self.nome_pesquisado.click()
                     print('achei')
                     sleep(.5)
