@@ -73,16 +73,19 @@ def desconectar(conn):
 # Lista Envio
 
 
-def inserir_id_envio(id):
+def inserir_id_envio(id) -> bool:
     conn = conectar()
     cursor = conn.cursor()
     try:
         cursor.execute(f"INSERT INTO envio (id_cliente) VALUES ('{id}')")
-    except sqlite3.IntegrityError as e:
-        print(e)
-    conn.commit()
+        conn.commit()
+        desconectar(conn)
+        return True
 
-    desconectar(conn)
+    except sqlite3.IntegrityError as e:
+        desconectar(conn)
+        return False
+
 def criar_lista_envio():
     conn = conectar()
     cursor = conn.cursor()

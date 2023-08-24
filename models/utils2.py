@@ -23,17 +23,15 @@ def filtra_vencimento():
             vencimento = cliente['Vencimento'].split(" ")[0]
             if vencimento == hoje or vencimento == ontem or vencimento == anteontem:
                 id = pesquisa_id(cliente["CPF"])
-                inserir_id_envio(id)
-                if not cliente in Clientes1:
+                if inserir_id_envio(id):
                     Clientes1.append(cliente)
         return Clientes1
     else:
         for cliente in Clientes:
             if cliente['Vencimento'].split(' ')[0] == hoje:
                 id = pesquisa_id(cliente["CPF"])
-                if not cliente in Clientes1:
+                if inserir_id_envio(id):
                     Clientes1.append(cliente)
-                inserir_id_envio(id)
         return Clientes1
 
 
