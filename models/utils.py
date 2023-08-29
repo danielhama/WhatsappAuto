@@ -188,9 +188,9 @@ def listar_Clientes_telefone_envio():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, envio.id_cliente, Contratos.vencimento FROM '
-                   'Telefones, Clientes as cli, envio, Contratos WHERE envio.id_cliente = cli.id AND '
-                   'Telefones.ClienteId = cli.id and Telefones.whatsapp = 1 GROUP BY Telefones.DDD || Telefones.numero')
+    cursor.execute("SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, envio.id_cliente, Contratos.vencimento FROM "
+                   "Telefones, Clientes as cli, envio, Contratos WHERE envio.id_cliente = cli.id AND "
+                   "Telefones.ClienteId = cli.id and Telefones.whatsapp = 1 AND Contratos.Situacao != 'LIQUIDADO' GROUP BY Telefones.DDD || Telefones.numero")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -298,7 +298,7 @@ def listar_Contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.Nome,  Contratos.Vencimento, cli.id FROM Clientes as cli, Contratos WHERE Contratos.CPF = cli.CPF AND Contratos.Vencimento < date('now','-2 day') AND Contratos.Situacao != 'CONTRATO LIQUIDADO'  GROUP BY cli.Id")
+        "SELECT cli.Nome,  Contratos.Vencimento, cli.id FROM Clientes as cli, Contratos WHERE Contratos.CPF = cli.CPF AND Contratos.Vencimento < date('now','-2 day') AND Contratos.Situacao NOT LIKE '%LIQUIDADO%'  GROUP BY cli.Id")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -377,7 +377,7 @@ def filtra_calculo_margem():
             total = cliente_limite[0][0]
             limite = cliente_limite[0][1]
             cursor.execute(
-                f'select Contratos.numero, Contratos.vencimento, Contratos.ValorAvaliacao, Contratos.ValorEmprestimo, Contratos.prazo, Contratos.CPF, Clientes.CPF, Clientes.Id from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.Id = {id}')
+                f"select Contratos.numero, Contratos.vencimento, Contratos.ValorAvaliacao, Contratos.ValorEmprestimo, Contratos.prazo, Contratos.CPF, Clientes.CPF, Clientes.Id from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.Id = {id} AND Contratos.situacao NOT LIKE  '%LIQUIDADO%'")
             Contratos = cursor.fetchall()
             if len(Contratos) > 0:
                 for contrato in Contratos:

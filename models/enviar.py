@@ -247,32 +247,32 @@ class EnviaMensagem:
                 print(e)
                 return self.teste(numero, cpf)
 
-    def code(self):
-        """ Cria um qrcode a partir dos dados obtidos do campo 'data=ref' """
-        try:
-            self.element_presence(By.XPATH, '//*[@id="app"]', 5)
-            data = self.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-            self.img = make(data)
-            self.img.show()
-            self.img.save(stream='qrcode.jpg')
-            igual = True
-            while igual:
-                data1 = self.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
-                if data == data1:
-                    sleep(2)
-                else:
-                    igual = False
+    # def code(self):
+    #     """ Cria um qrcode a partir dos dados obtidos do campo 'data=ref' """
+    #     try:
+    #         self.element_presence(By.XPATH, '//*[@id="app"]', 5)
+    #         data = self.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
+    #         self.img = make(data)
+    #         self.img.show()
+    #         self.img.save(stream='qrcode.jpg')
+    #         igual = True
+    #         while igual:
+    #             data1 = self.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
+    #             if data == data1:
+    #                 sleep(2)
+    #             else:
+    #                 igual = False
 
-
-            for proc in psutil.process_iter():
-                if proc.name() == "display":
-                    proc.kill()
-            return self.code()
-        except:
-
-            for proc in psutil.process_iter():
-                if proc.name() == "display":
-                    proc.kill()
+        #
+        #     for proc in psutil.process_iter():
+        #         if proc.name() == "display":
+        #             proc.kill()
+        #     return self.code()
+        # except:
+        #
+        #     for proc in psutil.process_iter():
+        #         if proc.name() == "display":
+        #             proc.kill()
 
 
     def checar_msg(self):
