@@ -88,10 +88,13 @@ class EnviaMensagem:
                 txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
                 nome = nome.split()
                 nome = nome[0].capitalize()
-                if header == True:
-                    txt_box.send_keys(f'Olá {nome}')
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(
-                    Keys.SHIFT).perform()
+                if txt_box.text != "Mensagem":
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("A").perform()
+                    ActionChains(self.driver).send_keys(Keys.DELETE).perform()
+                sleep(2)
+                txt_box.send_keys(f'Olá {nome}')
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(
+                Keys.SHIFT).perform()
                 for msg in texto:
                     txt_box.send_keys(msg)
                     ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.RETURN).key_up(
