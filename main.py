@@ -34,7 +34,8 @@ locale.setlocale(locale.LC_MONETARY, 'pt_BR.UTF-8')
 Config.set('graphics', 'width', '1280')
 Config.set('graphics', 'height', '720')
 
-logging.basicConfig(filename='app.log', level=logging.INFO)
+# logging.basicConfig(filename='/models/app.log', level=logging.INFO)
+logging.basicConfig(level=logging.INFO, filename="programa.log", format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
@@ -168,6 +169,7 @@ class RVTelefonesEnviar(BoxLayout):
         desconectar(conn)
         return lista_clientes
 
+
 class RVTelefones(BoxLayout):
 
     def populate(self):
@@ -235,7 +237,7 @@ class RVContratos(BoxLayout):
             id = pesquisa_id(cpf)
 
             cursor.execute(
-                f'SELECT contratos.numero, contratos.valoravaliacao, contratos.valoremprestimo, contratos.vencimento FROM contratos, clientes WHERE contratos.cpf = clientes.cpf and clientes.id = {id}')
+                f"SELECT contratos.numero, contratos.valoravaliacao, contratos.valoremprestimo, contratos.vencimento, Contratos.Situacao FROM contratos, clientes WHERE contratos.cpf = clientes.cpf AND Contratos.Situacao NOT LIKE '%LIQUIDADO%' and clientes.id = {id}")
             clientes = cursor.fetchall()
             lista_clientes = []
             if len(clientes) > 0:
@@ -244,8 +246,10 @@ class RVContratos(BoxLayout):
                     char1 = 50 - len(str(locale.currency(float(cliente[2]))))
                     vencimento = datetime.datetime.strftime(
                         datetime.datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
-                    cliente_exibicao = {'text': str(cliente[0]) + (" " * char) + locale.currency(float(cliente[1]), grouping=True) + (" " * char1) + locale.currency(float(cliente[2]), grouping=True) + (" " * char) + vencimento}
-
+                    cliente_exibicao = {
+                        'text': str(cliente[0]) + (" " * char) + locale.currency(float(cliente[1]), grouping=True) + (
+                                    " " * char1) + locale.currency(float(cliente[2]), grouping=True) + (
+                                            " " * char) + vencimento}
 
                     lista_clientes.append(cliente_exibicao)
             else:
@@ -300,6 +304,7 @@ class RVContratos(BoxLayout):
         content = RVIncluirContrato()
         self._popup = Popup(title="Incluir Contrato", content=content, size_hint=(0.9, 0.3))
         self._popup.open()
+
 
 class RVIncluirContrato(BoxLayout):
 
@@ -432,7 +437,6 @@ class RV(BoxLayout):
         value_2 = value_2.strip()
         try:
             if len(nome) > 0 and len(value_2) > 0:
-
                 self.rv.data.insert(0, {
                     'text': nome + '    ' + '|' + '    ' + value_2})
         except Exception as e:
@@ -491,7 +495,7 @@ class RV(BoxLayout):
         conn = conectar()
         cursor = conn.cursor()
         cursor.execute(
-            f'SELECT cli.nome, cli.cpf, c.numero, c.valor_avaliacao, c.valor_emprestimo, c.vencimento FROM  clientes as cli, contratos as c WHERE c.id_cliente = cli.id ORDER BY {self.ordenado} {self.asc_desc}')
+            f"SELECT cli.nome, cli.cpf, c.numero, c.valor_avaliacao, c.valor_emprestimo, c.vencimento FROM  clientes as cli, contratos as c WHERE c.id_cliente = cli.id AND c.Situacao NOT LIKE '%LIQUIDA%' ORDER BY {self.ordenado} {self.asc_desc}")
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
@@ -549,7 +553,6 @@ class RVCalculo(BoxLayout):
         except Exception as e:
             logging.exception(str(e))
 
-
     def enviar_cliente(self):
         telefones = listar_Telefones_por_cpf(cpf)
         if len(telefones) > 1:
@@ -560,7 +563,6 @@ class RVCalculo(BoxLayout):
             content.populate()
         else:
             whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
-
 
     def calcula_juros_selecionados(self):
         calculos = []
@@ -578,7 +580,8 @@ class RVCalculo(BoxLayout):
             valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
 
             d30_t, d60_t, d90_t, d120_t = calcular_juros(valor_avaliacao, valor_emprestimo,
-                                                     datetime.datetime.strptime(contrato[5], '%d/%m/%Y'), consulta_prazo(contrato[0]))
+                                                         datetime.datetime.strptime(contrato[5], '%d/%m/%Y'),
+                                                         consulta_prazo(contrato[0]))
             d30 += d30_t
             d60 += d60_t
             d90 += d90_t
@@ -845,7 +848,7 @@ class RVCalculo(BoxLayout):
             total = cliente[0][0]
             self.limite = cliente[0][1]
             cursor.execute(
-                f'select contratos.numero, contratos.vencimento, contratos.valoravaliacao, contratos.valoremprestimo, contratos.prazo, contratos.cpf, clientes.id from contratos, clientes where contratos.cpf = clientes.cpf AND clientes.id = {id}')
+                f"SELECT contratos.numero, contratos.vencimento, contratos.valoravaliacao, contratos.valoremprestimo, contratos.prazo, contratos.cpf, clientes.id from contratos, clientes where contratos.cpf = clientes.cpf AND clientes.id = {id} AND Contratos.Situacao NOT LIKE 'LIQUIDADO'")
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
@@ -936,8 +939,6 @@ class RVCalculoLiquidacao(BoxLayout):
         else:
             whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
 
-
-
     def lista_calculo_liquidacao(self):
         """
                 Função para listar os contratos do cliente
@@ -954,7 +955,9 @@ class RVCalculoLiquidacao(BoxLayout):
                     # valor_avaliacao = float(contrato[2].replace(".", '').replace(",", "."))
                     valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
 
-                    liquidacao, encargo = calcular_liquidacao(valor_emprestimo, datetime.datetime.strptime(contrato[5], '%d/%m/%Y'), consulta_prazo(contrato[0]))
+                    liquidacao, encargo = calcular_liquidacao(valor_emprestimo,
+                                                              datetime.datetime.strptime(contrato[5], '%d/%m/%Y'),
+                                                              consulta_prazo(contrato[0]))
 
                     calculo = {'contrato.text': contrato[0], 'valor.text': locale.currency(liquidacao, grouping=True),
                                'encargos.text': locale.currency(encargo, grouping=True) or 0}
@@ -996,7 +999,6 @@ class ProgBar(ProgressBar):
         self.progress_bar = ProgressBar()
 
 
-
 class EventLoopWorker(EventDispatcher):
 
     # __events__ = ('whatsapp',)  # defines this EventDispatcher's sole event
@@ -1005,6 +1007,7 @@ class EventLoopWorker(EventDispatcher):
         if not hasattr(cls, 'instance'):
             cls.instance = super(EventLoopWorker, cls).__new__(cls)
         return cls.instance
+
     def __init__(self):
         self.register_event_type("on_envio")
         super(EventLoopWorker, self).__init__()
@@ -1053,29 +1056,31 @@ class EventLoopWorker(EventDispatcher):
         except Exception as e:
             print(e)
 
-
     async def testa_telefone_whats(self):
         if self.envio_msg == None:
             self.envio_msg = EnviaMensagem()
             if not self.envio_msg.verifica_login():
                 self.envio_msg.chama_driver(head=False)
+
         @mainthread
         def kivy_update_status(text):
             texto = App.get_running_app().root.ids.right_content
             texto.text = text
+
         @mainthread
         def progbar_runner():
-            valor = 100/len(self.clientes)
+            valor = 100 / len(self.clientes)
             progbar = App.get_running_app().root.ids.progbar
             progbar.value += valor
+
         @mainthread
         def zera_progbar():
             progbar = App.get_running_app().root.ids.progbar
             progbar.value = 0
 
-
         for cliente in self.clientes:
-            kivy_update_status(f" Testando {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
+            kivy_update_status(
+                f" Testando {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
             await asyncio.sleep(1)
             sucesso = await self.envio_msg.teste(numero=cliente['Telefones'], cpf=cliente['CPF'])
             await asyncio.sleep(1)
@@ -1093,12 +1098,12 @@ class EventLoopWorker(EventDispatcher):
         qtd_enviada = self.contador - swhats - self.falha
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
-        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        kivy_update_status(
+            f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
         self.contador = 0
         self.falha = 0
         self.enviado_sucesso = 0
         deletar_lista()
-
 
     def start(self):
         try:
@@ -1109,31 +1114,34 @@ class EventLoopWorker(EventDispatcher):
             self._thread = threading.Thread(target=self._run_loop)
             self._thread.start()
 
-
     async def envio_whatsapp(self):
         if self.envio_msg == None:
             self.envio_msg = EnviaMensagem()
             if not self.envio_msg.verifica_login():
                 self.envio_msg.chama_driver(head=False)
+
         @mainthread
         def kivy_update_status(text):
             texto = App.get_running_app().root.ids.right_content
             texto.text = text
+
         @mainthread
         def progbar_runner():
-            valor = 100/len(self.clientes)
+            valor = 100 / len(self.clientes)
             progbar = App.get_running_app().root.ids.progbar
             progbar.value += valor
+
         @mainthread
         def zera_progbar():
             progbar = App.get_running_app().root.ids.progbar
             progbar.value = 0
 
-
         for cliente in self.clientes:
-            kivy_update_status(f"Enviando mensagem para {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
+            kivy_update_status(
+                f"Enviando mensagem para {cliente['Nome']}, número {cliente['Telefones']}\n{self.contador + 1}/{len(self.clientes)}")
             await asyncio.sleep(1)
-            sucesso = await self.envio_msg.send_whatsapp_msg(cliente['Telefones'], self.msg, cliente['Nome'], cliente['CPF'])
+            sucesso = await self.envio_msg.send_whatsapp_msg(cliente['Telefones'], self.msg, cliente['Nome'],
+                                                             cliente['CPF'])
             await asyncio.sleep(1)
             if sucesso == True:
                 self.enviado_sucesso += 1
@@ -1149,13 +1157,12 @@ class EventLoopWorker(EventDispatcher):
         qtd_enviada = self.contador - swhats - self.falha
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
-        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        kivy_update_status(
+            f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
         self.contador = 0
         self.falha = 0
         self.enviado_sucesso = 0
         deletar_lista()
-
-
 
     def _restart_pulse(self, dt=None):
         """Helper to start/reset the pulse task when the pulse changes."""
@@ -1175,9 +1182,6 @@ class EventLoopWorker(EventDispatcher):
         # self.loop.run_forever()
         # await self.envio_task
 
-
-
-
     def parar(self):
         # if self.loop is not None:
         texto = App.get_running_app().root.ids.right_content
@@ -1185,10 +1189,9 @@ class EventLoopWorker(EventDispatcher):
         progbar.value = 0
         self.envio_task.cancel()
 
-            # self._thread.join()
+        # self._thread.join()
 
-
-## Teste de numeros marcados como Sem Whatsapp
+    ## Teste de numeros marcados como Sem Whatsapp
     def start_testa_sem_whats(self):
         self.clientes = App.get_running_app().lista_sem_whats
         self._run_loop_teste_telefone()
@@ -1212,26 +1215,27 @@ class EventLoopWorker(EventDispatcher):
         except Exception as e:
             print(e)
 
-
     async def testa_sem_whats(self):
         if self.envio_msg == None:
             self.envio_msg = EnviaMensagem()
             if not self.envio_msg.verifica_login():
                 self.envio_msg.chama_driver(head=False)
+
         @mainthread
         def kivy_update_status(text):
             texto = App.get_running_app().root.ids.right_content
             texto.text = text
+
         @mainthread
         def progbar_runner():
-            valor = 100/len(self.clientes)
+            valor = 100 / len(self.clientes)
             progbar = App.get_running_app().root.ids.progbar
             progbar.value += valor
+
         @mainthread
         def zera_progbar():
             progbar = App.get_running_app().root.ids.progbar
             progbar.value = 0
-
 
         for numero in self.clientes:
             kivy_update_status(f" Testando {numero}\n{self.contador + 1}/{len(self.clientes)}")
@@ -1252,12 +1256,12 @@ class EventLoopWorker(EventDispatcher):
         qtd_enviada = self.contador - swhats - self.falha
         fim = time.time()
         horas, minutos, segundos = tempo_execucao(App.get_running_app().inicio, fim)
-        kivy_update_status(f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
+        kivy_update_status(
+            f'Foram enviadas {qtd_enviada}, {swhats} números não possuem whatsapp, {self.falha} números falharam no envio. \nTempo de execução {horas}:{minutos}:{segundos}')
         self.contador = 0
         self.falha = 0
         self.enviado_sucesso = 0
         deletar_lista()
-
 
 
 class Whats(App, ProgBar):
@@ -1331,7 +1335,8 @@ class Whats(App, ProgBar):
 
     def verifica_data(self, dt=None):
         try:
-            self.data1 = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute("data-ref")
+            self.data1 = self.worker.envio_msg.driver.find_element(By.CSS_SELECTOR, "div[data-ref]").get_attribute(
+                "data-ref")
             if self.data == self.data1:
                 pass
             else:
@@ -1361,8 +1366,6 @@ class Whats(App, ProgBar):
         except Exception as e:
             logging.exception(str(e))
             Clock.schedule_once(self.code, 2)
-
-
 
     def next(self, dt):
         if self.root.ids.progbar.value >= 100:
@@ -1464,7 +1467,6 @@ class Whats(App, ProgBar):
         except Exception as e:
             self.root.ids.right_content.text = "Não existe arquivo de clientes ainda, importe a base de dados primeiro."
 
-
     def cria_iter(self, clientes, dt=None):
         """Cria um iterável a partir da lista de clientes, e inicializa as váriaveis entes do envio da mensagens"""
         if not self.worker.msg:
@@ -1493,8 +1495,6 @@ class Whats(App, ProgBar):
             self.worker.start()
         except AssertionError as e:
             self.root.ids.right_content.text = "Processo iniciado aguarde"
-
-
 
     def cria_iter_sem(self):
         """Cria um iterável com a lista de telefones sem whatsapp a partir do arquivo sem_whats.csv e inicializa as váriavel"""
@@ -1616,8 +1616,6 @@ class Whats(App, ProgBar):
             pass
             self.evento3 = Clock.schedule_once(self.somente_teste, 0.5)
 
-
-
     def enviar_vencimento(self):
         try:
             # self.clientes_hoje = listar_Clientes_telefone_envio()
@@ -1646,7 +1644,6 @@ class Whats(App, ProgBar):
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = f"Erro na filtragem {e}"
-
 
     @threaded
     def filtra_vencidos(self):
@@ -1781,5 +1778,6 @@ class Whats(App, ProgBar):
 
 
 if __name__ == '__main__':
+    logging.info("Starting")
     whats = Whats()
     whats.run()

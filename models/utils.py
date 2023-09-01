@@ -102,7 +102,7 @@ def deletar_enviado(id):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"DELETE FROM 'envio' WHERE id_cliente = {id}")
+        cursor.execute(f"DELETE FROM envio WHERE id_cliente = {id}")
         conn.commit()
     except:
         pass
@@ -113,7 +113,7 @@ def deletar_lista():
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"DELETE FROM 'envio'")
+        cursor.execute(f"DELETE FROM envio")
         conn.commit()
     except:
         pass
@@ -132,11 +132,11 @@ def inserir_cliente(nome, cpf, limite):
         pass
     conn.close()
 
-def inserir_telefone(telefone, id):
+def inserir_telefone(DDD, telefone, id):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"INSERT INTO Telefones (numero, whatsapp, ClienteID) VALUES ('{telefone}', 1, {id})")
+        cursor.execute(f"INSERT INTO Telefones (numero, whatsapp, ClienteID, DDD) VALUES ('{telefone}', 1, {id}, {DDD})")
         conn.commit()
     except:
         pass
@@ -344,7 +344,7 @@ def lista_Telefones(whatsapp):
     lista_Telefones = []
     if len(Telefones) > 0:
         for telefone in Telefones:
-            lista_Telefones.append(telefone[1])
+            lista_Telefones.append(telefone[3]+telefone[2])
     else:
         print('Não existem números cadastrados.')
     desconectar(conn)
@@ -460,6 +460,8 @@ def deletar_contrato_desatualizado(data):
 def deletar_telefone(telefone):
     conn = conectar()
     cursor = conn.cursor()
+    if len(str(telefone)) > 9:
+        telefone = str(telefone)[2::]
     try:
         cursor.execute(f"DELETE FROM 'Telefones' WHERE numero={telefone}")
         conn.commit()
