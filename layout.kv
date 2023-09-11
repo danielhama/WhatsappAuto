@@ -13,7 +13,7 @@ BoxLayout:
 
     StackLayout:
         padding: 10,0,10,0
-        spacing: 10
+        spacing: 0
 
         # Button is a subclass of Label and can be sized
         # to text in the same way
@@ -60,6 +60,10 @@ BoxLayout:
         Button:
             text: 'Exibir Clientes'
             on_release: app.exibir()
+
+        Button:
+            text: 'Limpar contratos'
+            on_release: app.limpar_contratos()
 
     BoxLayout:
         id: grid_layout

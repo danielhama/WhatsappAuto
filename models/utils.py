@@ -540,6 +540,7 @@ def pesquisa_data_atualizacao(numero_contrato):
     cursor = conn.cursor()
     cursor.execute(f"SELECT c.DataAtualizacao FROM Contratos as c WHERE c.numero='{numero_contrato}'")
     data = cursor.fetchone()
+    conn.close()
     if data == None:
         print(f'Contrato novo {numero_contrato} efetuar a inclusão pelo relatório da bezel')
         return None
@@ -549,6 +550,14 @@ def pesquisa_data_atualizacao(numero_contrato):
 
 # OUTROS
 
+
+def limpa_contratos():
+    conn = conectar()
+    cursor = conn.cursor()
+    date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
+    cursor.execute(f"DELETE FROM Contratos WHERE DataAtualizacao < '{date}'")
+    conn.commit()
+    conn.close()
 
 
 

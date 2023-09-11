@@ -23,6 +23,8 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
+import models.utils
+
 kivy.require('1.10.0')
 from models.calculo import *
 from models.enviar import *
@@ -1761,6 +1763,8 @@ class Whats(App, ProgBar):
         #     remove('qrcode.jpg')
         # except Exception as e:
         #     logging.exception(str(e))
+    def limpar_contratos(self):
+        models.utils.limpa_contratos()
 
     def exibir(self):
         content = RV()

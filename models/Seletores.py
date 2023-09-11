@@ -21,3 +21,25 @@ barra_superior = '._3W2ap'
 #main ._2gzeB ._33LGR ._3K4-L .ItfyB._3nbHh ._22Msk div.copyable-text ._1Gy50 span.i0jNr.selectable-text.copyable-text span
 "._2gzeB ._33LGR ._3K4-L .ItfyB._3nbHh ._22Msk > div.copyable-text > div._1Gy50 > span.i0jNr.selectable-text.copyable-text"
 bloqueado = "._1alON"
+
+## SIPEN
+senha = "#Layer1 > table > tbody > tr:nth-child(4) > td > table > tbody > tr > td:nth-child(1) > input[type=password]:nth-child(1)"
+login = "#Layer1 > table > tbody > tr:nth-child(2) > td > input[type=text]"
+botao = "#Layer1 > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)"
+menu = "body > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td:nth-child(1) > button"
+
+sipen = "http://sipen.caixa/sipen"
+pesquisa_cliente = "/CarregarManterPesquisaCliente.do?"
+consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?method=carregar&numeroContrato="
+
+# Seletores
+cliente = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(3) > td:nth-child(2)"
+data_vencimento = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(11) > td:nth-child(2)"
+availiacao = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(8) > td:nth-child(2)"
+emprestimo = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(9) > td:nth-child(2)"
+avaliador = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(22) > td:nth-child(2)"
+situacao = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(5) > td:nth-child(2)"
+usuario = "#Layer1 > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > input:nth-child(1)"
+data_inventario = "#dataReferencia"
+contratos_ativos = "#rd1"
+confirma_inventario = "#btn_confirmar"
