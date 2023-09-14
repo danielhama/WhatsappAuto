@@ -223,13 +223,17 @@ def listar():
     return lista_Clientes
 
 
-def listar_Clientes_telefone():
+def listar_Clientes_telefone(teste: bool = False):
     """
     Função para listar os Telefones
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1 GROUP BY Telefones.Numero')  # GROUP BY Telefones.numero')
+    if teste:
+        cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1 GROUP BY Telefones.numero')
+    else:
+        cursor.execute(
+            'SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1')
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:

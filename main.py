@@ -1567,7 +1567,7 @@ class Whats(App, ProgBar):
             self.evento3 = None
 
         try:
-            self.clientes = listar_Clientes_telefone()
+            self.clientes = listar_Clientes_telefone(True)
             # self.qtd_teste = len(self.clientes)
             # self.it_importados = iter(self.clientes)
         except Exception as e:
