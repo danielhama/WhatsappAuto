@@ -202,29 +202,28 @@ class EnviaMensagem:
 
     async def testa(self, numero) -> bool:
         try:
-            numero = str(numero)
-            if len(numero) == 13:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero[0:4] + numero[5:13]}&source=&data=#")
+            if len(numero['Telefones']) == 11:
+                self.driver.get(f"https://web.whatsapp.com/send?phone={'55' + numero['Telefones'][0:2] + numero['Telefones'][3::]}&source=&data=#")
             else:
-                self.driver.get(f"https://web.whatsapp.com/send?phone={numero}&source=&data=#")
+                self.driver.get(f"https://web.whatsapp.com/send?phone={'55' + numero['Telefones']}&source=&data=#")
         except:
             return False
         try:
             sleep(4)
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
-            self.driver.find_element(By.CSS_SELECTOR, sel.ok).click()
+            # WebDriverWait(self.driver, 10).until(
+            #     EC.visibility_of_element_located((By.CSS_SELECTOR, sel.ok)))
+            self.pesquisa_seletor(sel.ok, 10).click()
             sleep(.1)
-            inserir_sem_whats(numero)
+            inserir_sem_whats(numero['Telefones'][2::])
             return True
         except Exception as e:
             try:
                 self.element_presence(By.CSS_SELECTOR, sel.campo_msg, 10)
-                deletar_sem_whats(numero)
+                deletar_sem_whats(numero['Telefones'][2::])
                 self.excluidos += 1
                 return False
             except:
-                return self.testa(numero=numero)
+                return self.testa(numero)
 
     async def teste(self, numero, cpf):
 

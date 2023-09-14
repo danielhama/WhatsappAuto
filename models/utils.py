@@ -153,19 +153,20 @@ def inserir_sem_whats(telefone):
     desconectar(conn)
 
 
-def inserir_contrato(numero, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, id_cliente, data):
+def inserir_contrato(numero, emissao, vencimento, valor_emprestimo, valor_avaliacao, situacao, prazo, cpf, data, modalidade):
     conn = conectar()
     cursor = conn.cursor()
     hoje = datetime.datetime.today()
-    data = datetime.datetime.strptime(data.split(' ')[0], '%d/%m/%Y')
+    # data = datetime.datetime.strptime(data.split(' ')[0], '%d/%m/%Y')
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO Contratos (numero, vencimento, ValorEmprestimo, ValorAvaliacao, situacao, prazo, DataAtualizacao) VALUES ('{numero}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo},  '{data}')")
+        cursor.execute(f"INSERT INTO Contratos (numero, Emissao, Vencimento, ValorEmprestimo, ValorAvaliacao, situacao, prazo, cpf, DataAtualizacao, Modalidade, QtdeRenovacoes, QtdeRenovacoes, Ativo, Peso, QtdeParcelas, DataInclusao) VALUES ('{numero}', '{emissao}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo}, '{cpf}', '{data}', {modalidade}, 0, 0, 1, '0.0', 0, '{hoje}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")
     except Exception as e:
+        print(e)
         atualizado = datetime.datetime.strptime(pesquisa_data_atualizacao(numero).split(" ")[0], '%Y-%m-%d')
         if atualizado < data:
 
@@ -228,7 +229,7 @@ def listar_Clientes_telefone():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1')  # GROUP BY Telefones.numero')
+    cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1 GROUP BY Telefones.Numero')  # GROUP BY Telefones.numero')
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:

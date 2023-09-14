@@ -24,6 +24,7 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
 import models.utils
+from models.sipen import Sipen
 
 kivy.require('1.10.0')
 from models.calculo import *
@@ -1280,7 +1281,7 @@ class Whats(App, ProgBar):
         # self.worker.envio_msg = EnviaMensagem()
         self.worker = EventLoopWorker()
         self.worker.envio_msg = EnviaMensagem()
-        # self.texto = self.root.ids.right_content.text
+        self.clientes_hoje = None
 
     def on_start(self):
 
@@ -1621,6 +1622,8 @@ class Whats(App, ProgBar):
     def enviar_vencimento(self):
         try:
             # self.clientes_hoje = listar_Clientes_telefone_envio()
+            if self.clientes_hoje == None:
+                self.clientes_hoje = listar_Clientes_telefone_envio()
             self.cria_iter(self.clientes_hoje)
             # self.clientes_hoje
         except Exception as e:
@@ -1763,9 +1766,21 @@ class Whats(App, ProgBar):
         #     remove('qrcode.jpg')
         # except Exception as e:
         #     logging.exception(str(e))
-    def limpar_contratos(self):
-        models.utils.limpa_contratos()
-
+    def atualiza(self):
+        sipen = Sipen()
+        if sipen.abre_inventario():
+            sipen.chama_driver()
+            sipen.load_sipen()
+            sipen.atualizar()
+        else:
+            sipen.deleta_arquivo()
+            sipen.chama_driver()
+            sipen.load_sipen()
+            sipen.inventario()
+            sipen.atualizar()
+        sleep(1)
+        limpa_contratos()
+        sipen.deleta_arquivo()
     def exibir(self):
         content = RV()
         self._popup = Popup(title="Clientes", content=content,

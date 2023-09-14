@@ -1,7 +1,8 @@
 campo_msg = "._3Uu1_"
 campo_msg2 = '#main > footer > div._2BU3P.tm2tP.copyable-area > div > span:nth-child(2) > div > div._2lMWa > div.p3_M1 > div > div.fd365im1.to2l77zo.bbv8nyr4.mwp4sxku.gfz4du6o.ag5g9lrv'
 apagar_pesquisa = ".-Jnba"
-ok = "._20C5O"
+# ok = "._20C5O"
+ok = ".p357zi0d.ns59xd2u.kcgo1i74.gq7nj7y3.lnjlmjd6.przvwfww.mc6o24uu.e65innqk.le5p0ye3"
 "#side > div._3gYev > div > div > div._2vDPL > div > div.Er7QU.copyable-text.selectable-text"
 campo_pesquisa2 = "#side > div._3gYev > div > div > div._2vDPL > div"
 campo_pesquisa = ".to2l77zo.gfz4du6o.ag5g9lrv.bze30y65.kao4egtt.qh0vvdkp"
@@ -43,3 +44,5 @@ usuario = "#Layer1 > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) >
 data_inventario = "#dataReferencia"
 contratos_ativos = "#rd1"
 confirma_inventario = "#btn_confirmar"
+cpf_selector = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(4) > td:nth-child(2)"
+modalidade = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(6) > td:nth-child(2)"
