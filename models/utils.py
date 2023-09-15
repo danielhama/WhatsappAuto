@@ -5,6 +5,9 @@ import pandas as pd
 from models.calculo import calcular_juros, calcular_data, calcular_margem
 from models.ferramentas import *
 import logging
+from io import BytesIO
+import win32clipboard
+from PIL import Image
 
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
@@ -13,7 +16,7 @@ def conectar():
     """
     Função para conectar ao servidor
     """
-    conn = sqlite3.connect(path.join(path.expanduser('~'), 'cartoespf.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+    conn = sqlite3.connect(path.join(path.expanduser('~'), 'arquivo.db'), detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
 
     conn.execute("""CREATE TABLE IF NOT EXISTS "clientes" (
@@ -471,6 +474,20 @@ def pesquisa_data_atualizacao(numero_contrato):
 
 # OUTROS
 
+def send_to_clipboard(clip_type, data):
+    win32clipboard.OpenClipboard()
+    win32clipboard.EmptyClipboard()
+    win32clipboard.SetClipboardData(clip_type, data)
+    win32clipboard.CloseClipboard()
+
+def clipboard(path):
+    filepath = path
+    image = Image.open(filepath[0])
+    output = BytesIO()
+    image.convert("RGB").save(output, "BMP")
+    data = output.getvalue()[14:]
+    output.close()
+    send_to_clipboard(win32clipboard.CF_DIB, data)
 
 
 

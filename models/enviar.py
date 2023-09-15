@@ -17,6 +17,8 @@ from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 
+import pyperclip
+
 
 class EnviaMensagem:
 
@@ -35,7 +37,7 @@ class EnviaMensagem:
     @threaded
     def chama_driver(self, head: bool = True) -> None:
         dir_path = os.getcwd()
-        profile = os.path.join(dir_path, "profile", "pf")
+        profile = os.path.join(dir_path, "profile", "dani")
         options = webdriver.ChromeOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
@@ -111,6 +113,29 @@ class EnviaMensagem:
             print("Seletor de campo mensagem não encontrado")
             return False
 
+    def envia_arquivo(self, path, nome: str, cpf) -> bool:
+        try:
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel.campo_msg)))
+            selecionado = self.driver.find_element(By.CSS_SELECTOR, sel.barra_superior).text.split(',')[0]
+            if selecionado.split(" ")[0] in nome:
+                txt_box = self.driver.find_element(By.CSS_SELECTOR, sel.campo_msg)
+                sleep(2)
+                clipboard(path)
+                txt_box.click()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("v").key_up(
+                        Keys.CONTROL).perform()
+                sleep(random.random() * 3 + .5)
+                self.driver.find_element(By.CSS_SELECTOR, "._3wFFT").click()
+                sleep(.5)
+                id = pesquisa_id(cpf)
+                deletar_enviado(id)
+                return True
+            else:
+                return False
+        except TimeoutException:
+            print("Seletor de campo mensagem não encontrado")
+            return False
+
 
     async def send_whatsapp_msg(self, numero, texto, nome: str, cpf,
                                 header: bool = True) -> bool:  # Faz a chamada de contato pelo número de telefone.
@@ -165,7 +190,7 @@ class EnviaMensagem:
                 pass
 
             # Testa se existe o campo de mensagem na página e envia as mensagens
-            return self.envia_msg(texto=texto, nome=nome, header=header, cpf=cpf)
+            return self.envia_arquivo(path=texto, nome=nome, cpf=cpf)
         else:
             return False
 

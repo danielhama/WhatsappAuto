@@ -17,5 +17,5 @@ pesquisa_contato = '/html/body/div[1]/div[1]/div[1]/div[3]/div/div[1]/div/label/
 
 barra = "#main > header > div._24-Ff > div > div > span"
 barra_superior = '._3W2ap'
-
+botao_enviar_imagem = "._3wFFT"
 bloqueado = '/html/body/div[1]/div/div/div[4]/div/footer/div/text()'
