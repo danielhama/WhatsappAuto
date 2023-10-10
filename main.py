@@ -22,6 +22,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
+# from selenium.common import NoSuchElementException
 
 import models.utils
 from models.sipen import Sipen
@@ -1023,7 +1024,7 @@ class EventLoopWorker(EventDispatcher):
         self.envio_task = None
         self.envio_msg = EnviaMensagem()
         self.msg = None
-        self.dados = asyncio.Queue()
+        # self.dados = asyncio.Queue()
         self.contador = 0
         self.clientes = None
         self.falha = 0
@@ -1766,21 +1767,39 @@ class Whats(App, ProgBar):
         #     remove('qrcode.jpg')
         # except Exception as e:
         #     logging.exception(str(e))
-    def atualiza(self):
-        sipen = Sipen()
-        if sipen.abre_inventario():
-            sipen.chama_driver()
-            sipen.load_sipen()
-            sipen.atualizar()
-        else:
+
+    def atualiza_sync(self):
+        asyncio.run(self.atualiza())
+    async def atualiza(self):
+        try:
+            sipen = Sipen()
+            if sipen.abre_inventario():
+                sipen.chama_driver()
+                # sipen.load_sipen()
+                await sipen.atualizar()
+                # sipen.fecha_driver()
+            else:
+                sipen.deleta_arquivo()
+                sipen.chama_driver()
+                await sipen.inventario()
+                await sipen.atualizar()
+                # sipen.fecha_driver()
+            sleep(1)
+            limpa_contratos()
             sipen.deleta_arquivo()
+        except NoSuchWindowException:
+            await self.atualiza()
+        except FileNotFoundError as e:
+            sipen = Sipen()
             sipen.chama_driver()
             sipen.load_sipen()
-            sipen.inventario()
-            sipen.atualizar()
-        sleep(1)
-        limpa_contratos()
-        sipen.deleta_arquivo()
+            await sipen.atualizar()
+
+
+        except Exception as e:
+            self.root.ids.right_content.text = str(e)
+
+
     def exibir(self):
         content = RV()
         self._popup = Popup(title="Clientes", content=content,
