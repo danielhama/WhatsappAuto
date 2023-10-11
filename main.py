@@ -244,7 +244,7 @@ BoxLayout:
         size: root.size
         pos: root.pos
         orientation: "vertical"
-        FileChooserIconView:
+        FileChooserListView:
             id: filechooser
 
         BoxLayout:
