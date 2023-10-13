@@ -56,8 +56,7 @@ class EnviaMensagem:
 
                 # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
         self.driver.execute_script("document.body.style.zoom='90 %'")
-        self.driver.set_window_rect(1600,900)
-        self.driver.set_window_position(0, 0)
+        self.driver.maximize_window()
         self.driver.get("https://web.whatsapp.com")
 
 

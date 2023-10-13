@@ -47,6 +47,8 @@ class Sipen:
             options = Options()
             options.add_argument("-headless")
         self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+        self.driver.maximize_window()
+
             # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
         # self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
         # WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CSS_SELECTOR, menu)))
@@ -99,6 +101,7 @@ class Sipen:
             if j != window:
                 self.driver.switch_to.window(j)
                 self.driver.close()
+                self.driver.switch_to.window(window)
                 break
 
 
