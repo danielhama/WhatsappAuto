@@ -2,7 +2,7 @@ from models.utils import *
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 
-def gitleia_arquivo(arquivo):
+def leia_arquivo(arquivo):
     """ Função importa o relatório csv usando o pandas, separa os telefones em colunas e
     define como uma lista
 """
