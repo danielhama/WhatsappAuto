@@ -1,14 +1,10 @@
 import os
 import random
-import undetected_chromedriver as uc
 import socket
 from time import sleep
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# from qrcode import make
-# import psutil
 from models.utils import *
 from models.ferramentas import threaded
 from selenium.webdriver import ActionChains

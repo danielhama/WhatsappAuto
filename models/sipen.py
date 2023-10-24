@@ -3,6 +3,7 @@ import os
 from time import sleep
 import pathlib
 from selenium import webdriver
+from selenium.common import TimeoutException
 # from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
