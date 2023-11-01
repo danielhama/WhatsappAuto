@@ -9,12 +9,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
+from undetected_chromedriver import ChromeOptions
+
 from models.utils import *
 import holidays
 from selenium.webdriver.chrome.webdriver import *
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
-import undetected_chromedriver as uc
+# import undetected_chromedriver as uc
 
 from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, menu, cpf_selector, \
     situacao, modalidade
@@ -40,19 +42,20 @@ class Sipen:
     @threaded
     def chama_driver(self, head: bool = False) -> None:
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
-        options = uc.ChromeOptions()
+        options = ChromeOptions()
         options.user_data_dir = profile
         options.headless = False
         options.browser_version = "107"
         if head == True:
             options = Options()
             options.add_argument("-headless")
-        self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-        self.driver.maximize_window()
+        # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
 
-            # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+        self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
         # self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
         # WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CSS_SELECTOR, menu)))
+        self.driver.maximize_window()
+
 
     def load_sipen(self):
         self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")

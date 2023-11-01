@@ -2,17 +2,22 @@ import os
 import random
 import socket
 from time import sleep
+
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+# from undetected_chromedriver import ChromeOptions
+
 from models.utils import *
 from models.ferramentas import threaded
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
 from selenium.webdriver.chrome.webdriver import *
-import undetected_chromedriver as uc
-
+# import undetected_chromedriver as uc
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 class EnviaMensagem:
@@ -35,22 +40,28 @@ class EnviaMensagem:
     def chama_driver(self, head: bool = True) -> None:
 
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "wpp")
-        options = uc.ChromeOptions()
-        options.user_data_dir = profile
+        options = Options()
+        options.add_argument(profile)
+        # options.user_data_dir = profile
         options.headless = False
 
         options.browser_version = "107"
         if head == True:
             options = Options()
             options.add_argument("-headless")
-            self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+            self.driver = webdriver.Chrome(
+                service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+
+            # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
 
                 # service=ChromeService(ChromeDriverManager().install()), options=options)
         else:
-            self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+            # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
             # self.driver = webdriver.Chrome(executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+            self.driver = webdriver.Chrome(
+                service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
-                # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+            # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
         self.driver.execute_script("document.body.style.zoom='90 %'")
         self.driver.maximize_window()
         self.driver.get("https://web.whatsapp.com")
