@@ -40,26 +40,24 @@ class EnviaMensagem:
     def chama_driver(self, head: bool = True) -> None:
 
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "wpp")
-        options = Options()
-        options.add_argument(profile)
+        options = webdriver.ChromeOptions()
+        options.add_argument(
+            r"user-data-dir={}".format(profile))
         # options.user_data_dir = profile
         options.headless = False
 
         options.browser_version = "107"
         if head == True:
-            options = Options()
+            options = webdriver.ChromeOptions()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+            self.driver = webdriver.Chrome(service=Service(
+                executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"),
+                                               options=options)
+            # self.driver = webdriver.Chrome(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", options=options)
 
-            # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-
-                # service=ChromeService(ChromeDriverManager().install()), options=options)
         else:
-            # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-            # self.driver = webdriver.Chrome(executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-            self.driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+            self.driver = webdriver.Chrome(service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"), options=options)
+                # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
             # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
         self.driver.execute_script("document.body.style.zoom='90 %'")

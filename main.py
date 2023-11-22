@@ -8,6 +8,7 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.clock import mainthread
 from kivy.config import Config
+from kivy.core.image import Image
 from kivy.event import EventDispatcher
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
@@ -15,19 +16,21 @@ from kivy.properties import StringProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
+# from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
+# from selenium.common import NoSuchWindowException
+
 # from selenium.common import NoSuchElementException
 
 import models.utils
 from models.sipen import Sipen
 
-kivy.require('1.10.0')
+kivy.require('2.2.1')
 from models.calculo import *
 from models.enviar import *
 from models.formata import *
@@ -161,7 +164,7 @@ class RVTelefonesEnviar(BoxLayout):
         cursor = conn.cursor()
 
         cursor.execute(
-            f'SELECT t.DDD || t.numero, t.id_cliente, c.id, c.cpf FROM telefones as t, clientes as c where c.id = {id}')
+            f'SELECT t.DDD || t.numero, t.ClienteID, c.id, c.cpf FROM telefones as t, clientes as c where c.id = {id}')
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
@@ -193,9 +196,10 @@ class RVTelefones(BoxLayout):
 
     def remove(self):
         if self.rv_telefone.data[indice_1]:
-            numero = int(self.rv_telefone.data[indice_1]['text'])
+            numero = int(self.rv_telefone.data[indice_1]['text'].split(" ")[0])
 
             self.rv_telefone.data.pop(indice_1)
+
             try:
                 deletar_telefone(numero)
             except Exception as e:
@@ -210,12 +214,17 @@ class RVTelefones(BoxLayout):
         cursor = conn.cursor()
 
         cursor.execute(
-            f'SELECT Telefones.DDD||Telefones.Numero, Telefones.ClienteID, Clientes.Id, Clientes.CPF FROM Telefones, Clientes where Clientes.id = {id} and Telefones.ClienteID = {id}')
+            f'SELECT Telefones.DDD||Telefones.Numero, Telefones.ClienteID, Clientes.Id, Clientes.CPF, Telefones.whatsapp FROM Telefones, Clientes where Clientes.id = {id} and Telefones.ClienteID = {id}')
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
             for cliente in clientes:
-                cliente = {'text': str(cliente[0])}
+                if cliente[4] == 1:
+                    temWhats = "Sim"
+                else:
+                    temWhats = "Não"
+
+                cliente = {'text': str(cliente[0] + "      " + temWhats)}
                 lista_clientes.append(cliente)
         else:
             print('Não existem clientes cadastrados.')
@@ -1787,7 +1796,7 @@ class Whats(App, ProgBar):
             sleep(1)
             limpa_contratos()
             sipen.deleta_arquivo()
-        except NoSuchWindowException:
+        except Exception:
             await self.atualiza()
         except FileNotFoundError as e:
             sipen = Sipen()

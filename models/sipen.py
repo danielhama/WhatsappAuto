@@ -3,13 +3,12 @@ import os
 from time import sleep
 import pathlib
 from selenium import webdriver
-from selenium.common import TimeoutException
+# from selenium.common import TimeoutException
 # from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
-from undetected_chromedriver import ChromeOptions
 
 from models.utils import *
 import holidays
@@ -42,18 +41,19 @@ class Sipen:
     @threaded
     def chama_driver(self, head: bool = False) -> None:
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
-        options = ChromeOptions()
+        options = webdriver.ChromeOptions()
         options.user_data_dir = profile
         options.headless = False
         options.browser_version = "107"
         if head == True:
-            options = Options()
+            options = webdriver.ChromeOptions()
             options.add_argument("-headless")
         # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+        self.driver = webdriver.Chrome(service=Service(
+                executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"),
+                                               options=options)
+        # self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
-        self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
-        # self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
-        # WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CSS_SELECTOR, menu)))
         self.driver.maximize_window()
 
 
@@ -129,7 +129,7 @@ class Sipen:
         while self.driver is None:
             sleep(1)
         try:
-            self.pesquisa_seletor(menu, 5)
+            self.pesquisa_seletor(menu, 3)
         except:
             self.load_sipen()
         inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
@@ -143,7 +143,7 @@ class Sipen:
                 await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'], valor_avaliacao=i['Avaliação'],
                               valor_emprestimo=i['Empréstimo'],
                               emissao=i['Emissão'], prazo=i['Prz.'])
-            except TimeoutException as e:
+            except Exception as e:
                 self.load_sipen()
                 try:
                     await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'], valor_avaliacao=i['Avaliação'],
