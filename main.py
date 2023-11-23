@@ -2455,6 +2455,12 @@ class Whats(App, ProgBar):
 
 
     @threaded
+    def apagar_lista(self):
+        try:
+            os.remove(path.join(path.expanduser('~'), 'cartoespf.db'))
+        except:
+            pass
+    @threaded
     def criar_lista(self):
         try:
             try:
