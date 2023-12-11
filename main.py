@@ -27,7 +27,6 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
 # from selenium.common import NoSuchElementException
 
-import models.utils
 from models.sipen import Sipen
 
 kivy.require('2.2.1')
