@@ -45,8 +45,10 @@ class EnviaMensagem:
             r"user-data-dir={}".format(profile))
         # options.user_data_dir = profile
         options.headless = False
-
-        options.browser_version = "107"
+        options.add_argument("disable-infobars")
+        options.add_argument("start-maximized")
+        options.page_load_strategy = "eager"
+        options.browser_version = "120"
         if head == True:
             options = webdriver.ChromeOptions()
             options.add_argument("-headless")
@@ -56,12 +58,9 @@ class EnviaMensagem:
             # self.driver = webdriver.Chrome(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", options=options)
 
         else:
-            self.driver = webdriver.Chrome(service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"), options=options)
+            self.driver = webdriver.Chrome(service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port=443), options=options)
                 # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
-            # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
-        self.driver.execute_script("document.body.style.zoom='90 %'")
-        self.driver.maximize_window()
         self.driver.get("https://web.whatsapp.com")
 
 

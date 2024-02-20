@@ -1795,13 +1795,14 @@ class Whats(App, ProgBar):
             sleep(1)
             limpa_contratos()
             sipen.deleta_arquivo()
-        except Exception:
-            await self.atualiza()
+
         except FileNotFoundError as e:
             sipen = Sipen()
             sipen.chama_driver()
             sipen.load_sipen()
             await sipen.atualizar()
+        except Exception:
+            await self.atualiza()
 
 
         except Exception as e:

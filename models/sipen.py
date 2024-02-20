@@ -38,24 +38,26 @@ class Sipen:
         self.pesquisa_cliente = "/CarregarManterPesquisaCliente.do?"
         self.consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?method=carregar&numeroContrato="
 
-    @threaded
+    # @threaded
     def chama_driver(self, head: bool = False) -> None:
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
         options = webdriver.ChromeOptions()
-        options.user_data_dir = profile
-        options.headless = False
-        options.browser_version = "107"
+        options.add_argument(
+            r"user-data-dir={}".format(profile))
+        # options.headless = False
+        # options.browser_version = "107"
+        options.add_argument("disable-infobars")
+        options.add_argument("start-maximized")
         if head == True:
             options = webdriver.ChromeOptions()
             options.add_argument("-headless")
         # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
         self.driver = webdriver.Chrome(service=Service(
-                executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"),
-                                               options=options)
+            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port
+            =443), options=options)
         # self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
 
         self.driver.maximize_window()
-
 
     def load_sipen(self):
         self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
@@ -108,8 +110,6 @@ class Sipen:
                 self.driver.switch_to.window(window)
                 break
 
-
-
     def abre_inventario(self):
         try:
             inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
@@ -123,7 +123,6 @@ class Sipen:
                 return False
         except FileNotFoundError as e:
             return False
-
 
     async def atualizar(self):
         while self.driver is None:
@@ -140,15 +139,17 @@ class Sipen:
             i['Nr. Contrato'] = i['Nr. Contrato'].replace(".", "").replace("-", "")
             # WebDriverWait(driver, 10).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
             try:
-                await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'], valor_avaliacao=i['Avaliação'],
-                              valor_emprestimo=i['Empréstimo'],
-                              emissao=i['Emissão'], prazo=i['Prz.'])
+                await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                                    valor_avaliacao=i['Avaliação'],
+                                    valor_emprestimo=i['Empréstimo'],
+                                    emissao=i['Emissão'], prazo=i['Prz.'])
             except Exception as e:
                 self.load_sipen()
                 try:
-                    await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'], valor_avaliacao=i['Avaliação'],
-                                  valor_emprestimo=i['Empréstimo'],
-                                  emissao=i['Emissão'], prazo=i['Prz.'])
+                    await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                                        valor_avaliacao=i['Avaliação'],
+                                        valor_emprestimo=i['Empréstimo'],
+                                        emissao=i['Emissão'], prazo=i['Prz.'])
                 except Exception as e:
                     print(e)
                     self.erro.append(i['Nr. Contrato'])
@@ -229,4 +230,3 @@ def ontem_feriado():
         return data
     else:
         return data
-
