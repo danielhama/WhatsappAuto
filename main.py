@@ -1783,15 +1783,12 @@ class Whats(App, ProgBar):
             sipen = Sipen()
             if sipen.abre_inventario():
                 sipen.chama_driver()
-                # sipen.load_sipen()
                 await sipen.atualizar()
-                # sipen.fecha_driver()
             else:
                 sipen.deleta_arquivo()
                 sipen.chama_driver()
                 await sipen.inventario()
                 await sipen.atualizar()
-                # sipen.fecha_driver()
             sleep(1)
             limpa_contratos()
             sipen.deleta_arquivo()
