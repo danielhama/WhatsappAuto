@@ -222,7 +222,7 @@ def ontem_feriado():
         data = hoje + datetime.timedelta(days=-1)
     data = datetime.date(year=data.year, month=data.month, day=data.day)
 
-    if data in holidays.country_holidays(country='Brazil', years=2023).keys():
+    if data in holidays.country_holidays(country='Brazil', years=hoje.year).keys():
         if hoje.weekday() == 0:
             data = hoje + datetime.timedelta(days=-3)
         else:
