@@ -23,11 +23,14 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
+
+import services.consultasipen
 # from selenium.common import NoSuchWindowException
 
 # from selenium.common import NoSuchElementException
 
 from models.sipen import Sipen
+from services.guarda import GuardaPenhor
 
 kivy.require('2.2.1')
 from models.calculo import *
@@ -35,7 +38,11 @@ from models.enviar import *
 from models.formata import *
 from models.utils2 import tempo_execucao, leia_texto, salva_texto, filtra_vencimento, filtra_data
 from models.vCARD import csv_para_vcf
-
+from services.consultasipen import ConsultaSipen
+from services.consultarenovados import Renovados
+from services.consultaliquidados import SipenLiquidados
+from models.SeletoresRelatorios import menu_novos, menu_renovados, menu_liquidados
+from datetime import datetime
 locale.setlocale(locale.LC_MONETARY, 'pt_BR.UTF-8')
 Config.set('graphics', 'width', '1280')
 Config.set('graphics', 'height', '720')
@@ -1291,6 +1298,8 @@ class Whats(App, ProgBar):
         self.worker = EventLoopWorker()
         self.worker.envio_msg = EnviaMensagem()
         self.clientes_hoje = None
+        self.login = None
+        self.senha = None
 
     def on_start(self):
 
@@ -1391,6 +1400,55 @@ class Whats(App, ProgBar):
         self.worker.msg = self.msgs.split('\n')
         self.root.ids.right_content.text = 'Mensagem definida!'
 
+    def set_login(self, login, senha):
+        self.login = login
+        self.senha = senha
+
+    def guarda_penhor(self, login, senha):
+        self.login = login
+        self.set_login(login, senha)
+        try:
+            guarda = GuardaPenhor(login, senha)
+            guarda.envia()
+            guarda.confirma()
+        except:
+            pass
+
+    def buscar_novos(self, login, senha):
+        self.set_login(login, senha)
+        try:
+            novos = ConsultaSipen(self.login, self.senha)
+            novos.chama_driver()
+            novos.acessar_relatorio_menu(menu_novos)
+            novos.consulta_data(novos.ultima_data(""), novos.ultimo_dia_util(), [10, 11, 12, 13, 14, 15],
+                                   r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt")
+            novos.driver.close()
+        except:
+            pass
+
+        try:
+            sipen = Renovados(
+                path=r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv", login=self.login,senha=self.senha)
+            sipen.abrir_arquivo()
+            sipen.chama_driver()
+            sipen.acessar_relatorio_menu(menu_renovados)
+            sipen.consulta_data(sipen.ultima_data(), sipen.ultimo_dia_util(), [10], "")
+            sipen.driver.close()
+        except:
+            pass
+        try:
+
+            sipenliq = SipenLiquidados(self.login, self.senha)
+            ultima_data = sipenliq.ultima_data()
+            data_final = sipenliq.ultimo_dia_util()
+            if ultima_data == datetime.now().strftime("%d/%m/%Y"):
+                return
+            sipenliq.chama_driver()
+            sipenliq.acessar_relatorio_menu(seletor=menu_liquidados)
+            sipenliq.consulta_data(ultima_data, data_final, [16],
+                                   r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\liquidado.txt")
+        except:
+            pass
     def limpar(self):
         self.root.ids.left_content.text = ""
 
@@ -1819,6 +1877,26 @@ class Whats(App, ProgBar):
                             size_hint=(0.9, 0.9))
         self._popup.open()
         content.populate_contratos()
+
+    def exibir_login(self):
+        content = BoxLogin()
+        self._popup = Popup(title="Login", content=content,
+                            size_hint=(0.3, 0.35))
+        self._popup.open()
+
+    def exibir_guarda(self):
+        content = BoxGuarda()
+        self._popup = Popup(title="Login", content=content,
+                            size_hint=(0.3, 0.35))
+        self._popup.open()
+
+class BoxLogin(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class BoxGuarda(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,9 @@
+
+sipen = "http://sipen.caixa/sipen"
+relatorio_emprestimo = "/jsp/TabelasApoio/Relatorio/frmrelGeral.jsp?opcao=2"
+pesquisa_cliente = "/CarregarManterPesquisaCliente.do?"
+consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?method=carregar&numeroContrato="
+renovacao = "/RenovarContratoLote.do?method=carregar"
+renovacao1 = "https://sipen.caixa/sipen/RenovarContratoLote.do?method=VALIDAR&tipoPessoa=01&numeroCPFCNPJ="
+liquidacao = "/CarregarRelatorioLiquidados.do?method=carregar"
+relatorio_renovacao = "/jsp/TabelasApoio/Relatorio/frmrelGeral.jsp?opcao=4'"

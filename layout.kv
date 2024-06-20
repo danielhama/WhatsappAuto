@@ -31,18 +31,14 @@ BoxLayout:
         Button:
             text: 'Parar'
             on_release: app.parar()
-#        Spinner:
-#            text: 'Testes'
-#            size: 100, 50
-#            sync_height: False
-#            values: 'Testa todos telefones', "Testa sem whatsapp"
-        Button:
-            text: 'Testa todos'
-            on_release: app.cria_iter_importados()
 
         Button:
-            text: 'Testa sem whats'
-            on_release: app.cria_iter_sem()
+            text: 'Relatórios'
+            on_release: app.exibir_login()
+
+        Button:
+            text: 'Guarda Penhor'
+            on_release: app.exibir_guarda()
 
         Button:
             text: 'Abre Web Whats'
@@ -854,3 +850,105 @@ BoxLayout:
         id: valor
     Label:
         id: encargos
+
+
+<BoxLogin>:
+    canvas:
+        Color:
+            rgba: 0.3, 0.3, 0.3, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    #box_login: box_login
+    orientation: 'vertical'
+
+    GridLayout:
+        cols: 1
+        rows: 5
+        size_hint_y: None
+        height: dp(200)
+        padding: dp(8)
+        spacing: dp(16)
+        Label:
+            spacing: dp(8)
+            text: "Login"
+
+        TextInput:
+            id: id_login
+            size_hint_min_y: 30
+            disabled_color: 0, 0, 0, 0
+#           padding: 20,10,20,10
+            multiline: False
+            focus: True
+            write_tab: False
+        Label:
+            spacing: dp(8)
+            text: "Senha"
+
+        TextInput:
+            id: id_senha
+            size_hint_min_y: 30
+            disabled_color: 0, 0, 0, 0
+            multiline: False
+#           padding: 20,10,20,10
+            focus: True
+            password_mask: "*"
+            password: True
+            write_tab: False
+            on_text_validate: app.buscar_novos(id_login.text, id_senha.text)
+
+        Button:
+            id: id_botao
+            text: 'Confirmar'
+            on_release: app.buscar_novos(id_login.text, id_senha.text)
+
+<BoxGuarda>:
+    canvas:
+        Color:
+            rgba: 0.3, 0.3, 0.3, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    #box_login: box_login
+    orientation: 'vertical'
+
+    GridLayout:
+        cols: 1
+        rows: 5
+        size_hint_y: None
+        height: dp(200)
+        padding: dp(8)
+        spacing: dp(16)
+        Label:
+            spacing: dp(8)
+            text: "Login"
+
+        TextInput:
+            id: id_login
+            size_hint_min_y: 30
+            disabled_color: 0, 0, 0, 0
+#           padding: 20,10,20,10
+            multiline: False
+            focus: True
+            write_tab: False
+        Label:
+            spacing: dp(8)
+            text: "Senha"
+
+        TextInput:
+            id: id_senha
+            size_hint_min_y: 30
+            disabled_color: 0, 0, 0, 0
+            multiline: False
+#           padding: 20,10,20,10
+            focus: True
+            password_mask: "*"
+            password: True
+            write_tab: False
+            on_text_validate: app.guarda_penhor(id_login.text, id_senha.text)
+
+        Button:
+            id: id_botao
+            text: 'Confirmar'
+            on_release: app.guarda_penhor(id_login.text, id_senha.text)
+
