@@ -1,20 +1,21 @@
 import datetime
+import os
 from getpass import getpass
+from time import sleep
 
 import holidays
+import xlwings as xw
 from selenium import webdriver
 from selenium.common import NoSuchElementException, TimeoutException, NoSuchFrameException
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
-from time import sleep
-import pyautogui as pa
-import os
-import xlwings as xw
-import models.links as l
+
 import models.SeletoresRelatorios as s
+import models.links as l
+
 
 class ConsultaSipen:
     driver = None
@@ -24,16 +25,6 @@ class ConsultaSipen:
     def __init__(self, login, senha):
         self.matricula = login
         self.senha = senha
-
-    def set_matricula_senha(self):
-        matricula = input("Matricula:")
-        senha = getpass('Senha: ')
-        if len(matricula) == 7 and len(senha) >= 8:
-            self.matricula = matricula
-            self.senha = senha
-        else:
-            print("Digite a matricula no formato C000000")
-            self.set_matricula_senha()
 
 
     def chama_driver(self):

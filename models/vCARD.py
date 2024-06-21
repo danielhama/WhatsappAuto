@@ -1,7 +1,8 @@
-from models.utils import listar, listar_Telefones_por_cpf
 from csv import writer
-from random import choice
 from os import path
+from random import choice
+
+from models.utils import listar, listar_Telefones_por_cpf
 
 
 def alea():

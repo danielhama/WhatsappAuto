@@ -1,15 +1,16 @@
 import datetime
 from time import sleep
 
-from selenium.webdriver import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
 import xlwings as xw
-
-from services.consultasipen import ConsultaSipen
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.wait import WebDriverWait
+
 import models.SeletoresRelatorios as s
+from services.consultasipen import ConsultaSipen
+
+
 class SipenLiquidados(ConsultaSipen):
     pass
 

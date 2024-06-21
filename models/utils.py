@@ -1,10 +1,11 @@
-import sqlite3
 import datetime
+import logging
+import sqlite3
+
 import pandas as pd
+
 from models.calculo import calcular_margem
 from models.ferramentas import *
-import logging
-
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
@@ -522,7 +523,7 @@ def atualizar_contrato(numero, vencimento, valor_avaliacao, valor_emprestimo, pr
 
 # PESQUISA ID
 
-def pesquisa_id(cpf):
+def pesquisa_id(cpf) -> int:
     conn = conectar()
     cursor = conn.cursor()
 

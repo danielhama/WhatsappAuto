@@ -1,6 +1,8 @@
 import datetime
 import logging
+
 from models.utils import listar_Clientes_telefone, pesquisa_id, inserir_id_envio, deletar_lista
+
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 

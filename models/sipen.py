@@ -1,24 +1,24 @@
-import asyncio
 import os
 from time import sleep
+import os
 import pathlib
+from time import sleep
+
+import holidays
 from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import *
 # from selenium.common import TimeoutException
 # from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-import pandas as pd
-
-from models.utils import *
-import holidays
-from selenium.webdriver.chrome.webdriver import *
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromeService
-# import undetected_chromedriver as uc
 
 from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, menu, cpf_selector, \
     situacao, modalidade
+from models.utils import *
+from services.sipenJava import menuIrpara
+import models.SeletoresRelatorios as s
+# import undetected_chromedriver as uc
 
 
 class Sipen:
@@ -28,15 +28,40 @@ class Sipen:
             cls.instance = super(Sipen, cls).__new__(cls)
         return cls.instance
 
-    def __init__(self):
+    def __init__(self, login, senha):
         super().__init__()
         self.erro = []
         self.driver = None
-        self.user = None
-        self.password = None
+        self.matricula = login
+        self.senha = senha
         self.sipen = "http://sipen.caixa/sipen"
         self.pesquisa_cliente = "/CarregarManterPesquisaCliente.do?"
         self.consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?method=carregar&numeroContrato="
+
+    def login(self) -> bool:
+        if self.matricula is not None and self.senha is not None:
+            self.driver.get("http://sipen.caixa/")
+            try:
+                if self.frame('frame'):
+                    WebDriverWait(self.driver, 120).until(EC.visibility_of_element_located((By.CSS_SELECTOR, s.usuario)))
+                    _usuario = self.pesquisa_seletor(s.usuario, 30).send_keys(self.matricula)
+                    _senha = self.pesquisa_seletor(s.senha, 10).send_keys(self.senha)
+
+                    self.pesquisa_seletor(s.botao_login, 10).click()
+                    return True
+            except:
+                return False
+    def frame(self, frame_name):
+        try:
+            self.driver.switch_to.default_content()
+            frame = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, "principal")))
+            if frame.tag_name == frame_name:
+                self.driver.switch_to.frame(frame)
+                return True
+            else:
+                return False
+        except:
+            return False
 
     # @threaded
     def chama_driver(self, head: bool = False) -> None:
@@ -59,10 +84,6 @@ class Sipen:
 
         self.driver.maximize_window()
 
-    def load_sipen(self):
-        self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
-        WebDriverWait(self.driver, 120).until(EC.presence_of_element_located((By.CSS_SELECTOR, menu)))
-
     def fecha_driver(self):
         try:
             self.driver.quit()
@@ -70,10 +91,10 @@ class Sipen:
             pass
 
     def set_user(self, user):
-        user = self.user
+        self.user = user
 
     def set_password(self, password):
-        password = self.password
+        self.password = password
 
     def pesquisa_seletor(self, selector: str, tempo: int):
         return WebDriverWait(self.driver, tempo).until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
@@ -85,9 +106,10 @@ class Sipen:
     async def inventario(self) -> None:
         while self.driver is None:
             sleep(1)
-        self.load_sipen()
+        self.login()
         data = ontem_feriado()
         data = data.strftime("%d/%m/%Y")
+        # menuIrpara(self.driver, '/CarregarRelInventarioGeralContratos.do')
         self.driver.get(
             "https://sipen.caixa/sipen/jsp/Comuns/Principal.jsp?destino=/CarregarRelInventarioGeralContratos.do")
         window = self.driver.current_window_handle
@@ -112,8 +134,8 @@ class Sipen:
 
     def abre_inventario(self):
         try:
-            inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
-            data = datetime.datetime.fromtimestamp(inventario.stat().st_atime)
+            self.inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
+            data = datetime.datetime.fromtimestamp(self.inventario.stat().st_atime)
             data = datetime.date(year=data.year, month=data.month, day=data.day)
             hoje = datetime.datetime.today()
             hoje = datetime.date(year=hoje.year, month=hoje.month, day=hoje.day)
@@ -128,15 +150,20 @@ class Sipen:
         while self.driver is None:
             sleep(1)
         try:
-            self.pesquisa_seletor(menu, 3)
+            self.login()
         except:
-            self.load_sipen()
-        inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
-        inventarioDF = pd.read_excel(inventario, header=3)
-
+            self.login()
+        inventarioDF = pd.read_excel(self.inventario, header=3)
+        hoje = datetime.datetime.today()
+        hoje = datetime.datetime(year=hoje.year, month=hoje.month, day=hoje.day)
         for idx, i in inventarioDF.iterrows():
             print(f"Iniciando pesquisa para Contrato {i['Nr. Contrato']}")
             i['Nr. Contrato'] = i['Nr. Contrato'].replace(".", "").replace("-", "")
+            data_anterior = pesquisa_data_atualizacao(i['Nr. Contrato'])
+            data_anterior = datetime.datetime.strptime(data_anterior.split(" ")[0], "%Y-%m-%d")
+
+            if data_anterior == hoje:
+                continue
             # WebDriverWait(driver, 10).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
             try:
                 await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
@@ -144,7 +171,7 @@ class Sipen:
                                     valor_emprestimo=i['Empréstimo'],
                                     emissao=i['Emissão'], prazo=i['Prz.'])
             except Exception as e:
-                self.load_sipen()
+                self.login()
                 try:
                     await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
                                         valor_avaliacao=i['Avaliação'],
@@ -158,7 +185,6 @@ class Sipen:
     async def situacao(self, numero, vencimento, valor_emprestimo, valor_avaliacao, emissao, prazo):
         while self.driver is None:
             sleep(1)
-        # self.load_sipen()
         self.driver.get(self.consulta_contrato + numero)
         cpf = self.pesquisa_seletor(cpf_selector, 10).text
         cpf = cpf.replace(".", "").replace("-", "")
@@ -175,6 +201,7 @@ class Sipen:
             print(e)
             self.erro.append(numero)
 
+
     def deleta_arquivo(self):
         try:
             os.remove(pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls"))
@@ -183,34 +210,6 @@ class Sipen:
 
     def fecha(self):
         self.driver.close()
-
-    # def main(self):
-    #     try:
-    #         sipen = Sipen()
-    #         if sipen.abre_inventario():
-    #             sipen.chama_driver()
-    #             # sipen.load_sipen()
-    #             asyncio.run(sipen.atualizar())
-    #             # sipen.fecha_driver()
-    #         else:
-    #             sipen.deleta_arquivo()
-    #             sipen.chama_driver()
-    #             # sipen.load_sipen()
-    #             sipen.inventario()
-    #             asyncio.run(sipen.atualizar())
-    #             # sipen.fecha_driver()
-    #         sleep(1)
-    #         limpa_contratos()
-    #         sipen.deleta_arquivo()
-    #
-    #     except NoSuchWindowException:
-    #         pass
-    #     except FileNotFoundError as e:
-    #         sipen = Sipen()
-    #         sipen.chama_driver()
-    #         sipen.load_sipen()
-    #         sipen.atualizar()
-    #         sipen.fecha_driver()
 
 
 # Função para verificar se ontem foi feriado

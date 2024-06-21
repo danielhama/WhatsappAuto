@@ -4,20 +4,20 @@ import socket
 from time import sleep
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
+from selenium.webdriver.chrome.webdriver import *
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# from undetected_chromedriver import ChromeOptions
 
-from models.utils import *
-from models.ferramentas import threaded
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.keys import Keys
 import models.Seletores as sel
-from selenium.webdriver.chrome.webdriver import *
+from models.ferramentas import threaded
+from models.utils import *
+
+
+# from undetected_chromedriver import ChromeOptions
 # import undetected_chromedriver as uc
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 class EnviaMensagem:

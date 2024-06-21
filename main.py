@@ -24,13 +24,12 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
-import services.consultasipen
-# from selenium.common import NoSuchWindowException
-
-# from selenium.common import NoSuchElementException
-
 from models.sipen import Sipen
+from services.consultasipen import ConsultaSipen
 from services.guarda import GuardaPenhor
+
+# from selenium.common import NoSuchWindowException
+# from selenium.common import NoSuchElementException
 
 kivy.require('2.2.1')
 from models.calculo import *
@@ -38,11 +37,12 @@ from models.enviar import *
 from models.formata import *
 from models.utils2 import tempo_execucao, leia_texto, salva_texto, filtra_vencimento, filtra_data
 from models.vCARD import csv_para_vcf
-from services.consultasipen import ConsultaSipen
+# from services.consultasipen import ConsultaSipen
 from services.consultarenovados import Renovados
 from services.consultaliquidados import SipenLiquidados
 from models.SeletoresRelatorios import menu_novos, menu_renovados, menu_liquidados
 from datetime import datetime
+
 locale.setlocale(locale.LC_MONETARY, 'pt_BR.UTF-8')
 Config.set('graphics', 'width', '1280')
 Config.set('graphics', 'height', '720')
@@ -147,7 +147,7 @@ class Row2(RecycleDataViewBehavior, Label):
                 try:
                     lista_de_contratos.remove(contrato)
                 except Exception as e:
-                    print(e)
+                    logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
 
 class RVTelefonesEnviar(BoxLayout):
@@ -156,7 +156,7 @@ class RVTelefonesEnviar(BoxLayout):
         try:
             self.rv_telefone.data = self.listar_exibicao_telefones()
         except Exception as e:
-            logging.basicConfig(filename='app.log', level=logging.INFO)
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def enviar_mensagem(self):
         whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefone_enviar)
@@ -189,7 +189,7 @@ class RVTelefones(BoxLayout):
         try:
             self.rv_telefone.data = self.listar_exibicao_telefones()
         except Exception as e:
-            logging.basicConfig(filename='app.log', level=logging.INFO)
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def insert(self, value):
         if len(value) >= 12:
@@ -198,7 +198,7 @@ class RVTelefones(BoxLayout):
                 inserir_telefone(value, id)
                 self.populate()
             except Exception as e:
-                logging.basicConfig(filename='app.log', level=logging.INFO)
+                logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def remove(self):
         if self.rv_telefone.data[indice_1]:
@@ -209,7 +209,7 @@ class RVTelefones(BoxLayout):
             try:
                 deletar_telefone(numero)
             except Exception as e:
-                logging.basicConfig(filename='app.log', level=logging.INFO)
+                logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def listar_exibicao_telefones(self):
         """
@@ -244,7 +244,7 @@ class RVContratos(BoxLayout):
         try:
             self.rv_contratos.data = self.lista_contratos()
         except Exception as e:
-            logging.basicConfig(filename='app.log', level=logging.INFO)
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def lista_contratos(self):
         """
@@ -263,8 +263,8 @@ class RVContratos(BoxLayout):
                 for cliente in clientes:
                     char = 50 - len(str(locale.currency(float(cliente[1]))))
                     char1 = 50 - len(str(locale.currency(float(cliente[2]))))
-                    vencimento = datetime.datetime.strftime(
-                        datetime.datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
+                    vencimento = datetime.strftime(
+                        datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
                     cliente_exibicao = {
                         'text': str(cliente[0]) + (" " * char) + locale.currency(float(cliente[1]), grouping=True) + (
                                     " " * char1) + locale.currency(float(cliente[2]), grouping=True) + (
@@ -276,7 +276,7 @@ class RVContratos(BoxLayout):
             desconectar(conn)
             return lista_clientes
         except Exception as e:
-            logging.basicConfig(filename='app.log', level=logging.INFO)
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def calcular(self):
         content_calculo = RVCalculo()
@@ -334,7 +334,7 @@ class RVIncluirContrato(BoxLayout):
                 inserir_telefone(value, id)
                 self.populate()
             except Exception as e:
-                logging.basicConfig(filename='app.log', level=logging.INFO)
+                logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def remove(self):
         if self.rv_telefone.data[indice_1]:
@@ -344,7 +344,7 @@ class RVIncluirContrato(BoxLayout):
             try:
                 deletar_telefone(numero)
             except Exception as e:
-                logging.basicConfig(filename='app.log', level=logging.INFO)
+                logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def listar_exibicao_telefones(self):
         """
@@ -377,10 +377,10 @@ class RVContratos1(BoxLayout):
                 try:
                     if type(cliente['Vencimento']) == str:
                         vencimento = cliente['Vencimento'].split(' ')
-                        vencimento = datetime.datetime.strptime(vencimento[0], '%Y-%m-%d')
-                        vencimento = datetime.datetime.strftime(vencimento, '%d/%m/%Y')
+                        vencimento = datetime.strptime(vencimento[0], '%Y-%m-%d')
+                        vencimento = datetime.strftime(vencimento, '%d/%m/%Y')
                     else:
-                        vencimento = datetime.datetime.strftime(cliente['Vencimento'], '%d/%m/%Y')
+                        vencimento = datetime.strftime(cliente['Vencimento'], '%d/%m/%Y')
                     cliente = {'nome.text': cliente['Nome'], 'cpf.text': cliente['CPF'], 'vencimento.text': vencimento,
                                'telefones.text': str(cliente['Telefones'])}
                     clientes.append(cliente)
@@ -391,7 +391,7 @@ class RVContratos1(BoxLayout):
 
             self.rv_bottom.data = clientes
         except Exception as e:
-            logging.exception(str(e))
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
 
 class RV(BoxLayout):
@@ -459,12 +459,12 @@ class RV(BoxLayout):
                 self.rv.data.insert(0, {
                     'text': nome + '    ' + '|' + '    ' + value_2})
         except Exception as e:
-            logging.exception(str(e))
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
         try:
             if len(nome) > 0 and len(value_2) > 0:
                 inserir_cliente(nome, value_2)
         except Exception as e:
-            logging.exception(str(e))
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
 
     def search(self, pesquisa: str):
         if ".213." not in self.rv.data[0]['text']:
@@ -520,8 +520,8 @@ class RV(BoxLayout):
         if len(clientes) > 0:
             for cliente in clientes:
                 char = 45 - len(cliente[0])
-                vencimento = datetime.datetime.strftime(
-                    datetime.datetime.strptime(cliente[5].split(' ')[0], '%Y-%m-%d'), "%d/%m/%Y")
+                vencimento = datetime.strftime(
+                    datetime.strptime(cliente[5].split(' ')[0], '%Y-%m-%d'), "%d/%m/%Y")
                 cliente = {'text': str(
                     cliente[0] + (' ' * char) + '|' + '    ' + str(cliente[1]) + '    ' + '|' + '    ' + str(
                         cliente[2]) + '    ' + '|' + '    ' + locale.currency(cliente[3],
@@ -599,7 +599,7 @@ class RVCalculo(BoxLayout):
             valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
 
             d30_t, d60_t, d90_t, d120_t = calcular_juros(valor_avaliacao, valor_emprestimo,
-                                                         datetime.datetime.strptime(contrato[5], '%d/%m/%Y'),
+                                                         datetime.strptime(contrato[5], '%d/%m/%Y'),
                                                          consulta_prazo(contrato[0]))
             d30 += d30_t
             d60 += d60_t
@@ -658,7 +658,7 @@ class RVCalculo(BoxLayout):
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
-                    vencimento = datetime.datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
+                    vencimento = datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
                     prazo = cliente[4]
                     self.total_avaliacao = float(cliente[2])
                     self.total_emprestimo = float(cliente[3])
@@ -716,7 +716,7 @@ class RVCalculo(BoxLayout):
             calculos = []
             global mensagem
             mensagem = []
-            hoje = datetime.datetime.today()
+            hoje = datetime.today()
             d30 = 0
             d60 = 0
             d90 = 0
@@ -726,7 +726,7 @@ class RVCalculo(BoxLayout):
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
-                    vencimento = datetime.datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
+                    vencimento = datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
                     if vencimento <= hoje:
                         self.vencimento = cliente[1]
                         prazo = cliente[4]
@@ -778,7 +778,7 @@ class RVCalculo(BoxLayout):
                 Função para listar os contratos do cliente
                 """
         data30, data60, data90, data120 = calcular_data_futura(data)
-        data = datetime.datetime.strptime(data, '%d/%m/%Y')
+        data = datetime.strptime(data, '%d/%m/%Y')
 
         try:
             conn = conectar()
@@ -796,7 +796,7 @@ class RVCalculo(BoxLayout):
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
-                    vencimento = datetime.datetime.strptime(cliente[1].split(" ")[0], '%Y-%m-%d')
+                    vencimento = datetime.strptime(cliente[1].split(" ")[0], '%Y-%m-%d')
                     if vencimento <= data:
                         prazo = cliente[4]
                         self.total_avaliacao = cliente[2]
@@ -871,7 +871,7 @@ class RVCalculo(BoxLayout):
             clientes = cursor.fetchall()
             if len(clientes) > 0:
                 for cliente in clientes:
-                    vencimento = datetime.datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
+                    vencimento = datetime.strptime(cliente[1].split(' ')[0], '%Y-%m-%d')
                     self.vencimento = cliente[1]
                     prazo = cliente[4]
                     self.avaliacao = float(cliente[2])
@@ -975,7 +975,7 @@ class RVCalculoLiquidacao(BoxLayout):
                     valor_emprestimo = float(contrato[4].replace(".", '').replace(",", "."))
 
                     liquidacao, encargo = calcular_liquidacao(valor_emprestimo,
-                                                              datetime.datetime.strptime(contrato[5], '%d/%m/%Y'),
+                                                              datetime.strptime(contrato[5], '%d/%m/%Y'),
                                                               consulta_prazo(contrato[0]))
 
                     calculo = {'contrato.text': contrato[0], 'valor.text': locale.currency(liquidacao, grouping=True),
@@ -1324,7 +1324,7 @@ class Whats(App, ProgBar):
         try:
             self.worker.envio_msg.fecha_driver()
         except Exception as e:
-            logging.exception(str(e))
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
             pass
         try:
             if self.worker is None:
@@ -1409,8 +1409,18 @@ class Whats(App, ProgBar):
         self.set_login(login, senha)
         try:
             guarda = GuardaPenhor(login, senha)
-            guarda.envia()
-            guarda.confirma()
+
+            if guarda.envia():
+                self.root.ids.right_content.text = "Finalizado envio com sucesso"
+            else:
+                self.root.ids.right_content.text = "Erro ao enviar para guarda"
+
+            if guarda.confirma():
+                self.root.ids.right_content.text = "Confirmação de recebimento com sucesso"
+            else:
+                self.root.ids.right_content.text = "Erro ao confirmar recebimento para guarda"
+            self.dismiss_popup()
+
         except:
             pass
 
@@ -1423,6 +1433,7 @@ class Whats(App, ProgBar):
             novos.consulta_data(novos.ultima_data(""), novos.ultimo_dia_util(), [10, 11, 12, 13, 14, 15],
                                    r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt")
             novos.driver.close()
+            self.dismiss_popup()
         except:
             pass
 
@@ -1589,43 +1600,6 @@ class Whats(App, ProgBar):
         # self.root.ids.right_content.text = str(self.lista)
         self.worker.start_testa_sem_whats()
 
-    # def testa_sem(self, dt=None):
-    #     """Testa os número sem whatsapp"""
-    #     if len(self.lista_sem_whats) == 0:
-    #         self.root.ids.right_content.text = "Ainda não existe arquivo com a lista de telefones sem whatsapp"
-    #     else:
-    #         try:
-    #             self.numero = next(self.it)
-    #         except StopIteration:
-    #             fim = time.time()
-    #             horas, minutos, segundos = tempo_execucao(self.inicio, fim)
-    #             self.root.ids.right_content.text = f'Foram testados {self.contador} números {self.worker.envio_msg.excluidos} excluídos da lista  em {horas}:{minutos}:{segundos}'
-    #             self.root.ids.progbar.value = 0
-    #
-    #             return
-    #         if self.qtd_inicial > 0:
-    #             try:
-    #                 # id_sem = pesquisa_id_por_telefone(self.numero)
-    #                 self.tem_whats = self.worker.envio_msg.testa(numero=self.numero)
-    #                 self.contador += 1
-    #                 self.root.ids.progbar.value += self.value
-    #                 if self.tem_whats:
-    #                     self.root.ids.right_content.text = f"{self.numero} não tem whatsapp\n{self.contador}/{self.qtd_inicial}"
-    #                 else:
-    #                     self.root.ids.right_content.text = f"{self.numero} tem whatsapp\n{self.contador}/{self.qtd_inicial}"
-    #
-    #             except Exception as erro_teste:
-    #                 self.root.ids.right_content.text = str(erro_teste)
-    #                 self.worker.envio_msg.is_connected()
-    #         if self.evento4 == False:
-    #             self.evento2.cancel()
-    #             self.evento2 = None
-    #             self.root.ids.right_content.text = "Teste parado"
-    #             self.root.ids.progbar.value = 0
-    #
-    #             return
-    #         else:
-    #             self.evento2 = Clock.schedule_once(self.testa_sem, 0.5)
 
     def cria_iter_importados(self):
         """Cria um iterável a partir da lista de clientes importados e inicializa as variáveis para teste dos telefones importados"""
@@ -1834,33 +1808,37 @@ class Whats(App, ProgBar):
         # except Exception as e:
         #     logging.exception(str(e))
 
-    def atualiza_sync(self):
-        asyncio.run(self.atualiza())
-    async def atualiza(self):
+    def atualiza_sync(self, login, senha):
+        asyncio.run(self.atualiza(login, senha))
+    async def atualiza(self,login, senha):
         try:
-            sipen = Sipen()
+            sipen = Sipen(login, senha)
             if sipen.abre_inventario():
                 sipen.chama_driver()
                 await sipen.atualizar()
+                self.dismiss_popup()
+                self.root.ids.right_content.text = "Contratos atualizados com sucesso"
+
             else:
                 sipen.deleta_arquivo()
                 sipen.chama_driver()
                 await sipen.inventario()
                 await sipen.atualizar()
+                self.dismiss_popup()
+                self.root.ids.right_content.text = "Contratos atualizados com sucesso"
+
             sleep(1)
             limpa_contratos()
             sipen.deleta_arquivo()
 
         except FileNotFoundError as e:
-            sipen = Sipen()
+            sipen = Sipen(login, senha)
             sipen.chama_driver()
-            sipen.load_sipen()
             await sipen.atualizar()
-        except Exception:
-            await self.atualiza()
-
-
+            self.dismiss_popup()
+            self.root.ids.right_content.text = "Contratos atualizados com sucesso"
         except Exception as e:
+            logging.basicConfig(filename='erro.log', level=logging.ERROR)
             self.root.ids.right_content.text = str(e)
 
 
@@ -1878,25 +1856,18 @@ class Whats(App, ProgBar):
         self._popup.open()
         content.populate_contratos()
 
-    def exibir_login(self):
-        content = BoxLogin()
+    def exibir_login(self, function):
+        content = BoxLogin(function)
         self._popup = Popup(title="Login", content=content,
                             size_hint=(0.3, 0.35))
         self._popup.open()
 
-    def exibir_guarda(self):
-        content = BoxGuarda()
-        self._popup = Popup(title="Login", content=content,
-                            size_hint=(0.3, 0.35))
-        self._popup.open()
 
 class BoxLogin(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, function, **kwargs):
         super().__init__(**kwargs)
+        self.function = function
 
-class BoxGuarda(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
 
 if __name__ == '__main__':

@@ -1,16 +1,17 @@
 import datetime
 from time import sleep
-from selenium.webdriver.support import expected_conditions as ec
 
+import pandas as pd
+import xlwings as xw
+from selenium.common.exceptions import NoSuchFrameException
 from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
-from services.consultasipen import ConsultaSipen
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, NoSuchFrameException
-import pandas as pd
 import models.SeletoresRelatorios as s
-import xlwings as xw
+from services.consultasipen import ConsultaSipen
+
 
 class Renovados(ConsultaSipen):
     dataframe = None
