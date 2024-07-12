@@ -1,6 +1,4 @@
 import os
-from time import sleep
-import os
 import pathlib
 from time import sleep
 
@@ -10,14 +8,15 @@ from selenium.webdriver.chrome.webdriver import *
 # from selenium.common import TimeoutException
 # from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, menu, cpf_selector, \
+import models.SeletoresRelatorios as s
+from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, cpf_selector, \
     situacao, modalidade
 from models.utils import *
-from services.sipenJava import menuIrpara
-import models.SeletoresRelatorios as s
+
+
 # import undetected_chromedriver as uc
 
 
@@ -30,6 +29,7 @@ class Sipen:
 
     def __init__(self, login, senha):
         super().__init__()
+        self.inventario_path = None
         self.erro = []
         self.driver = None
         self.matricula = login
@@ -43,18 +43,20 @@ class Sipen:
             self.driver.get("http://sipen.caixa/")
             try:
                 if self.frame('frame'):
-                    WebDriverWait(self.driver, 120).until(EC.visibility_of_element_located((By.CSS_SELECTOR, s.usuario)))
-                    _usuario = self.pesquisa_seletor(s.usuario, 30).send_keys(self.matricula)
-                    _senha = self.pesquisa_seletor(s.senha, 10).send_keys(self.senha)
+                    WebDriverWait(self.driver, 120).until(
+                        ec.visibility_of_element_located((By.CSS_SELECTOR, s.usuario)))
+                    self.pesquisa_seletor(s.usuario, 30).send_keys(self.matricula)
+                    self.pesquisa_seletor(s.senha, 10).send_keys(self.senha)
 
                     self.pesquisa_seletor(s.botao_login, 10).click()
                     return True
             except:
                 return False
+
     def frame(self, frame_name):
         try:
             self.driver.switch_to.default_content()
-            frame = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, "principal")))
+            frame = WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.ID, "principal")))
             if frame.tag_name == frame_name:
                 self.driver.switch_to.frame(frame)
                 return True
@@ -73,14 +75,15 @@ class Sipen:
         # options.browser_version = "107"
         options.add_argument("disable-infobars")
         options.add_argument("start-maximized")
-        if head == True:
+        if head:
             options = webdriver.ChromeOptions()
             options.add_argument("-headless")
         # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-        self.driver = webdriver.Chrome(service=Service(
-            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port
-            =443), options=options)
-        # self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+        self.driver = webdriver.Chrome(
+            service=Service(
+            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe",
+            port=443),
+            options=options)
 
         self.driver.maximize_window()
 
@@ -90,20 +93,14 @@ class Sipen:
         except:
             pass
 
-    def set_user(self, user):
-        self.user = user
-
-    def set_password(self, password):
-        self.password = password
-
     def pesquisa_seletor(self, selector: str, tempo: int):
-        return WebDriverWait(self.driver, tempo).until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+        return WebDriverWait(self.driver, tempo).until(ec.presence_of_element_located((By.CSS_SELECTOR, selector)))
 
     def atualiza_pagina(self):
         self.driver.get("http://sipen.caixa/sipen/Login.do?method=carregar")
-        WebDriverWait(self.driver, 120).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
+        WebDriverWait(self.driver, 120).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
 
-    async def inventario(self) -> None:
+    def inventario(self) -> None:
         while self.driver is None:
             sleep(1)
         self.login()
@@ -122,7 +119,7 @@ class Sipen:
         self.driver.find_element(By.CSS_SELECTOR, confirma_inventario).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         self.driver.find_element(By.CSS_SELECTOR, "#btnExportar").click()
-        sleep(5)
+        self.download_wait()
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
         for j in self.driver.window_handles:
@@ -130,12 +127,24 @@ class Sipen:
                 self.driver.switch_to.window(j)
                 self.driver.close()
                 self.driver.switch_to.window(window)
-                break
+                return
+
+    def download_wait(self):
+        seconds = 0
+        dl_wait = True
+        while dl_wait and seconds < 20:
+            sleep(1)
+            dl_wait = False
+            for fname in os.listdir(r"C:\Users\c084029\Downloads"):
+                if fname.endswith('.crdownload'):
+                    dl_wait = True
+            seconds += 1
+        return False
 
     def abre_inventario(self):
         try:
-            self.inventario = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
-            data = datetime.datetime.fromtimestamp(self.inventario.stat().st_atime)
+            self.inventario_path = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
+            data = datetime.datetime.fromtimestamp(self.inventario_path.stat().st_atime)
             data = datetime.date(year=data.year, month=data.month, day=data.day)
             hoje = datetime.datetime.today()
             hoje = datetime.date(year=hoje.year, month=hoje.month, day=hoje.day)
@@ -143,46 +152,50 @@ class Sipen:
                 return True
             else:
                 return False
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             return False
 
-    async def atualizar(self):
+    def atualizar(self):
         while self.driver is None:
             sleep(1)
+
         try:
+            if self.driver.find_element(By.CSS_SELECTOR, s.menu) is not None:
+                pass
             self.login()
         except:
             self.login()
-        inventarioDF = pd.read_excel(self.inventario, header=3)
+        inventarioDF = pd.read_excel(self.inventario_path, header=3)
         hoje = datetime.datetime.today()
         hoje = datetime.datetime(year=hoje.year, month=hoje.month, day=hoje.day)
         for idx, i in inventarioDF.iterrows():
             print(f"Iniciando pesquisa para Contrato {i['Nr. Contrato']}")
             i['Nr. Contrato'] = i['Nr. Contrato'].replace(".", "").replace("-", "")
             data_anterior = pesquisa_data_atualizacao(i['Nr. Contrato'])
-            data_anterior = datetime.datetime.strptime(data_anterior.split(" ")[0], "%Y-%m-%d")
+            if data_anterior is not None:
+                data_anterior = datetime.datetime.strptime(data_anterior.split(" ")[0], "%Y-%m-%d")
 
-            if data_anterior == hoje:
-                continue
+                if data_anterior == hoje:
+                    continue
             # WebDriverWait(driver, 10).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
             try:
-                await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
-                                    valor_avaliacao=i['Avaliação'],
-                                    valor_emprestimo=i['Empréstimo'],
-                                    emissao=i['Emissão'], prazo=i['Prz.'])
+                self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                              valor_avaliacao=i['Avaliação'],
+                              valor_emprestimo=i['Empréstimo'],
+                              emissao=i['Emissão'], prazo=i['Prz.'])
             except Exception as e:
                 self.login()
                 try:
-                    await self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
-                                        valor_avaliacao=i['Avaliação'],
-                                        valor_emprestimo=i['Empréstimo'],
-                                        emissao=i['Emissão'], prazo=i['Prz.'])
+                    self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                                  valor_avaliacao=i['Avaliação'],
+                                  valor_emprestimo=i['Empréstimo'],
+                                  emissao=i['Emissão'], prazo=i['Prz.'])
                 except Exception as e:
                     print(e)
                     self.erro.append(i['Nr. Contrato'])
         self.fecha_driver()
 
-    async def situacao(self, numero, vencimento, valor_emprestimo, valor_avaliacao, emissao, prazo):
+    def situacao(self, numero, vencimento, valor_emprestimo, valor_avaliacao, emissao, prazo):
         while self.driver is None:
             sleep(1)
         self.driver.get(self.consulta_contrato + numero)
@@ -200,7 +213,6 @@ class Sipen:
         except Exception as e:
             print(e)
             self.erro.append(numero)
-
 
     def deleta_arquivo(self):
         try:

@@ -8,18 +8,18 @@ function s_Confirmar(){
 		document.forms[0].target = "principal";
 		document.forms[0].submit();
 	} else {
-		alert("\u00C9 necess\u00E1rio enviar pelo menos um item.");
+		alert("É necessário enviar pelo menos um item.");
 	}
 }
 
 function login(){
     if(!verifica_branco(document.forms[0].usuario.value)){
-        alert("CAMPO DE PREENCHIMENTO OBRIGAT\u00D3RIO.");
+        alert("CAMPO DE PREENCHIMENTO OBRIGATÓRIO.");
         document.forms[0].usuario.focus();
         return;
     }
     else if(!verifica_branco(document.forms[0].senha.value)){
-        alert("CAMPO DE PREENCHIMENTO OBRIGAT\u00D3RIO.");
+        alert("CAMPO DE PREENCHIMENTO OBRIGATÓRIO.");
         document.forms[0].senha.focus();
         return;
     }else{
@@ -134,7 +134,7 @@ function s_Emitir_Relatorio(){
 function s_Pesquisar(){
 
 	if( document.forms[0].numeroUnidade.value == "" ){
-		alert("CAMPO DE PREENCHIMENTO OBRIGAT\u00D3RIO.");
+		alert("CAMPO DE PREENCHIMENTO OBRIGATÓRIO.");
 		document.forms[0].numeroUnidade.focus();
 		return;
 	}
@@ -240,7 +240,7 @@ function f_TeclaPesquisa(){
 			}
 			if (aoMenosUmContratoSelecionado) {
 				if (f_EhVazio( document.forms[0].justificativa.value)) {
-					alert("MA00001 - Campo de preenchimento obrigat\u00F3rio");
+					alert("MA00001 - Campo de preenchimento obrigatório");
 					document.forms[0].justificativa.focus();
 					return;
 				}
@@ -264,7 +264,7 @@ function f_TeclaPesquisa(){
 			  }
 			}
 			if (todosContratosSelecionados) {
-				alert("MA00119 - \u00C9 necess\u00E1rio confirmar pelo menos um.");
+				alert("MA00119 - É necessário confirmar pelo menos um.");
 				document.forms[0].justificativa.focus();
 				return;
 			}
@@ -292,7 +292,7 @@ function f_TeclaPesquisa(){
 // 			}
 // 			if (aoMenosUmContratoSelecionado) {
 // 				if (f_EhVazio( document.forms[0].justificativa.value)) {
-// 					alert("MA00001 - Campo de preenchimento obrigat\u00F3rio");
+// 					alert("MA00001 - Campo de preenchimento obrigatório");
 // 					document.forms[0].justificativa.focus();
 // 					return;
 // 				}
@@ -316,7 +316,7 @@ function f_TeclaPesquisa(){
 // 			  }
 // 			}
 // 			if (todosContratosSelecionados) {
-// 				alert("MA00119 - \u00C9 necess\u00E1rio confirmar pelo menos um.");
+// 				alert("MA00119 - É necessário confirmar pelo menos um.");
 // 				document.forms[0].justificativa.focus();
 // 				return;
 // 			}
@@ -375,3 +375,246 @@ function f_TeclaPesquisa(){
 		}
 		/*ajustes modal fim*/
 
+/Renovacao/
+
+        //<![CDATA[
+            function fMascararCpfCnpj(elem)
+            {
+                var ckbTipoPessoa = document.getElementsByName( 'tipoPessoa' );
+                if( ckbTipoPessoa[ 1 ].checked ){
+                    return mascara( elem, '99.999.999/9999-99' );
+                }
+                return mascara( elem, '999.999.999-99' );
+            }
+
+            function fAtualizarFiltro(limparCampos)
+            {
+                var numeroCPFCNPJ = document.getElementById( 'numeroCPFCNPJ' );
+                if( limparCampos ){
+                    numeroCPFCNPJ.value = '';
+                }
+                numeroCPFCNPJ.focus();
+            }
+
+            function sPesquisar()
+            {
+                var ckbTipoPessoa = document.getElementsByName( 'tipoPessoa' );
+                if( !ckbTipoPessoa[ 0 ].checked && !ckbTipoPessoa[ 1 ].checked ){
+                    popupMensagemAjax( 'MA00001' );
+                    ckbTipoPessoa[ 0 ].focus();
+                    return;
+                }
+                var numeroCPFCNPJ = document.getElementById( 'numeroCPFCNPJ' );
+                if( f_bEhVazio( numeroCPFCNPJ.value ) ){
+                    popupMensagemAjax( 'MA00001' );
+                    numeroCPFCNPJ.focus();
+                    return;
+                }
+
+                if( ckbTipoPessoa[ 0 ].checked && !f_bValidaCPF( numeroCPFCNPJ.value ) ){
+                    popupMensagemAjax( 'MA00079' );
+                    numeroCPFCNPJ.focus();
+                    return;
+                }
+                if( ckbTipoPessoa[ 1 ].checked && !f_bValidaCNPJ( numeroCPFCNPJ.value ) ){
+                    popupMensagemAjax( 'MA00084' );
+                    numeroCPFCNPJ.focus();
+                    return;
+                }
+
+                document.forms[0].target = 'principal';
+                document.forms[0].action = CONTEXT + 'RenovarContratoLote.do?method=validar';
+                document.forms[0].submit();
+            }
+        //]]>
+
+
+
+        //<![CDATA[
+        	function s_Pesquisar(acao, pagina){
+
+        		var formulario = document.forms[0];
+        		formulario.paginaCorrente.value = pagina;
+        		formulario.acao.value = acao;
+        		document.forms[0].action = CONTEXT + "RenovarContratoLote.do?method=carregarPaginado";
+        		document.forms[0].submit();
+
+            }
+
+            function YNconfirm(txt)
+            {
+                return typeof (suporteVBscript) == "undefined" ? confirm(txt) : VBconfirm(txt) == 6;
+            }
+
+            var hashCode = '';
+
+            function fGerarHash()
+            {
+                hash = '';
+
+                tipoPrazo = document.getElementsByName( 'tipoPrazo' );
+                hash += tipoPrazo[0].checked;
+                hash += document.getElementById( 'prazoRenovacao' ).value;
+
+                hash += tipoPrazo[1].checked;
+                hash += document.getElementById( 'dataVencimentoAlternativo' ).value;
+
+                hash += document.getElementById( 'selecionarTodosContratos' ).value;
+
+                ckbContratoSelecionado = document.getElementsByName( 'ckbContratoSelecionado' );
+                if( ckbContratoSelecionado != undefined && ckbContratoSelecionado.length > 0 ){
+                    for( index = 0; index < ckbContratoSelecionado.length; index++ ){
+                        hash += ckbContratoSelecionado[ index ].checked + ckbContratoSelecionado[ index ].value;
+                    }
+                }
+
+                txtValorNovoRenovacao = document.getElementsByName( 'txtValorNovoRenovacao' );
+                if( txtValorNovoRenovacao != undefined && txtValorNovoRenovacao.length > 0 ){
+                    for( index = 0; index < txtValorNovoRenovacao.length; index++ ){
+                        hash += txtValorNovoRenovacao[ index ].value;
+                    }
+                }
+
+                ckbNovoVencimento = document.getElementsByName( 'ckbNovoVencimento' );
+                if( ckbNovoVencimento != undefined && ckbNovoVencimento.length > 0 ){
+                    for( index = 0; index < ckbNovoVencimento.length; index++ ){
+                        hash += ckbNovoVencimento[ index ].checked + ckbNovoVencimento[ index ].value;
+                    }
+                }
+
+                txtDataNovoVencimento = document.getElementsByName( 'txtDataNovoVencimento' );
+                if( txtDataNovoVencimento != undefined && txtDataNovoVencimento.length > 0 ){
+                    for( index = 0; index < txtDataNovoVencimento.length; index++ ){
+                        hash += txtDataNovoVencimento[ index ].value;
+                    }
+                }
+
+                return hash;
+            }
+
+            function sVoltarInicioUC()
+            {
+                document.forms[0].action = CONTEXT + "jsp/Comuns/Principal.jsp?destino=/RenovarContratoLote.do?method=carregar";
+                document.forms[0].submit();
+            }
+
+            function fApresentarModalidades()
+            {
+                document.getElementById( 'divModalidades' ).style.display = 'block';
+                document.getElementById( 'trDetalharModalidade' ).style.display = 'none';
+            }
+
+            function fApresentarBoleto()
+            {
+                document.getElementById( 'divBoletos' ).style.display = 'block';
+                document.getElementById( 'lnkDetalharBoleto' ).style.display = 'none';
+            }
+
+            function fOcultarBoleto()
+            {
+                document.getElementById( 'divBoletos' ).style.display = 'none';
+                document.getElementById( 'lnkDetalharBoleto' ).style.display = 'block';
+            }
+
+
+            function fOcultarModalidades()
+            {
+                document.getElementById( 'divModalidades' ).style.display = 'none';
+                document.getElementById( 'trDetalharModalidade' ).style.display = 'table-row';
+            }
+
+            function fAjustarTipoPrazo()
+            {
+                tipoPrazo = document.getElementsByName( 'tipoPrazo' );
+                prazoRenovacao = document.getElementById( 'prazoRenovacao' );
+                dataVencimentoAlternativo = document.getElementById( 'dataVencimentoAlternativo' );
+                prazoRenovacao.disabled = true;
+                dataVencimentoAlternativo.disabled = true;
+                if( tipoPrazo[ 0 ].checked ){
+                    prazoRenovacao.disabled = false;
+                    prazoRenovacao.focus();
+                }else{
+                    dataVencimentoAlternativo.disabled = false;
+                    dataVencimentoAlternativo.focus();
+                }
+            }
+
+            function fHabilitarCalculo( habilitar )
+            {
+            	icPausa = 'N';
+
+            	if( !habilitar ){
+                    if( document.getElementsByClassName( 'destaqueAzul' ) > 0 || document.getElementsByClassName( 'destaqueLaranja' ) > 0 ){
+                        habilitar = true;
+                    }
+                }
+                if(icPausa != "S"){
+                	document.getElementById( 'btnCalcular' ).disabled = ( !habilitar && ( fContarContratosSelecionados() > 0 ) );
+                }else{
+                	ckbContratoSelecionado = document.getElementsByName( 'ckbContratoSelecionado' );
+                	permitePausa = document.getElementsByName( 'permitePausa' );
+                	contPermitePausa = 0;
+                	for( index = 0; index < ckbContratoSelecionado.length; index++ ){
+                		if( permitePausa[ index ].value == 'S' ){
+                			contPermitePausa++;
+                		}
+                    }
+                	if(contPermitePausa == 0){
+                		habilitar = false;
+                	}
+                	document.getElementById( 'btnCalcular' ).disabled = ( !habilitar && ( fContarContratosSelecionados() >= 0 ) );
+                }
+                document.getElementById( 'btnDetalhar' ).disabled = ( habilitar || ( fContarContratosSelecionados() <= 0 ) );
+                if( habilitar ){
+                    document.getElementById( 'tdQuantidadeContratosRenovados' ).innerHTML = '&nbsp;&nbsp;';
+                    document.getElementById( 'tdValorTotalEmprestimo' ).innerHTML = '&nbsp;';
+                    document.getElementById( 'tdValorTotalRenovacao' ).innerHTML = '&nbsp;';
+                    spnValorLiquidoRenovacao = document.getElementsByName( 'spnValorLiquidoRenovacao' );
+                    if( spnValorLiquidoRenovacao != undefined && spnValorLiquidoRenovacao.length > 0 ){
+                        for( index = 0; index < spnValorLiquidoRenovacao.length; index++ ){
+                            spnValorLiquidoRenovacao[ index ].innerHTML = '&nbsp;';
+                        }
+                    }
+                }else{
+                    document.getElementById( 'tdQuantidadeContratosRenovados' ).innerHTML = '&nbsp;' + document
+                        .getElementById( 'hdnQuantidadeContratosRenovados' ).value + '&nbsp;';
+                    document.getElementById( 'tdValorTotalEmprestimo' ).innerHTML = document.getElementById( 'hdnValorTotalEmprestimo' )
+                        .value;
+                    document.getElementById( 'tdValorTotalRenovacao' ).innerHTML = document.getElementById( 'hdnValorTotalRenovacao' )
+                        .value + '&nbsp;' + document.getElementById( 'hdnSinalValorTotalRenovacao' ).value;
+                    spnValorLiquidoRenovacao = document.getElementsByName( 'spnValorLiquidoRenovacao' );
+                    hdnValorLiquidoRenovacao = document.getElementsByName( 'hdnValorLiquidoRenovacao' );
+                    hdnTipoSaldo = document.getElementsByName( 'hdnTipoSaldo' );
+                    if( spnValorLiquidoRenovacao != undefined && spnValorLiquidoRenovacao.length > 0 ){
+                        for( index = 0; index < spnValorLiquidoRenovacao.length; index++ ){
+                            spnValorLiquidoRenovacao[ index ].innerHTML = hdnValorLiquidoRenovacao[ index ].value + '&nbsp;'
+                                + hdnTipoSaldo[ index ].value;
+                        }
+                    }
+                }
+            }
+
+            function fVerificarSelecaoTodosContratos(elem)
+            {
+                ckbContratoSelecionado = document.getElementsByName( 'ckbContratoSelecionado' );
+                ckbNovoVencimento = document.getElementsByName( 'ckbNovoVencimento' );
+                txtValorNovoRenovacao = document.getElementsByName( 'txtValorNovoRenovacao' );
+                txtDataNovoVencimento = document.getElementsByName( 'txtDataNovoVencimento' );
+                icPausa = 'N';
+                icPausaContrato = document.getElementsByName( 'icPausaContrato' );
+                permitePausa = document.getElementsByName( 'permitePausa' );
+                codigoMensagemNaoPausa = document.getElementsByName( 'codigoMensagemNaoPausa' );
+                icContratoPausado = document.getElementsByName( 'icContratoPausado' );
+                ckbDespausar = document.getElementsByName( 'ckbDespausar' );
+            	ckbAlterarPausa = document.getElementsByName( 'ckbAlterarPausa' );
+
+            	if( ckbContratoSelecionado != undefined ){
+                    if( elem != undefined && elem.id == 'selecionarTodosContratos' ){
+                    	if(icPausa != 'S'){
+	                        for( index = 0; index < ckbContratoSelecionado.length; index++ ){
+	                            ckbContratoSelecionado[ index ].checked = elem.checked;
+	                        }
+                    	}else{
+                    		for( index = 0; index < ckbContratoSelecionado.length; index++ ){
+		                        if( permitePausa[ index ].value == 'S' ){
+		                        	ckbContratoSelecionado[…

@@ -10,7 +10,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 import models.SeletoresRelatorios as s
 from services.consultasipen import ConsultaSipen
 
-
 class SipenLiquidados(ConsultaSipen):
     pass
 
@@ -21,7 +20,9 @@ class SipenLiquidados(ConsultaSipen):
         texto = ""
         tamanho_relatorio = len(texto_divido) - 1
         quantidade_contratos = tamanho_relatorio / 6
-        for i in range(1, int(quantidade_contratos + 1)):
+        for i in range(0, int(quantidade_contratos)):
+            if "Modalidade" in texto_divido[posicao[0]]:
+                posicao = [pos + 1 for pos in posicao]
             if "1631.213" in texto_divido[posicao[0]]:
                 texto = texto_divido[posicao[0]] + " "
                 texto = texto + texto_divido[posicao[1]] + " "
@@ -29,7 +30,9 @@ class SipenLiquidados(ConsultaSipen):
                 self.gravacao_txt(texto, path)
             posicao = [pos + 6 for pos in posicao]
 
-
+    def start(self):
+        self.chama_driver()
+        self.acessar_relatorio_menu(s.menu_liquidados)
     def gravacao_txt(self, texto, path):
 
         try:

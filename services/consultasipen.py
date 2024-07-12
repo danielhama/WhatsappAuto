@@ -52,7 +52,9 @@ class ConsultaSipen:
         else:
             self.acessar_relatorio(link, seletor)
 
-
+    def start(self):
+        self.chama_driver()
+        self.acessar_relatorio_menu(s.menu_novos)
 
     def acessar_relatorio_menu(self, seletor):
         if self.login():
@@ -89,19 +91,29 @@ class ConsultaSipen:
                     self.driver.switch_to.frame("principal")
                 except: pass
     def consulta_data(self, data_inicial, data_final, tabelas, arquivo):
-        window = self.driver.current_window_handle
         if type(data_inicial) == str:
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
             data_final = datetime.datetime.strptime(data_final, "%d/%m/%Y")
+        if data_inicial >= data_final:
+            return
+        else:
+            self.start()
+            # window = self.driver.current_window_handle
+
         while data_inicial <= data_final:
             if self.dia_semana(data_inicial):
                 self.mudar_frame()
                 try:
-                    data_ref = self.pesquisa_seletor(s.data_ref, 60)
+                    data_ref = self.pesquisa_seletor(s.data_ref, 2)
                 except:
-                    self.voltar()
-                    data_ref = self.pesquisa_seletor(s.data_ref, 60)
+                    try:
+                        self.voltar()
+                        data_ref = self.pesquisa_seletor(s.data_ref, 2)
+                    except:
+                        self.mudar_frame()
+                        data_ref = self.pesquisa_seletor(s.data_ref, 2)
+
 
                 data_ref.clear()
                 data_ref.send_keys(data_inicial.strftime("%d/%m/%Y"))
@@ -220,7 +232,7 @@ class ConsultaSipen:
         vencimento = ultima_linha[6]
 
         data = datetime.datetime.strptime(vencimento, "%d/%m/%Y")
-        data = data + datetime.timedelta(days=-(int(prazo)) + 1)
+        data = data + datetime.timedelta(days=-(int(prazo)))
         return data.strftime("%d/%m/%Y")
 
     @staticmethod

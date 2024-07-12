@@ -211,12 +211,16 @@ def listar():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.Nome, cli.CPF FROM Clientes as cli')
+    cursor.execute('SELECT cli.Nome, cli.CPF, cli.DataNascimento, cli.Limite, cli.DataAtualizacao FROM Clientes as cli')
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
         for cliente in Clientes:
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1]}
+            cliente = {'Nome': cliente[0],
+                       'CPF': cliente[1],
+                       "Nascimento": cliente[2],
+                       "Limite": cliente[3],
+                       "Atualizacao": cliente[4]}
             lista_Clientes.append(cliente)
     else:
         print('Não existem Clientes cadastrados.')
@@ -267,6 +271,23 @@ def listar_Telefones_por_cpf(cpf):
     desconectar(conn)
     return lista_Telefones
 
+def listar_total_av_emp_por_CPF(cpf):
+    """
+        Função para listar os Telefones
+        """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(
+        f"SELECT SUM(ValorAvaliacao), SUM(ValorEmprestimo) FROM Contratos WHERE Contratos.CPF = '{cpf}'")
+    valores = cursor.fetchall()
+    if len(valores) > 0:
+        desconectar(conn)
+        return valores[0]
+    else:
+        print('Não existem Clientes cadastrados.')
+        desconectar(conn)
+        return 0,0
+
 def listar_nome(cpf):
     """
         Função para listar os nomes
@@ -286,16 +307,32 @@ def listar_nome(cpf):
     desconectar(conn)
     return lista_nomes
 
+def listar_limite(cpf):
+    """
+        Função para listar os limite
+        """
+    conn = conectar()
+    cursor = conn.cursor()
+    id = pesquisa_id(cpf)
+    cursor.execute(
+        f'SELECT Clientes.Limite FROM Clientes WHERE Clientes.id = {id}')
+    nomes = cursor.fetchall()
+    lista_nomes = []
+    if len(nomes) > 0:
+        for nome in nomes:
+            lista_nomes.append(nome[0])
+    else:
+        print('Não existem Clientes cadastrados.')
+    desconectar(conn)
+    return lista_nomes
+
 def listar_Contratos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM Contratos')
     Contratos = cursor.fetchall()
-    lista_Contratos = []
-    for contrato in Contratos:
-        lista_Contratos.append(contrato[1])
-    desconectar(conn)
-    return lista_Contratos
+
+    return Contratos
 
 def listar_Contratos_vencidos():
     """

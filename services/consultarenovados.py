@@ -21,6 +21,9 @@ class Renovados(ConsultaSipen):
         super().__init__(login, senha)
         self.path = path
 
+    def start(self):
+        self.chama_driver()
+        self.acessar_relatorio_menu(s.menu_renovados)
     def data_referencia(self) -> object:
         try:
             self.driver.switch_to.frame("iframe01")
@@ -39,6 +42,10 @@ class Renovados(ConsultaSipen):
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
             data_final = datetime.datetime.strptime(data_final, "%d/%m/%Y")
+        if data_inicial <= data_final:
+            self.start()
+        else:
+            return
         while data_inicial <= data_final:
             if self.dia_semana(data_inicial):
                 data_ref = self.data_referencia()

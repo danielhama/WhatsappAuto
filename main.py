@@ -27,21 +27,17 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from models.sipen import Sipen
 from services.consultasipen import ConsultaSipen
 from services.guarda import GuardaPenhor
+from services.reports import gera_clientes, gera_personalizado_contratos
 
-# from selenium.common import NoSuchWindowException
-# from selenium.common import NoSuchElementException
-
-kivy.require('2.2.1')
 from models.calculo import *
 from models.enviar import *
 from models.formata import *
 from models.utils2 import tempo_execucao, leia_texto, salva_texto, filtra_vencimento, filtra_data
 from models.vCARD import csv_para_vcf
-# from services.consultasipen import ConsultaSipen
 from services.consultarenovados import Renovados
 from services.consultaliquidados import SipenLiquidados
-from models.SeletoresRelatorios import menu_novos, menu_renovados, menu_liquidados
 from datetime import datetime
+kivy.require('2.2.1')
 
 locale.setlocale(locale.LC_MONETARY, 'pt_BR.UTF-8')
 Config.set('graphics', 'width', '1280')
@@ -267,8 +263,8 @@ class RVContratos(BoxLayout):
                         datetime.strptime(cliente[3].split(' ')[0], '%Y-%m-%d'), '%d/%m/%Y')
                     cliente_exibicao = {
                         'text': str(cliente[0]) + (" " * char) + locale.currency(float(cliente[1]), grouping=True) + (
-                                    " " * char1) + locale.currency(float(cliente[2]), grouping=True) + (
-                                            " " * char) + vencimento}
+                                " " * char1) + locale.currency(float(cliente[2]), grouping=True) + (
+                                        " " * char) + vencimento}
 
                     lista_clientes.append(cliente_exibicao)
             else:
@@ -1428,23 +1424,18 @@ class Whats(App, ProgBar):
         self.set_login(login, senha)
         try:
             novos = ConsultaSipen(self.login, self.senha)
-            novos.chama_driver()
-            novos.acessar_relatorio_menu(menu_novos)
             novos.consulta_data(novos.ultima_data(""), novos.ultimo_dia_util(), [10, 11, 12, 13, 14, 15],
-                                   r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt")
-            novos.driver.close()
+                                r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt")
             self.dismiss_popup()
         except:
             pass
 
         try:
             sipen = Renovados(
-                path=r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv", login=self.login,senha=self.senha)
+                path=r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv",
+                login=self.login, senha=self.senha)
             sipen.abrir_arquivo()
-            sipen.chama_driver()
-            sipen.acessar_relatorio_menu(menu_renovados)
             sipen.consulta_data(sipen.ultima_data(), sipen.ultimo_dia_util(), [10], "")
-            sipen.driver.close()
         except:
             pass
         try:
@@ -1452,14 +1443,11 @@ class Whats(App, ProgBar):
             sipenliq = SipenLiquidados(self.login, self.senha)
             ultima_data = sipenliq.ultima_data()
             data_final = sipenliq.ultimo_dia_util()
-            if ultima_data == datetime.now().strftime("%d/%m/%Y"):
-                return
-            sipenliq.chama_driver()
-            sipenliq.acessar_relatorio_menu(seletor=menu_liquidados)
             sipenliq.consulta_data(ultima_data, data_final, [16],
                                    r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\liquidado.txt")
         except:
             pass
+
     def limpar(self):
         self.root.ids.left_content.text = ""
 
@@ -1599,7 +1587,6 @@ class Whats(App, ProgBar):
         self.lista = str(self.lista_sem_whats).split(",")
         # self.root.ids.right_content.text = str(self.lista)
         self.worker.start_testa_sem_whats()
-
 
     def cria_iter_importados(self):
         """Cria um iterável a partir da lista de clientes importados e inicializa as variáveis para teste dos telefones importados"""
@@ -1810,20 +1797,21 @@ class Whats(App, ProgBar):
 
     def atualiza_sync(self, login, senha):
         asyncio.run(self.atualiza(login, senha))
-    async def atualiza(self,login, senha):
+
+    async def atualiza(self, login, senha):
         try:
             sipen = Sipen(login, senha)
             if sipen.abre_inventario():
                 sipen.chama_driver()
-                await sipen.atualizar()
+                sipen.atualizar()
                 self.dismiss_popup()
                 self.root.ids.right_content.text = "Contratos atualizados com sucesso"
 
             else:
                 sipen.deleta_arquivo()
                 sipen.chama_driver()
-                await sipen.inventario()
-                await sipen.atualizar()
+                sipen.inventario()
+                sipen.atualizar()
                 self.dismiss_popup()
                 self.root.ids.right_content.text = "Contratos atualizados com sucesso"
 
@@ -1836,11 +1824,15 @@ class Whats(App, ProgBar):
             sipen.chama_driver()
             await sipen.atualizar()
             self.dismiss_popup()
+
             self.root.ids.right_content.text = "Contratos atualizados com sucesso"
         except Exception as e:
-            logging.basicConfig(filename='erro.log', level=logging.ERROR)
+            logging.basicConfig(filename='erro.log', level=logging.ERROR, errors=str(e))
             self.root.ids.right_content.text = str(e)
 
+        finally:
+            gera_clientes()
+            gera_personalizado_contratos()
 
     def exibir(self):
         content = RV()
@@ -1867,7 +1859,6 @@ class BoxLogin(BoxLayout):
     def __init__(self, function, **kwargs):
         super().__init__(**kwargs)
         self.function = function
-
 
 
 if __name__ == '__main__':

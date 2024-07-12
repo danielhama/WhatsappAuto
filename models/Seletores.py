@@ -46,3 +46,8 @@ contratos_ativos = "#rd1"
 confirma_inventario = "#btn_confirmar"
 cpf_selector = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(4) > td:nth-child(2)"
 modalidade = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(6) > td:nth-child(2)"
+
+#CADASTRO CLIENTE SIPEN
+cad_data_nascimento = "body > table > tbody > tr:nth-child(2) > td > table:nth-child(1) > tbody > tr > td > form > table:nth-child(31) > tbody > tr:nth-child(3) > td"
+cad_nome = "body > table > tbody > tr:nth-child(2) > td > table:nth-child(1) > tbody > tr > td > form > table:nth-child(31) > tbody > tr:nth-child(1) > td:nth-child(1)"
+cad_cpf = "body > table > tbody > tr:nth-child(2) > td > table:nth-child(1) > tbody > tr > td > form > table:nth-child(31) > tbody > tr:nth-child(1) > td:nth-child(2)"
