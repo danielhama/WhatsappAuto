@@ -42,10 +42,10 @@ class Renovados(ConsultaSipen):
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
             data_final = datetime.datetime.strptime(data_final, "%d/%m/%Y")
-        if data_inicial <= data_final:
-            self.start()
-        else:
+        if data_inicial > data_final:
             return
+        elif self.driver == None:
+            self.start()
         while data_inicial <= data_final:
             if self.dia_semana(data_inicial):
                 data_ref = self.data_referencia()

@@ -12,6 +12,8 @@ from kivy.core.image import Image
 from kivy.event import EventDispatcher
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.core.clipboard import Clipboard
+
 from kivy.properties import StringProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.boxlayout import BoxLayout
@@ -531,7 +533,9 @@ class RV(BoxLayout):
 
 
 class RVCalculo(BoxLayout):
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.mensagem = ""
     def populate(self):
         try:
             self.rv_calculo.data = self.lista_calculo()
@@ -569,20 +573,10 @@ class RVCalculo(BoxLayout):
             logging.exception(str(e))
 
     def enviar_cliente(self):
-        telefones = listar_Telefones_por_cpf(cpf)
-        if len(telefones) > 1:
-            content = RVTelefonesEnviar()
-            self._popup = Popup(title="Selecione o telefone para enviar", content=content,
-                                size_hint=(0.4, 0.4))
-            self._popup.open()
-            content.populate()
-        else:
-            whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
+        Clipboard.copy(self.mensagem)
 
     def calcula_juros_selecionados(self):
         calculos = []
-        global mensagem
-        mensagem = []
         d30 = 0
         d60 = 0
         d90 = 0
@@ -616,19 +610,26 @@ class RVCalculo(BoxLayout):
         calculos.append(calculo)
 
         msg_vazia = " "
-        mensagem.append(msg_vazia)
         msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
-        mensagem.append(msg)
-        mensagem.append(msg_vazia)
+        self.mensagem = msg
+        self.mensagem += "\n"
+        # mensagem.append(msg)
+        # mensagem.append(msg_vazia)
         msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
-        mensagem.append(msg)
-        mensagem.append(msg_vazia)
+        self.mensagem += msg
+        self.mensagem += "\n"
+        # mensagem.append(msg)
+        # mensagem.append(msg_vazia)
         msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
-        mensagem.append(msg)
-        mensagem.append(msg_vazia)
+        self.mensagem += msg
+        self.mensagem += "\n"
+        # mensagem.append(msg)
+        # mensagem.append(msg_vazia)
         msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
-        mensagem.append(msg)
-        mensagem.append(msg_vazia)
+        self.mensagem += msg
+        self.mensagem += "\n"
+        # mensagem.append(msg)
+        # mensagem.append(msg_vazia)
 
         return calculos
 
@@ -643,8 +644,6 @@ class RVCalculo(BoxLayout):
             cursor = conn.cursor()
             id = pesquisa_id(cpf)
             calculos = []
-            global mensagem
-            mensagem = []
             d30 = 0
             d60 = 0
             d90 = 0
@@ -677,21 +676,28 @@ class RVCalculo(BoxLayout):
                            'vencimento.text': data120 or '00/00/0000'}
                 calculos.append(calculo)
 
-                msg_vazia = " "
-                mensagem.append(msg_vazia)
+                # msg_vazia = " "
+                # mensagem.append(msg_vazia)
                 msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
+                # mensagem.append(msg)
+                # mensagem.append(msg_vazia)
                 msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
+                # mensagem.append(msg)
+                # mensagem.append(msg_vazia)
                 msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
+                # mensagem.append(msg)
+                # mensagem.append(msg_vazia)
                 msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
-
+                self.mensagem += msg
+                self.mensagem += "\n"
+                # mensagem.append(msg)
+                # mensagem.append(msg_vazia)
             else:
                 print('Não existem contratos cadastrados para esse cliente.')
             desconectar(conn)
@@ -710,8 +716,6 @@ class RVCalculo(BoxLayout):
             cursor = conn.cursor()
             id = pesquisa_id(cpf)
             calculos = []
-            global mensagem
-            mensagem = []
             hoje = datetime.today()
             d30 = 0
             d60 = 0
@@ -747,21 +751,19 @@ class RVCalculo(BoxLayout):
                            'vencimento.text': data120 or '00/00/0000'}
                 calculos.append(calculo)
 
-                msg_vazia = " "
-                mensagem.append(msg_vazia)
-                msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
-                msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
-                msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
-                msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
 
+                msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
+                self.mensagem += msg
+                self.mensagem += "\n"
+                msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
+                self.mensagem += msg
+                self.mensagem += "\n"
+                msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
+                self.mensagem += msg
+                self.mensagem += "\n"
+                msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
+                self.mensagem += msg
+                self.mensagem += "\n"
             else:
                 print('Não existem contratos cadastrados para esse cliente.')
             desconectar(conn)
@@ -781,8 +783,6 @@ class RVCalculo(BoxLayout):
             cursor = conn.cursor()
             id = pesquisa_id(cpf)
             calculos = []
-            global mensagem
-            mensagem = []
             d30 = 0
             d60 = 0
             d90 = 0
@@ -817,20 +817,20 @@ class RVCalculo(BoxLayout):
                            'vencimento.text': data120 or '00/00/0000'}
                 calculos.append(calculo)
 
-                msg_vazia = " "
-                mensagem.append(msg_vazia)
+                # msg_vazia = " "
+                # mensagem.append(msg_vazia)
                 msg = f'Renovação para 30 dias {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 60 dias {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 90 dias {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 120 dias {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
 
             else:
                 print('Não existem contratos cadastrados para esse cliente.')
@@ -850,8 +850,7 @@ class RVCalculo(BoxLayout):
             cursor = conn.cursor()
             id = pesquisa_id(cpf)
             calculos = []
-            global mensagem
-            mensagem = []
+
             d30 = 0
             d60 = 0
             d90 = 0
@@ -896,20 +895,19 @@ class RVCalculo(BoxLayout):
                            'vencimento.text': data120 or '00/00/0000'}
                 calculos.append(calculo)
 
-                msg_vazia = " "
-                mensagem.append(msg_vazia)
+
                 msg = f'Renovação para 30 dias  {locale.currency(d30, grouping=True)} - Novo Vencimento {data30}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 60 dias  {locale.currency(d60, grouping=True)} - Novo Vencimento {data60}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 90 dias  {locale.currency(d90, grouping=True)} - Novo Vencimento {data90}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 msg = f'Renovação para 120 dias  {locale.currency(d120, grouping=True)} - Novo Vencimento {data120}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
 
             else:
                 print('Não existem contratos cadastrados para esse cliente.')
@@ -924,6 +922,12 @@ class RVCalculo(BoxLayout):
 
 
 class RVCalculoLiquidacao(BoxLayout):
+
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.mensagem = ""
+
 
     def populate_liquidacao(self):
         try:
@@ -944,15 +948,17 @@ class RVCalculoLiquidacao(BoxLayout):
             logging.exception(str(e))
 
     def enviar_cliente(self):
-        telefones = listar_Telefones_por_cpf(cpf)
-        if len(telefones) > 1:
-            content = RVTelefonesEnviar()
-            self._popup = Popup(title="Selecione o telefone para enviar", content=content,
-                                size_hint=(0.4, 0.4))
-            self._popup.open()
-            content.populate()
-        else:
-            whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
+        Clipboard.copy(self.mensagem)
+    # def enviar_cliente(self):
+    #     telefones = listar_Telefones_por_cpf(cpf)
+    #     if len(telefones) > 1:
+    #         content = RVTelefonesEnviar()
+    #         self._popup = Popup(title="Selecione o telefone para enviar", content=content,
+    #                             size_hint=(0.4, 0.4))
+    #         self._popup.open()
+    #         content.populate()
+    #     else:
+    #         whats.worker.envio_msg.send_whatsapp_msg_valor(texto=mensagem, numero=telefones)
 
     def lista_calculo_liquidacao(self):
         """
@@ -960,11 +966,8 @@ class RVCalculoLiquidacao(BoxLayout):
                 """
         try:
             calculos = []
-            global mensagem
-            mensagem = []
             self.total_emprestimo = 0
             valor_total = 0
-            msg_vazia = " "
             if len(lista_de_contratos) > 0:
                 for contrato in lista_de_contratos:
                     # valor_avaliacao = float(contrato[2].replace(".", '').replace(",", "."))
@@ -980,15 +983,13 @@ class RVCalculoLiquidacao(BoxLayout):
 
                     valor_total += liquidacao
 
-                    mensagem.append(msg_vazia)
                     msg = f'Contrato: {contrato[0]}  Valor: {locale.currency(liquidacao, grouping=True)}'
-                    mensagem.append(msg)
-                    mensagem.append(msg_vazia)
+                    self.mensagem += msg
+                    self.mensagem += "\n"
 
-                mensagem.append(msg_vazia)
                 msg = f' Valor Total: {locale.currency(valor_total, grouping=True)}'
-                mensagem.append(msg)
-                mensagem.append(msg_vazia)
+                self.mensagem += msg
+                self.mensagem += "\n"
                 self.ids.calculo_liquidacao = locale.currency(valor_total, grouping=True)
                 calculo = {'contrato.text': "TOTAL", 'valor.text': locale.currency(valor_total, grouping=True),
                            'encargos.text': " " or 0}

@@ -7,4 +7,4 @@ renovacao = "/RenovarContratoLote.do?method=carregar"
 renovacao1 = "https://sipen.caixa/sipen/RenovarContratoLote.do?method=VALIDAR&tipoPessoa=01&numeroCPFCNPJ="
 liquidacao = "/CarregarRelatorioLiquidados.do?method=carregar"
 relatorio_renovacao = "/jsp/TabelasApoio/Relatorio/frmrelGeral.jsp?opcao=4'"
-cadastro = "'/CarregarManterPesquisaCliente.do?method=carregar&menuOrigem=incluirAvaliacaoBens'"
+cadastro = '/CarregarManterPesquisaCliente.do?method=carregar&menuOrigem=incluirAvaliacaoBens'

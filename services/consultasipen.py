@@ -95,9 +95,9 @@ class ConsultaSipen:
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
             data_final = datetime.datetime.strptime(data_final, "%d/%m/%Y")
-        if data_inicial >= data_final:
+        if data_inicial > data_final:
             return
-        else:
+        elif self.driver == None:
             self.start()
             # window = self.driver.current_window_handle
 
@@ -126,7 +126,7 @@ class ConsultaSipen:
                     else:
                         self.driver.switch_to.alert.accept()
                         sleep(.2)
-                        self.voltar()
+                        # self.voltar()
                 except:
                     self.procura_tabela(tabelas=tabelas, arquivo=arquivo)
                 data_inicial = data_inicial + datetime.timedelta(days=+1)
@@ -150,19 +150,7 @@ class ConsultaSipen:
                 self.driver.find_element(By.CSS_SELECTOR,
                                      s.voltar_novos).click()
             except:
-                try:
-                    self.window()
-                    self.driver.switch_to.default_content()
-                    WebDriverWait(self.driver, 2).until(ec.presence_of_element_located((By.ID, "principal")))
-                    self.driver.switch_to.frame("principal")
-                    self.driver.find_element(By.CSS_SELECTOR, s.voltar_liquidados).click()
-                except:
-                    try:
-                        self.window()
-                        self.driver.find_element(By.CSS_SELECTOR,
-                                                 s.voltar_liquidados).click()
-                    except:
-                        pass
+                pass
     def procura_tabela(self, tabelas: list, arquivo: str):
         try:
             self.driver.switch_to.window(self.driver.window_handles[0])
@@ -232,7 +220,7 @@ class ConsultaSipen:
         vencimento = ultima_linha[6]
 
         data = datetime.datetime.strptime(vencimento, "%d/%m/%Y")
-        data = data + datetime.timedelta(days=-(int(prazo)))
+        data = data + datetime.timedelta(days=-(int(prazo))+1)
         return data.strftime("%d/%m/%Y")
 
     @staticmethod
