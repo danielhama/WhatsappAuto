@@ -395,7 +395,7 @@ class RVContratos1(BoxLayout):
 class RV(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.ordenado = 'c.valor_avaliacao'
+        self.ordenado = 'c.ValorAvaliacao'
         self.asc_desc = 'DESC'
 
     def exibir(self):
@@ -424,16 +424,16 @@ class RV(BoxLayout):
 
     def spinner_ordenado(self, comando):
         if comando == 'Contrato':
-            self.ordenado = 'c.numero'
+            self.ordenado = 'c.Numero'
             self.populate_contratos()
         elif comando == 'Empréstimo':
-            self.ordenado = 'c.valor_emprestimo'
+            self.ordenado = 'c.ValorEmprestimo'
             self.populate_contratos()
         elif comando == 'Avaliação':
-            self.ordenado = 'c.valor_avaliacao'
+            self.ordenado = 'c.ValorAvaliacao'
             self.populate_contratos()
         elif comando == 'Vencimento':
-            self.ordenado = 'c.vencimento'
+            self.ordenado = 'c.Vencimento'
             self.populate_contratos()
 
     def spinner_asc_desc(self, comando):
@@ -512,7 +512,7 @@ class RV(BoxLayout):
         conn = conectar()
         cursor = conn.cursor()
         cursor.execute(
-            f"SELECT cli.nome, cli.cpf, c.numero, c.valor_avaliacao, c.valor_emprestimo, c.vencimento FROM  clientes as cli, contratos as c WHERE c.id_cliente = cli.id AND c.Situacao NOT LIKE '%LIQUIDA%' ORDER BY {self.ordenado} {self.asc_desc}")
+            f"SELECT cli.Nome, cli.CPF, c.Numero, c.ValorAvaliacao, c.ValorEmprestimo, c.Vencimento FROM  clientes as cli, contratos as c WHERE c.CPF = cli.CPF AND c.Situacao NOT LIKE '%LIQUIDA%' ORDER BY {self.ordenado} {self.asc_desc}")
         clientes = cursor.fetchall()
         lista_clientes = []
         if len(clientes) > 0:
@@ -522,9 +522,9 @@ class RV(BoxLayout):
                     datetime.strptime(cliente[5].split(' ')[0], '%Y-%m-%d'), "%d/%m/%Y")
                 cliente = {'text': str(
                     cliente[0] + (' ' * char) + '|' + '    ' + str(cliente[1]) + '    ' + '|' + '    ' + str(
-                        cliente[2]) + '    ' + '|' + '    ' + locale.currency(cliente[3],
+                        cliente[2]) + '    ' + '|' + '    ' + locale.currency(float(cliente[3]),
                                                                               grouping=True) + '    ' + locale.currency(
-                        cliente[4], grouping=True) + '    ' + '|' + '    ' + vencimento)}
+                        float(cliente[4]), grouping=True) + '    ' + '|' + '    ' + vencimento)}
                 lista_clientes.append(cliente)
         else:
             print('Não existem clientes cadastrados.')
@@ -1321,7 +1321,8 @@ class Whats(App, ProgBar):
         try:
             self.worker.envio_msg.fecha_driver()
         except Exception as e:
-            logging.basicConfig(filename='erro.log', level=logging.ERROR)
+            logging.basicConfig(filename='erro.log',
+                                level=logging.ERROR)
             pass
         try:
             if self.worker is None:
@@ -1377,8 +1378,11 @@ class Whats(App, ProgBar):
 
     def popupo(self, dt=None):
         try:
-            self._popup1 = Popup(title='QRCode', content=Image(source='qrcode.jpg'), size_hint=(None, None),
-                                 size=(400, 400), auto_dismiss=True)
+            self._popup1 = Popup(title='QRCode',
+                                 content=Image(source='qrcode.jpg'),
+                                 size_hint=(None, None),
+                                 size=(400, 400),
+                                 auto_dismiss=True)
             self._popup1.open()
             self.update()
         except Exception as e:
@@ -1404,8 +1408,10 @@ class Whats(App, ProgBar):
     def guarda_penhor(self, login, senha):
         self.login = login
         self.set_login(login, senha)
+        self.dismiss_popup()
+
         try:
-            guarda = GuardaPenhor(login, senha)
+            guarda = GuardaPenhor(login, senha, "")
 
             if guarda.envia():
                 self.root.ids.right_content.text = "Finalizado envio com sucesso"
@@ -1416,7 +1422,7 @@ class Whats(App, ProgBar):
                 self.root.ids.right_content.text = "Confirmação de recebimento com sucesso"
             else:
                 self.root.ids.right_content.text = "Erro ao confirmar recebimento para guarda"
-            self.dismiss_popup()
+            # self.dismiss_popup()
 
         except:
             pass
@@ -1424,28 +1430,30 @@ class Whats(App, ProgBar):
     def buscar_novos(self, login, senha):
         self.set_login(login, senha)
         try:
-            novos = ConsultaSipen(self.login, self.senha)
-            novos.consulta_data(novos.ultima_data(""), novos.ultimo_dia_util(), [10, 11, 12, 13, 14, 15],
-                                r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt")
+            novos = ConsultaSipen(login=self.login,
+                                  senha=self.senha,
+                                  arquivo= r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.csv")
+            novos.consulta_data(novos.ultima_data(), novos.ultimo_dia_util(), [10, 11, 12, 13, 14, 15])
             self.dismiss_popup()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         try:
             sipen = Renovados(
-                path=r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv",
-                login=self.login, senha=self.senha)
+                arquivo=r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv",
+                login=self.login,
+                senha=self.senha)
             sipen.abrir_arquivo()
-            sipen.consulta_data(sipen.ultima_data(), sipen.ultimo_dia_util(), [10], "")
+            sipen.consulta_data(sipen.ultima_data(), sipen.ultimo_dia_util(), [10])
         except:
             pass
         try:
 
-            sipenliq = SipenLiquidados(self.login, self.senha)
+            sipenliq = SipenLiquidados(self.login, self.senha,
+                                   r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\liquidado.csv")
             ultima_data = sipenliq.ultima_data()
             data_final = sipenliq.ultimo_dia_util()
-            sipenliq.consulta_data(ultima_data, data_final, [16],
-                                   r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\liquidado.txt")
+            sipenliq.consulta_data(ultima_data, data_final, [16])
         except:
             pass
 
@@ -1740,6 +1748,25 @@ class Whats(App, ProgBar):
         except Exception as e:
             logging.exception(str(e))
             self.root.ids.right_content.text = f"Banco de dados ainda não existe, importe um arquivo primeiro {e}"
+    def filtra_vencidos_30dias(self):
+        try:
+            try:
+                deletar_lista()
+                listar_Contratos_vencidos_30dias()
+                self.clientes_hoje = None
+                self.clientes_hoje = listar_Clientes_telefone_envio()
+            except Exception as e:
+                logging.exception(str(e))
+                self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
+                return
+            global clientes_importados
+            clientes_importados = None
+            clientes_importados = self.clientes_hoje
+            # self.imprime_importados()
+            self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos há mais de 30 dias'
+        except Exception as e:
+            logging.exception(str(e))
+            self.root.ids.right_content.text = f"Banco de dados ainda não existe, importe um arquivo primeiro {e}"
 
     def filtra_data(self):
         try:
@@ -1812,6 +1839,7 @@ class Whats(App, ProgBar):
                 sipen.deleta_arquivo()
                 sipen.chama_driver()
                 sipen.inventario()
+                sleep(0.5)
                 sipen.atualizar()
                 self.dismiss_popup()
                 self.root.ids.right_content.text = "Contratos atualizados com sucesso"
@@ -1832,8 +1860,11 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = str(e)
 
         finally:
-            gera_clientes()
-            gera_personalizado_contratos()
+            try:
+                gera_clientes()
+                gera_personalizado_contratos()
+            except:
+                self.root.ids.right_content.text = "Erro ao gerar relatório de clientes, incluir novo cliente pela Bezel"
 
     def exibir(self):
         content = RV()

@@ -20,7 +20,8 @@ from models.utils import *
 # import undetected_chromedriver as uc
 
 
-class EnviaMensagem:
+class EnviaMensagem: 
+
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, 'instance'):

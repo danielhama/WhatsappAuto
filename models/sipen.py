@@ -102,7 +102,7 @@ class Sipen:
 
     def inventario(self) -> None:
         while self.driver is None:
-            sleep(1)
+            sleep(.5)
         self.login()
         data = ontem_feriado()
         data = data.strftime("%d/%m/%Y")
@@ -119,6 +119,7 @@ class Sipen:
         self.driver.find_element(By.CSS_SELECTOR, confirma_inventario).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         self.driver.find_element(By.CSS_SELECTOR, "#btnExportar").click()
+        sleep(.2)
         self.download_wait()
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -132,12 +133,13 @@ class Sipen:
     def download_wait(self):
         seconds = 0
         dl_wait = True
-        while dl_wait and seconds < 20:
+        while dl_wait and seconds < 30:
             sleep(1)
             dl_wait = False
             for fname in os.listdir(r"C:\Users\c084029\Downloads"):
                 if fname.endswith('.crdownload'):
                     dl_wait = True
+                    sleep(1)
             seconds += 1
         return False
 
@@ -145,9 +147,13 @@ class Sipen:
         try:
             self.inventario_path = pathlib.Path(r"C:\Users\c084029\Downloads\RelatorioInventarioGeralContrato.xls")
             data = datetime.datetime.fromtimestamp(self.inventario_path.stat().st_atime)
-            data = datetime.date(year=data.year, month=data.month, day=data.day)
+            data = datetime.date(year=data.year,
+                                 month=data.month,
+                                 day=data.day)
             hoje = datetime.datetime.today()
-            hoje = datetime.date(year=hoje.year, month=hoje.month, day=hoje.day)
+            hoje = datetime.date(year=hoje.year,
+                                 month=hoje.month,
+                                 day=hoje.day)
             if data == hoje:
                 return True
             else:
@@ -161,13 +167,15 @@ class Sipen:
 
         try:
             if self.driver.find_element(By.CSS_SELECTOR, s.menu) is not None:
-                pass
-            self.login()
+                self.login()
         except:
             self.login()
-        inventarioDF = pd.read_excel(self.inventario_path, header=3)
+        inventarioDF = pd.read_excel(self.inventario_path,
+                                     header=3)
         hoje = datetime.datetime.today()
-        hoje = datetime.datetime(year=hoje.year, month=hoje.month, day=hoje.day)
+        hoje = datetime.datetime(year=hoje.year,
+                                 month=hoje.month,
+                                 day=hoje.day)
         for idx, i in inventarioDF.iterrows():
             print(f"Iniciando pesquisa para Contrato {i['Nr. Contrato']}")
             i['Nr. Contrato'] = i['Nr. Contrato'].replace(".", "").replace("-", "")
@@ -179,17 +187,21 @@ class Sipen:
                     continue
             # WebDriverWait(driver, 10).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
             try:
-                self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                self.situacao(numero=i['Nr. Contrato'],
+                              vencimento=i['Vencimento'],
                               valor_avaliacao=i['Avaliação'],
                               valor_emprestimo=i['Empréstimo'],
-                              emissao=i['Emissão'], prazo=i['Prz.'])
+                              emissao=i['Emissão'],
+                              prazo=i['Prz.'])
             except Exception as e:
                 self.login()
                 try:
-                    self.situacao(numero=i['Nr. Contrato'], vencimento=i['Vencimento'],
+                    self.situacao(numero=i['Nr. Contrato'],
+                                  vencimento=i['Vencimento'],
                                   valor_avaliacao=i['Avaliação'],
                                   valor_emprestimo=i['Empréstimo'],
-                                  emissao=i['Emissão'], prazo=i['Prz.'])
+                                  emissao=i['Emissão'],
+                                  prazo=i['Prz.'])
                 except Exception as e:
                     print(e)
                     self.erro.append(i['Nr. Contrato'])
@@ -206,10 +218,16 @@ class Sipen:
         vencimento = datetime.datetime.strptime(vencimento, '%d/%m/%Y')
         emissao = datetime.datetime.strptime(emissao, '%d/%m/%Y')
         try:
-            inserir_contrato(numero=numero, emissao=emissao, vencimento=vencimento,
-                             valor_emprestimo=valor_emprestimo, valor_avaliacao=valor_avaliacao,
+            inserir_contrato(numero=numero,
+                             emissao=emissao,
+                             vencimento=vencimento,
+                             valor_emprestimo=valor_emprestimo,
+                             valor_avaliacao=valor_avaliacao,
                              situacao=_situacao,
-                             prazo=prazo, cpf=cpf, data=datetime.datetime.today(), modalidade=_modalidade)
+                             prazo=prazo,
+                             cpf=cpf,
+                             data=datetime.datetime.today(),
+                             modalidade=_modalidade)
         except Exception as e:
             print(e)
             self.erro.append(numero)
@@ -231,9 +249,12 @@ def ontem_feriado():
         data = hoje + datetime.timedelta(days=-3)
     else:
         data = hoje + datetime.timedelta(days=-1)
-    data = datetime.date(year=data.year, month=data.month, day=data.day)
+    data = datetime.date(year=data.year,
+                         month=data.month,
+                         day=data.day)
 
-    if data in holidays.country_holidays(country='Brazil', years=hoje.year).keys():
+    if data in holidays.country_holidays(country='Brazil',
+                                         years=hoje.year).keys():
         if hoje.weekday() == 0:
             data = hoje + datetime.timedelta(days=-3)
         else:

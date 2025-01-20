@@ -127,7 +127,8 @@ def inserir_cliente(nome, cpf, limite):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"INSERT INTO Clientes (Nome, CPF, Limite) VALUES ('{nome}', '{cpf}', {limite})")
+        cursor.execute(f"INSERT INTO Clientes (Nome, CPF, Limite) "
+                       f"VALUES ('{nome}', '{cpf}', {limite})")
         conn.commit()
     except:
         pass
@@ -137,7 +138,8 @@ def inserir_telefone(DDD, telefone, id):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"INSERT INTO Telefones (numero, whatsapp, ClienteID, DDD) VALUES ('{telefone}', 1, {id}, {DDD})")
+        cursor.execute(f"INSERT INTO Telefones (numero, whatsapp, ClienteID, DDD) "
+                       f"VALUES ('{telefone}', 1, {id}, {DDD})")
         conn.commit()
     except:
         pass
@@ -162,7 +164,8 @@ def inserir_contrato(numero, emissao, vencimento, valor_emprestimo, valor_avalia
     valor_avaliacao = convert_to_float(valor_avaliacao)
     valor_emprestimo = convert_to_float(valor_emprestimo)
     try:
-        cursor.execute(f"INSERT INTO Contratos (numero, Emissao, Vencimento, ValorEmprestimo, ValorAvaliacao, situacao, prazo, cpf, DataAtualizacao, Modalidade, QtdeRenovacoes, QtdeRenovacoes, Ativo, Peso, QtdeParcelas, DataInclusao) VALUES ('{numero}', '{emissao}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo}, '{cpf}', '{data}', {modalidade}, 0, 0, 1, '0.0', 0, '{hoje}')")
+        cursor.execute(f"INSERT INTO Contratos (numero, Emissao, Vencimento, ValorEmprestimo, ValorAvaliacao, situacao, prazo, cpf, DataAtualizacao, Modalidade, QtdeRenovacoes, QtdeRenovacoes, Ativo, Peso, QtdeParcelas, DataInclusao) "
+                       f"VALUES ('{numero}', '{emissao}', '{vencimento}', {valor_emprestimo}, {valor_avaliacao}, '{situacao}', {prazo}, '{cpf}', '{data}', {modalidade}, 0, 0, 1, '0.0', 0, '{hoje}')")
         conn.commit()
         if cursor.rowcount == 1:
             print("Contrato incluído com sucesso")
@@ -190,9 +193,11 @@ def listar_Clientes_telefone_envio():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, envio.id_cliente, Contratos.vencimento FROM "
-                   "Telefones, Clientes as cli, envio, Contratos WHERE envio.id_cliente = cli.id AND "
-                   "Telefones.ClienteId = cli.id and Telefones.whatsapp = 1 AND Contratos.Situacao != 'LIQUIDADO' GROUP BY Telefones.DDD || Telefones.numero")
+    cursor.execute("SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, envio.id_cliente, Contratos.vencimento "
+                   "FROM Telefones, Clientes as cli, envio, Contratos "
+                   "WHERE envio.id_cliente = cli.id AND "
+                   "Telefones.ClienteId = cli.id and Telefones.whatsapp = 1 AND Contratos.Situacao != 'LIQUIDADO' "
+                   "GROUP BY Telefones.DDD || Telefones.numero")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -211,7 +216,8 @@ def listar():
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute('SELECT cli.Nome, cli.CPF, cli.DataNascimento, cli.Limite, cli.DataAtualizacao FROM Clientes as cli')
+    cursor.execute('SELECT cli.Nome, cli.CPF, cli.DataNascimento, cli.Limite, cli.DataAtualizacao '
+                   'FROM Clientes AS cli')
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -235,15 +241,25 @@ def listar_Clientes_telefone(teste: bool = False):
     conn = conectar()
     cursor = conn.cursor()
     if teste:
-        cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1 GROUP BY Telefones.numero')
+        cursor.execute('SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento '
+                       'FROM Telefones, Clientes AS cli, Contratos '
+                       'WHERE cli.CPF = Contratos.CPF '
+                       'AND Telefones.ClienteID = cli.Id '
+                       'AND Telefones.whatsapp = 1 '
+                       'GROUP BY Telefones.numero')
     else:
         cursor.execute(
-            'SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1')
+            'SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero, Contratos.CPF, Contratos.vencimento '
+            'FROM Telefones, Clientes as cli, Contratos '
+            'WHERE cli.CPF = Contratos.CPF and Telefones.ClienteID = cli.Id and Telefones.whatsapp = 1')
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
         for cliente in Clientes:
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones':cliente[2], 'Vencimento':cliente[4]}
+            cliente = {'Nome': cliente[0],
+                       'CPF': cliente[1],
+                       'Telefones':cliente[2],
+                       'Vencimento':cliente[4]}
             lista_Clientes.append(cliente)
     else:
         print('Não existem Clientes cadastrados.')
@@ -260,7 +276,9 @@ def listar_Telefones_por_cpf(cpf):
     cursor = conn.cursor()
     id = pesquisa_id(cpf)
     cursor.execute(
-        f'SELECT Telefones.DDD || Telefones.numero FROM Telefones WHERE Telefones.ClienteID = {id}')
+        f'SELECT Telefones.DDD || Telefones.numero '
+        f'FROM Telefones '
+        f'WHERE Telefones.ClienteID = {id}')
     Telefones = cursor.fetchall()
     lista_Telefones = []
     if len(Telefones) > 0:
@@ -278,7 +296,9 @@ def listar_total_av_emp_por_CPF(cpf):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT SUM(ValorAvaliacao), SUM(ValorEmprestimo) FROM Contratos WHERE Contratos.CPF = '{cpf}'")
+        f"SELECT SUM(ValorAvaliacao), SUM(ValorEmprestimo) "
+        f"FROM Contratos "
+        f"WHERE Contratos.CPF = '{cpf}'")
     valores = cursor.fetchall()
     if len(valores) > 0:
         desconectar(conn)
@@ -286,7 +306,7 @@ def listar_total_av_emp_por_CPF(cpf):
     else:
         print('Não existem Clientes cadastrados.')
         desconectar(conn)
-        return 0,0
+        return 0, 0
 
 def listar_nome(cpf):
     """
@@ -296,7 +316,9 @@ def listar_nome(cpf):
     cursor = conn.cursor()
     id = pesquisa_id(cpf)
     cursor.execute(
-        f'SELECT Clientes.nome FROM Clientes WHERE Clientes.id = {id}')
+        f'SELECT Clientes.nome '
+        f'FROM Clientes '
+        f'WHERE Clientes.id = {id}')
     nomes = cursor.fetchall()
     lista_nomes = []
     if len(nomes) > 0:
@@ -315,7 +337,9 @@ def listar_limite(cpf):
     cursor = conn.cursor()
     id = pesquisa_id(cpf)
     cursor.execute(
-        f'SELECT Clientes.Limite FROM Clientes WHERE Clientes.id = {id}')
+        f'SELECT Clientes.Limite '
+        f'FROM Clientes '
+        f'WHERE Clientes.id = {id}')
     nomes = cursor.fetchall()
     lista_nomes = []
     if len(nomes) > 0:
@@ -341,7 +365,13 @@ def listar_Contratos_vencidos():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT cli.Nome,  Contratos.Vencimento, cli.id FROM Clientes as cli, Contratos WHERE Contratos.CPF = cli.CPF AND Contratos.Vencimento < date('now','-2 day') AND Contratos.Situacao NOT LIKE '%LIQUIDADO%'  GROUP BY cli.Id")
+        "SELECT cli.Nome,  Contratos.Vencimento, cli.id "
+        "FROM Clientes as cli, Contratos "
+        "WHERE Contratos.CPF = cli.CPF "
+        "AND Contratos.Vencimento < date('now','-2 day') "
+        "AND Contratos.Situacao "
+        "NOT LIKE '%LIQUIDADO%'  "
+        "GROUP BY cli.Id")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
@@ -362,19 +392,52 @@ def listar_Contratos_licitacao():
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero,  Contratos.vencimento FROM Telefones, Clientes as cli, Contratos WHERE Contratos.situacao LIKE '%LICI%' AND Telefones.whatsapp == 1 AND Telefones.ClienteID = cli.id AND Contratos.CPF = cli.CPF GROUP BY Telefones.Numero")
+        f"SELECT cli.nome, cli.cpf, Telefones.DDD || Telefones.numero,  Contratos.vencimento "
+        f"FROM Telefones, Clientes as cli, Contratos "
+        f"WHERE Contratos.situacao LIKE '%LICI%' "
+        f"AND Telefones.whatsapp == 1 "
+        f"AND Telefones.ClienteID = cli.id "
+        f"AND Contratos.CPF = cli.CPF "
+        f"GROUP BY Telefones.Numero")
     Clientes = cursor.fetchall()
     lista_Clientes = []
     if len(Clientes) > 0:
         for cliente in Clientes:
             inserir_id_envio(str(cliente[3]))
-            cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[3]}
+            cliente = {'Nome': cliente[0],
+                       'CPF': cliente[1],
+                       'Telefones': cliente[2],
+                       'Vencimento': cliente[3]}
             lista_Clientes.append(cliente)
     else:
         print('Não existem Clientes cadastrados.')
     desconectar(conn)
     return lista_Clientes
 
+def listar_Contratos_vencidos_30dias():
+    """
+    Função para listar os Contratos vencidos há mais de 30 dias
+    """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT cli.Nome,  Contratos.Vencimento, cli.id "
+        "FROM Clientes as cli, Contratos "
+        "WHERE Contratos.CPF = cli.CPF "
+        "AND Contratos.Vencimento < date('now','-30 day') "
+        "AND Contratos.Situacao "
+        "NOT LIKE '%LIQUIDADO%'  "
+        "GROUP BY cli.Id")
+    Clientes = cursor.fetchall()
+    lista_Clientes = []
+    if len(Clientes) > 0:
+        for cliente in Clientes:
+            # cliente = {'Nome': cliente[0], 'CPF': cliente[1], 'Telefones': cliente[2], 'Vencimento': cliente[4]}
+            # lista_Clientes.append(cliente)
+            inserir_id_envio(cliente[2])
+    else:
+        print('Não existem Clientes cadastrados.')
+    desconectar(conn)
 
 def lista_Telefones(whatsapp):
     """
@@ -382,7 +445,9 @@ def lista_Telefones(whatsapp):
     """
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM 'Telefones' WHERE Telefones.whatsapp = {whatsapp} ORDER BY ID DESC")
+    cursor.execute(f"SELECT * FROM 'Telefones' "
+                   f"WHERE Telefones.whatsapp = {whatsapp} "
+                   f"ORDER BY ID DESC")
     Telefones = cursor.fetchall()
     lista_Telefones = []
     if len(Telefones) > 0:
@@ -415,12 +480,29 @@ def filtra_calculo_margem():
             d120 = 0
             total_emprestimo = 0
             cursor.execute(
-                f"select SUM(Contratos.ValorAvaliacao) as total, Clientes.limite from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.id = {id} AND Contratos.situacao NOT LIKE  '%LIQUIDADO%'")
+                f"select SUM(Contratos.ValorAvaliacao) as total, Clientes.limite "
+                f"FROM Contratos, Clientes "
+                f"WHERE Contratos.CPF = Clientes.CPF "
+                f"AND Clientes.id = {id} "
+                f"AND Contratos.situacao "
+                f"NOT LIKE  '%LIQUIDADO%'")
             cliente_limite = cursor.fetchall()
             total = cliente_limite[0][0]
             limite = cliente_limite[0][1]
             cursor.execute(
-                f"select Contratos.numero, Contratos.vencimento, Contratos.ValorAvaliacao, Contratos.ValorEmprestimo, Contratos.prazo, Contratos.CPF, Clientes.CPF, Clientes.Id from Contratos, Clientes where Contratos.CPF = Clientes.CPF AND Clientes.Id = {id} AND Contratos.situacao NOT LIKE  '%LIQUIDADO%'")
+                f"select Contratos.numero, "
+                f"Contratos.vencimento, "
+                f"Contratos.ValorAvaliacao, "
+                f"Contratos.ValorEmprestimo, "
+                f"Contratos.prazo, "
+                f"Contratos.CPF, "
+                f"Clientes.CPF, "
+                f"Clientes.Id "
+                f"FROM Contratos, Clientes "
+                f"WHERE Contratos.CPF = Clientes.CPF "
+                f"AND Clientes.Id = {id} "
+                f"AND Contratos.situacao "
+                f"NOT LIKE  '%LIQUIDADO%'")
             Contratos = cursor.fetchall()
             if len(Contratos) > 0:
                 for contrato in Contratos:
@@ -434,8 +516,12 @@ def filtra_calculo_margem():
                     else:
                         total_emprestimo += avaliacao * .85
                     if total_emprestimo > emprestimo:
-                        d30_t, d60_t, d90_t, d120_t = calcular_margem(avaliacao, emprestimo,
-                                                                      vencimento, prazo, limite, total)
+                        d30_t, d60_t, d90_t, d120_t = calcular_margem(valor_avaliacao=avaliacao,
+                                                                      valor_emprestimo=emprestimo,
+                                                                      vencimento=vencimento,
+                                                                      prazo=prazo,
+                                                                      limite=limite,
+                                                                      total=total)
                         d30 += d30_t
                         d60 += d60_t
                         d90 += d90_t
@@ -447,8 +533,11 @@ def filtra_calculo_margem():
                     if len(Telefones) >= 1:
                         for telefone in Telefones:
                             telefone = telefone[0:4]+telefone[5:13]
-                            cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
-                                       'Vencimento': vencimento, 'Margem': d30}
+                            cliente_1 = {'Nome': cliente[2],
+                                         'CPF': cliente[1],
+                                         'Telefones': telefone,
+                                         'Vencimento': vencimento,
+                                         'Margem': d30}
                             Clientes1.append(cliente_1)
                         # telefone = telefone[0:4]+telefone[5:13]
                         # cliente_1 = {'Nome': cliente[2], 'CPF': cliente[1], 'Telefones': telefone,
@@ -457,7 +546,8 @@ def filtra_calculo_margem():
 
         desconectar(conn)
         Clientes = pd.DataFrame(Clientes1)
-        Clientes.drop_duplicates(subset='Telefones', inplace=True)
+        Clientes.drop_duplicates(subset='Telefones',
+                                 inplace=True)
         Clientes1 = Clientes.to_dict('records')
 
         return Clientes1
@@ -470,7 +560,9 @@ def consulta_prazo(contrato):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"SELECT prazo FROM Contratos WHERE Contratos.numero = '{contrato}'")
+        cursor.execute(f"SELECT prazo "
+                       f"FROM Contratos "
+                       f"WHERE Contratos.numero = '{contrato}'")
         prazo = cursor.fetchall()
         desconectar(conn)
         return prazo[0][0]
@@ -483,7 +575,8 @@ def deletar_contrato(numero):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"DELETE FROM 'Contratos' WHERE numero='{numero}'")
+        cursor.execute(f"DELETE FROM 'Contratos' "
+                       f"WHERE numero='{numero}'")
         conn.commit()
     except:
         pass
@@ -494,7 +587,8 @@ def deletar_contrato_desatualizado(data):
     cursor = conn.cursor()
     try:
         data = datetime.datetime.strftime(datetime.datetime.strptime(data.split()[0], '%d/%m/%Y'), '%Y-%m-%d %H:%M:%S')
-        cursor.execute(f"DELETE FROM 'Contratos' WHERE Contratos.DataAtualizacao!='{data}'")
+        cursor.execute(f"DELETE FROM 'Contratos' "
+                       f"WHERE Contratos.DataAtualizacao!='{data}'")
         conn.commit()
         print("Excluindo Contratos liquidados")
     except:
@@ -506,7 +600,8 @@ def deletar_telefone(telefone):
     if len(str(telefone)) > 9:
         telefone = str(telefone)[2::]
     try:
-        cursor.execute(f"DELETE FROM 'Telefones' WHERE numero={telefone}")
+        cursor.execute(f"DELETE FROM 'Telefones' "
+                       f"WHERE numero={telefone}")
         conn.commit()
     except:
         pass
@@ -516,7 +611,8 @@ def deletar_cliente(cpf):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"DELETE FROM 'Clientes' WHERE cpf='{cpf}'")
+        cursor.execute(f"DELETE FROM 'Clientes' "
+                       f"WHERE cpf='{cpf}'")
         conn.commit()
     except:
         pass
@@ -526,7 +622,9 @@ def deletar_sem_whats(telefone):
     conn = conectar()
     cursor = conn.cursor()
     try:
-        cursor.execute(f"UPDATE Telefones set whatsapp={1} WHERE numero={telefone}")
+        cursor.execute(f"UPDATE Telefones "
+                       f"SET whatsapp={1} "
+                       f"WHERE numero={telefone}")
         conn.commit()
     except:
         pass
@@ -550,7 +648,13 @@ def atualizar_contrato(numero, vencimento, valor_avaliacao, valor_emprestimo, pr
         return
     if atualizado <= data:
         cursor.execute(
-                f"UPDATE Contratos SET vencimento='{vencimento}', ValorEmprestimo={valor_emprestimo}, ValorAvaliacao={valor_avaliacao}, DataAtualizacao='{data}', prazo={prazo} WHERE numero='{numero}'")
+                f"UPDATE Contratos "
+                f"SET vencimento='{vencimento}', "
+                f"ValorEmprestimo={valor_emprestimo}, "
+                f"ValorAvaliacao={valor_avaliacao}, "
+                f"DataAtualizacao='{data}', "
+                f"prazo={prazo} "
+                f"WHERE numero='{numero}'")
         conn.commit()
     if cursor.rowcount == 1:
         print('Contrato atualizado com sucesso.')
@@ -564,7 +668,9 @@ def pesquisa_id(cpf) -> int:
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT id FROM Clientes WHERE cpf='{cpf}'")
+    cursor.execute(f"SELECT id "
+                   f"FROM Clientes "
+                   f"WHERE cpf='{cpf}'")
     id = cursor.fetchone()
 
     return id[0]
@@ -573,7 +679,10 @@ def pesquisa_id_por_telefone(numero):
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT t.DDD || t.numero as telefone, t.ClienteID, c.id, c.cpf FROM Telefones as t, Clientes as c where c.id = t.ClienteID and telefone = {numero}")
+    cursor.execute(f"SELECT t.DDD || t.numero AS telefone, t.ClienteID, c.id, c.cpf "
+                   f"FROM Telefones AS t, Clientes AS c "
+                   f"WHERE c.id = t.ClienteID "
+                   f"AND telefone = {numero}")
     id = cursor.fetchone()
     if id[0] is not None:
         return id[0]
@@ -581,7 +690,9 @@ def pesquisa_id_por_telefone(numero):
 def pesquisa_data_atualizacao(numero_contrato):
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT c.DataAtualizacao FROM Contratos as c WHERE c.numero='{numero_contrato}'")
+    cursor.execute(f"SELECT c.DataAtualizacao "
+                   f"FROM Contratos AS c "
+                   f"WHERE c.numero='{numero_contrato}'")
     data = cursor.fetchone()
     conn.close()
     if data == None:
@@ -598,7 +709,8 @@ def limpa_contratos():
     conn = conectar()
     cursor = conn.cursor()
     date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
-    cursor.execute(f"DELETE FROM Contratos WHERE DataAtualizacao < '{date}'")
+    cursor.execute(f"DELETE FROM Contratos "
+                   f"WHERE DataAtualizacao < '{date}'")
     conn.commit()
     conn.close()
 

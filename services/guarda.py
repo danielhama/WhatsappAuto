@@ -3,13 +3,15 @@ from time import sleep
 
 from services.consultasipen import ConsultaSipen
 
+
 class GuardaPenhor(ConsultaSipen):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, 'instance'):
             cls.instance = super(ConsultaSipen, cls).__new__(cls)
         return cls.instance
-    def __init__(self, login, senha):
-        super().__init__(login, senha)
+
+    def __init__(self, login, senha, arquivo):
+        super().__init__(login, senha, arquivo)
         self.driver = None
         self.matricula = login
         self.senha = senha
@@ -34,7 +36,7 @@ class GuardaPenhor(ConsultaSipen):
             }
             menuIrPara('/CarregarConfirmaEntregaGarantiasPVRETPV.do?method=carregar')
             """
-            )
+                                       )
             self.mudar_frame()
             # self.pesquisa_seletor(
             #     "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > form > table > tbody > tr:nth-child(1) > td:nth-child(2) > input.ObjForm",
@@ -113,7 +115,7 @@ class GuardaPenhor(ConsultaSipen):
             }
             menuIrPara('/CarregarMovimentacaoPVRETPV.do?method=carregar')
             """
-            )
+                                       )
             try:
                 sleep(1)
                 self.driver.switch_to.alert.accept()
@@ -146,5 +148,4 @@ class GuardaPenhor(ConsultaSipen):
         except Exception as e:
             print(e)
             return False
-                # self.driver.close()
-
+            # self.driver.close()

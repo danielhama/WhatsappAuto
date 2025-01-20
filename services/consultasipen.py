@@ -21,11 +21,10 @@ class ConsultaSipen:
     driver = None
     matricula = None
     senha = None
-
-    def __init__(self, login, senha):
+    def __init__(self, login, senha, arquivo):
         self.matricula = login
         self.senha = senha
-
+        self.arquivo = arquivo
 
     def chama_driver(self):
         # Profile
@@ -90,7 +89,7 @@ class ConsultaSipen:
                     self.driver.switch_to.default_content()
                     self.driver.switch_to.frame("principal")
                 except: pass
-    def consulta_data(self, data_inicial, data_final, tabelas, arquivo):
+    def consulta_data(self, data_inicial, data_final, tabelas):
         if type(data_inicial) == str:
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
@@ -103,6 +102,7 @@ class ConsultaSipen:
 
         while data_inicial <= data_final:
             if self.dia_semana(data_inicial):
+                print(f"Iniciando pesquisa para data {data_inicial.strftime('%d/%m/%Y')}")
                 self.mudar_frame()
                 try:
                     data_ref = self.pesquisa_seletor(s.data_ref, 2)
@@ -128,11 +128,11 @@ class ConsultaSipen:
                         sleep(.2)
                         # self.voltar()
                 except:
-                    self.procura_tabela(tabelas=tabelas, arquivo=arquivo)
+                    self.procura_tabela(tabelas=tabelas, arquivo=self.arquivo)
                 data_inicial = data_inicial + datetime.timedelta(days=+1)
             else:
                 data_inicial = data_inicial + datetime.timedelta(days=+1)
-
+        self.driver.close()
     def window(self):
         if (len(self.driver.window_handles)) == 2:
             self.driver.switch_to.window(self.driver.window_handles[0])
@@ -204,10 +204,9 @@ class ConsultaSipen:
                 if texto != "":
                     self.gravacao_txt(texto, path)
 
-    @staticmethod
     def ultima_data(self):
         try:
-            arquivo = open(r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\arquivo.txt",
+            arquivo = open(self.arquivo,
                            "r")
         except:
             return "06/11/2011"

@@ -17,9 +17,7 @@ class Renovados(ConsultaSipen):
     dataframe = None
     path = None
 
-    def __init__(self, path, login, senha):
-        super().__init__(login, senha)
-        self.path = path
+
 
     def start(self):
         self.chama_driver()
@@ -35,9 +33,9 @@ class Renovados(ConsultaSipen):
         return self.pesquisa_seletor(s.data_ref, 60)
 
     def abrir_arquivo(self):
-        self.dataframe = pd.read_csv(self.path, delimiter=';')
+        self.dataframe = pd.read_csv(self.arquivo, delimiter=';')
 
-    def consulta_data(self, data_inicial, data_final, tabelas, arquivo):
+    def consulta_data(self, data_inicial, data_final, tabelas):
         if type(data_inicial) == str:
             data_inicial = datetime.datetime.strptime(data_inicial, "%d/%m/%Y")
         if type(data_final) == str:
@@ -70,10 +68,11 @@ class Renovados(ConsultaSipen):
                 data_inicial = data_inicial + datetime.timedelta(days=+1)
             else:
                 data_inicial = data_inicial + datetime.timedelta(days=+1)
+        self.driver.close()
 
     def dataframe_to_csv(self):
         self.dataframe.to_csv(
-            r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\renovacoes1.csv", sep=";",
+            self.arquivo, sep=";",
             index=False)
 
     def procura_relatorio(self):
@@ -160,30 +159,3 @@ class Renovados(ConsultaSipen):
         else:
             return "06/11/2011"
 
-
-    def consulta_data_faltantes(self, tabelas, arquivo):
-        book = xw.Book(
-            r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\datasliquidados.xlsx")
-        lista = book.sheets[0]['A2'].expand('vertical')
-        book.close()
-        for data in lista:
-            if self.dia_semana(data.formula):
-                data_ref = self.data_referencia()
-                data_ref.clear()
-                data_ref.send_keys(data.formula)
-                data_ref.send_keys(Keys.RETURN)
-                try:
-                    sleep(0.5)
-                    if self.driver.switch_to.alert.text == "DATA INFORMADA NÃO É UM DIA ÚTIL":
-                        self.driver.switch_to.alert.accept()
-                        sleep(.2)
-                        try:
-                            self.data_referencia()
-                        except:
-                            self.voltar()
-                    else:
-                        self.driver.switch_to.alert.accept()
-                        sleep(.2)
-                        self.voltar()
-                except:
-                    self.procura_relatorio()

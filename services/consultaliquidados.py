@@ -54,7 +54,7 @@ class SipenLiquidados(ConsultaSipen):
 
     def ultima_data(self):
         try:
-            arquivo = open(r"C:\Users\c084029\OneDrive - Caixa Economica Federal\Documentos\Análise Penhor\liquidado.txt",
+            arquivo = open(self.arquivo,
                            "r")
         except Exception as e:
             return "06/11/2011"
