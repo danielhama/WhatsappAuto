@@ -4,7 +4,8 @@ from time import sleep
 
 import holidays
 from selenium import webdriver
-from selenium.webdriver.chrome.webdriver import *
+# from selenium.webdriver.chrome.webdriver import *
+from selenium.webdriver.firefox.webdriver import *
 # from selenium.common import TimeoutException
 # from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
@@ -68,20 +69,20 @@ class Sipen:
     # @threaded
     def chama_driver(self, head: bool = False) -> None:
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
-        options = webdriver.ChromeOptions()
+        options = webdriver.FirefoxOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
         # options.headless = False
         # options.browser_version = "107"
-        options.add_argument("disable-infobars")
-        options.add_argument("start-maximized")
+        # options.add_argument("disable-infobars")
+        # options.add_argument("start-maximized")
         if head:
-            options = webdriver.ChromeOptions()
+            options = webdriver.FirefoxOptions()
             options.add_argument("-headless")
         # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
-        self.driver = webdriver.Chrome(
+        self.driver = webdriver.Firefox(
             service=Service(
-            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe",
+            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win64\129.0.6668.71\chromedriver-win32\geckodriver.exe",
             port=443),
             options=options)
 

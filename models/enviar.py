@@ -10,11 +10,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
+from selenium.webdriver import ChromeService
 import models.Seletores as sel
 from models.ferramentas import threaded
 from models.utils import *
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 # from undetected_chromedriver import ChromeOptions
 # import undetected_chromedriver as uc
@@ -53,14 +53,14 @@ class EnviaMensagem:
         if head == True:
             options = webdriver.ChromeOptions()
             options.add_argument("-headless")
-            self.driver = webdriver.Chrome(service=Service(
-                executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe"),
-                                               options=options)
+            self.driver = webdriver.Chrome(
+                # service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port=443), options=options)
+                service=ChromeService(ChromeDriverManager(driver_version="129.0.6668.71").install()), options=options)
             # self.driver = webdriver.Chrome(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", options=options)
 
         else:
-            self.driver = webdriver.Chrome(service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port=443), options=options)
-                # service=ChromeService(ChromeDriverManager(driver_version="107.0.5304.62").install()), options=options)
+            self.driver = webdriver.Chrome(#service=Service(executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe", port=443), options=options)
+                service=ChromeService(ChromeDriverManager(driver_version="129.0.6668.71").install()), options=options)
 
         self.driver.get("https://web.whatsapp.com")
 

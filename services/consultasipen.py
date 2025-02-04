@@ -7,12 +7,12 @@ import holidays
 import xlwings as xw
 from selenium import webdriver
 from selenium.common import NoSuchElementException, TimeoutException, NoSuchFrameException
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
-
+from selenium.webdriver.firefox.webdriver import *
 import models.SeletoresRelatorios as s
 import models.links as l
 
@@ -25,18 +25,18 @@ class ConsultaSipen:
         self.matricula = login
         self.senha = senha
         self.arquivo = arquivo
-
+        self.janela_atual = None
     def chama_driver(self):
         # Profile
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
-        options = webdriver.ChromeOptions()
-        options.add_argument(
-            r"user-data-dir={}".format(profile))
-        options.add_argument("disable-infobars")
-        options.add_argument("start-maximized")
-        self.driver = webdriver.Chrome(service=Service(
-            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win32\107.0.5304.62\chromedriver.exe",
-            port=443), options=options)
+        # options = webdriver.Firefox()
+        # options.add_argument(
+        #     r"user-data-dir={}".format(profile))
+        # options.add_argument("disable-infobars")
+        # options.add_argument("start-maximized")
+        self.driver = webdriver.Firefox(service=Service(
+            executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win64\129.0.6668.71\chromedriver-win32\geckodriver.exe",
+            port=443))
 
         self.driver.maximize_window()
 
@@ -50,7 +50,11 @@ class ConsultaSipen:
                 return False
         else:
             self.acessar_relatorio(link, seletor)
+    def set_janela(self):
+        self.janela_atual = self.driver.current_window_handle
 
+    def get_janela(self):
+        self.driver.switch_to.window(self.janela_atual)
     def start(self):
         self.chama_driver()
         self.acessar_relatorio_menu(s.menu_novos)
@@ -69,6 +73,7 @@ class ConsultaSipen:
                 sleep(.5)
                 self.driver.switch_to.frame("iframe01")
                 self.pesquisa_seletor(s.data_ref, 60)
+                self.set_janela()
                 return True
             except:
                 return False
@@ -123,15 +128,17 @@ class ConsultaSipen:
                     if self.driver.switch_to.alert.text == "DATA INFORMADA NÃO É UM DIA ÚTIL":
                         self.driver.switch_to.alert.accept()
                         sleep(.2)
+                        self.get_janela()
                     else:
                         self.driver.switch_to.alert.accept()
                         sleep(.2)
                         # self.voltar()
+                        self.get_janela()
                 except:
                     self.procura_tabela(tabelas=tabelas, arquivo=self.arquivo)
-                data_inicial = data_inicial + datetime.timedelta(days=+1)
+                data_inicial = self.proximo_dia_util(data_inicial)
             else:
-                data_inicial = data_inicial + datetime.timedelta(days=+1)
+                data_inicial = self.proximo_dia_util(data_inicial)
         self.driver.close()
     def window(self):
         if (len(self.driver.window_handles)) == 2:
@@ -222,6 +229,16 @@ class ConsultaSipen:
         data = data + datetime.timedelta(days=-(int(prazo))+1)
         return data.strftime("%d/%m/%Y")
 
+    def proximo_dia_util(self, data):
+        if data.weekday() == 5:
+            data += datetime.timedelta(days=2)
+        else:
+            data += datetime.timedelta(days=1)
+        if data in holidays.country_holidays(country='Brazil', years=data.year).keys():
+            data += datetime.timedelta(days=1)
+            if data.weekday() == 5:
+                data = data + datetime.timedelta(days=2)
+        return data
     @staticmethod
     def ultimo_dia_util():
         hoje = datetime.datetime.now()
