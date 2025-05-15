@@ -35,7 +35,8 @@ consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?metho
 
 # Seletores
 cliente = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(3) > td:nth-child(2)"
-data_vencimento = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(11) > td:nth-child(2)"
+vencimento_seletor2 = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(12) > td:nth-child(2)"
+vencimento_seletor = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(11) > td:nth-child(2)"
 availiacao = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(8) > td:nth-child(2)"
 emprestimo = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(9) > td:nth-child(2)"
 avaliador = "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > form > table:nth-child(62) > tbody > tr:nth-child(22) > td:nth-child(2)"

@@ -1,9 +1,10 @@
 import os
 import pathlib
 from time import sleep
-
+import pyautogui as pa
 import holidays
 from selenium import webdriver
+from selenium.webdriver import FirefoxProfile
 # from selenium.webdriver.chrome.webdriver import *
 from selenium.webdriver.firefox.webdriver import *
 # from selenium.common import TimeoutException
@@ -14,7 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import models.SeletoresRelatorios as s
 from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, cpf_selector, \
-    situacao, modalidade
+    situacao, modalidade, vencimento_seletor, vencimento_seletor2
 from models.utils import *
 
 
@@ -68,10 +69,26 @@ class Sipen:
 
     # @threaded
     def chama_driver(self, head: bool = False) -> None:
-        profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "sipen")
+        profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "firefox")
         options = webdriver.FirefoxOptions()
-        options.add_argument(
-            r"user-data-dir={}".format(profile))
+        # options.add_argument("-profile")
+        # options.add_argument(profile)
+        firefox_profile = FirefoxProfile()
+        # firefox_profile.set_preference("browser.download.folderList", 2)
+        # firefox_profile.set_preference("browser.download.dir", downloaddir)
+        # firefox_profile.set_preference("browser.download.useDownloadDir", True)
+        firefox_profile.set_preference("browser.download.viewableInternally.enabledTypes", "")
+        firefox_profile.set_preference("browser.download.manager.useWindow", False)
+        firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
+        firefox_profile.set_preference("browser.download.manager.closeWhenDone", True);
+        firefox_profile.set_preference('browser.helperApps.neverAsk.openFile', "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        # firefox_profile.set_preference()
+        # firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk",
+        #                       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        options.profile = firefox_profile
+            # r"user-data-dir={}".format(profile))
         # options.headless = False
         # options.browser_version = "107"
         # options.add_argument("disable-infobars")
@@ -119,8 +136,12 @@ class Sipen:
         self.pesquisa_seletor(contratos_ativos, 5).click()
         self.driver.find_element(By.CSS_SELECTOR, confirma_inventario).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
+        sleep(0.5)
         self.driver.find_element(By.CSS_SELECTOR, "#btnExportar").click()
-        sleep(.2)
+        sleep(3)
+        pa.press('enter')
+        sleep(1)
+
         self.download_wait()
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -162,12 +183,12 @@ class Sipen:
         except FileNotFoundError:
             return False
 
-    def atualizar(self):
+    def atualizar(self, forcar=False):
         while self.driver is None:
             sleep(1)
 
         try:
-            if self.driver.find_element(By.CSS_SELECTOR, s.menu) is not None:
+            if self.driver.find_element(By.CSS_SELECTOR, s.menu) is not None: 
                 self.login()
         except:
             self.login()
@@ -183,9 +204,9 @@ class Sipen:
             data_anterior = pesquisa_data_atualizacao(i['Nr. Contrato'])
             if data_anterior is not None:
                 data_anterior = datetime.datetime.strptime(data_anterior.split(" ")[0], "%Y-%m-%d")
-
-                if data_anterior == hoje:
-                    continue
+                if not forcar:
+                    if data_anterior == hoje:
+                        continue
             # WebDriverWait(driver, 10).until(ec.invisibility_of_element_located((By.CSS_SELECTOR, usuario)))
             try:
                 self.situacao(numero=i['Nr. Contrato'],
@@ -216,7 +237,15 @@ class Sipen:
         cpf = cpf.replace(".", "").replace("-", "")
         _situacao = self.pesquisa_seletor(situacao, 5).text
         _modalidade = int(self.pesquisa_seletor(modalidade, 5).text)
+        vencimento = self.pesquisa_seletor(vencimento_seletor, 5).text
+        # vencimento = datetime.datetime.strptime(vencimento, '%d/%m/%Y')
+        if "R$" in vencimento:
+            vencimento = self.pesquisa_seletor(
+                selector=vencimento_seletor2,
+                tempo=5
+            ).text
         vencimento = datetime.datetime.strptime(vencimento, '%d/%m/%Y')
+
         emissao = datetime.datetime.strptime(emissao, '%d/%m/%Y')
         try:
             inserir_contrato(numero=numero,

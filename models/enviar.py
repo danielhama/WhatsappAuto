@@ -41,7 +41,7 @@ class EnviaMensagem:
     def chama_driver(self, head: bool = True) -> None:
 
         profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "wpp")
-        options = webdriver.ChromeOptions()
+        options = webdriver.FirefoxOptions()
         options.add_argument(
             r"user-data-dir={}".format(profile))
         # options.user_data_dir = profile

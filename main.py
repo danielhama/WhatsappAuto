@@ -1406,12 +1406,12 @@ class Whats(App, ProgBar):
         self.senha = senha
 
     def guarda_penhor(self, login, senha):
-        self.login = login
-        self.set_login(login, senha)
+        if self.login is None and self.senha is None:
+            self.set_login(login, senha)
         self.dismiss_popup()
 
         try:
-            guarda = GuardaPenhor(login, senha, "")
+            guarda = GuardaPenhor(self.login, self.senha, "")
 
             if guarda.envia():
                 self.root.ids.right_content.text = "Finalizado envio com sucesso"
@@ -1428,7 +1428,8 @@ class Whats(App, ProgBar):
             pass
 
     def buscar_novos(self, login, senha):
-        self.set_login(login, senha)
+        if self.login is None and self.senha is None:
+            self.set_login(login, senha)
         try:
             novos = ConsultaSipen(login=self.login,
                                   senha=self.senha,
@@ -1881,10 +1882,13 @@ class Whats(App, ProgBar):
         content.populate_contratos()
 
     def exibir_login(self, function):
-        content = BoxLogin(function)
-        self._popup = Popup(title="Login", content=content,
-                            size_hint=(0.3, 0.35))
-        self._popup.open()
+        if self.login is None and self.senha is None:
+            content = BoxLogin(function)
+            self._popup = Popup(title="Login", content=content,
+                                size_hint=(0.3, 0.35))
+            self._popup.open()
+        else:
+            function(self.login, self.senha)
 
 
 class BoxLogin(BoxLayout):

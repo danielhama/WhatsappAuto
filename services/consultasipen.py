@@ -1,13 +1,10 @@
 import datetime
-import os
-from getpass import getpass
 from time import sleep
 
 import holidays
 import xlwings as xw
 from selenium import webdriver
 from selenium.common import NoSuchElementException, TimeoutException, NoSuchFrameException
-from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
@@ -48,8 +45,8 @@ class ConsultaSipen:
                 return True
             except:
                 return False
-        else:
-            self.acessar_relatorio(link, seletor)
+        # else:
+        #     self.acessar_relatorio(link, seletor)
     def set_janela(self):
         self.janela_atual = self.driver.current_window_handle
 

@@ -37,6 +37,7 @@ class GuardaPenhor(ConsultaSipen):
             menuIrPara('/CarregarConfirmaEntregaGarantiasPVRETPV.do?method=carregar')
             """
                                        )
+            sleep(2)
             self.mudar_frame()
             # self.pesquisa_seletor(
             #     "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > form > table > tbody > tr:nth-child(1) > td:nth-child(2) > input.ObjForm",
@@ -53,6 +54,7 @@ class GuardaPenhor(ConsultaSipen):
                                                 }
                                                 s_Pesquisar()
             """)
+            sleep(1)
             self.driver.execute_script("""function s_Emitir_Relatorio(){
                                                 if( document.forms[0].numeroUnidadeOrigem.value == "" ){
                                                     alert("SELECIONE UM ITEM DA LISTA.");
@@ -77,7 +79,7 @@ class GuardaPenhor(ConsultaSipen):
                                             s_Emitir_Relatorio()
                                             """)
             try:
-                sleep(1)
+                sleep(5)
                 self.driver.switch_to.alert.accept()
                 self.driver.close()
                 return True
@@ -85,10 +87,12 @@ class GuardaPenhor(ConsultaSipen):
                 self.driver.switch_to.default_content()
                 self.driver.switch_to.frame("principal")
                 self.pesquisa_seletor("#btnConfirmar", 5).click()
+                sleep(1)
                 alerta = self.driver.switch_to.alert.text
                 self.driver.switch_to.alert.accept()
                 if "sucesso" in alerta:
                     self.pesquisa_seletor("#botaoImprimir > table > tbody > tr > td > input", 5).click()
+                    sleep(2)
                     return True
         except Exception:
             logging.basicConfig(filename='erro.log', level=logging.ERROR)
@@ -117,7 +121,7 @@ class GuardaPenhor(ConsultaSipen):
             """
                                        )
             try:
-                sleep(1)
+                sleep(3)
                 self.driver.switch_to.alert.accept()
                 return True
             except:
@@ -138,13 +142,15 @@ class GuardaPenhor(ConsultaSipen):
                                             }
                                             s_Confirmar()
                                             """)
-                sleep(1)
+                sleep(3)
                 alerta = self.driver.switch_to.alert.text
                 self.driver.switch_to.alert.accept()
                 if "SUCESSO" in alerta:
                     self.mudar_frame()
-                    self.pesquisa_seletor("#botaoImprimir > table > tbody > tr > td > img", 5).click()
+                    self.pesquisa_seletor("#botaoImprimir > table > tbody > tr > td > img", 10).click()
+                    sleep(5)
                     return True
+
         except Exception as e:
             print(e)
             return False
