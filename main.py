@@ -46,7 +46,7 @@ Config.set('graphics', 'width', '1280')
 Config.set('graphics', 'height', '720')
 
 # logging.basicConfig(filename='/models/app.log', level=logging.INFO)
-logging.basicConfig(level=logging.INFO, filename="programa.log", format="%(asctime)s - %(levelname)s - %(message)s")
+# logging.basicConfig(level=logging.INFO, filename="programa.log", format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
@@ -1297,13 +1297,53 @@ class Whats(App, ProgBar):
         self.clientes_hoje = None
         self.login = None
         self.senha = None
+        self._logger_configure()
 
     def on_start(self):
 
         try:
             mkdir(path.join(path.expanduser('~'), 'whatsrelatorios'))
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
+
+    def _logger_configure(self):
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        LOG_DIR = os.path.join(BASE_DIR, "logs")
+
+        if not os.path.exists(LOG_DIR):
+            os.makedirs(LOG_DIR)
+
+        log_filename = os.path.join(
+            LOG_DIR,
+            datetime.now().strftime("%Y-%m-%d.log")
+        )
+
+        self.logger = logging.getLogger("chamafila")
+        self.logger.setLevel(logging.INFO)
+
+        # evita duplicação de handlers
+        if not self.logger.handlers:
+            formatter = logging.Formatter(
+                "%(asctime)s - %(levelname)s - %(message)s"
+            )
+
+            # arquivo
+            file_handler = logging.FileHandler(
+                log_filename, encoding="utf-8"
+            )
+            file_handler.setFormatter(formatter)
+
+            # terminal
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+
+            self.logger.addHandler(file_handler)
+            self.logger.addHandler(console_handler)
+
+        self.logger.info("=" * 60)
+        self.logger.info("INÍCIO DA EXECUÇÃO")
+        self.logger.info("=" * 60)
 
     def build(self):
         self.evento1 = None
@@ -1321,9 +1361,7 @@ class Whats(App, ProgBar):
         try:
             self.worker.envio_msg.fecha_driver()
         except Exception as e:
-            logging.basicConfig(filename='erro.log',
-                                level=logging.ERROR)
-            pass
+            self.logger.exception(str(e))
         try:
             if self.worker is None:
                 self.worker = EventLoopWorker()
@@ -1336,7 +1374,7 @@ class Whats(App, ProgBar):
             #     if self.headless:
             #         Clock.schedule_once(self.code, 0.5)
         except Exception as erro_chama:
-            logging.exception(str(erro_chama))
+            self.logger.exception(str(erro_chama))
             self.root.ids.right_content.text = str(erro_chama)
 
     def code(self, dt=None):
@@ -1346,7 +1384,7 @@ class Whats(App, ProgBar):
         try:
             self.gera_qrcode()
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self._popup1.dismiss()
 
     def update(self):
@@ -1367,7 +1405,7 @@ class Whats(App, ProgBar):
                 self.root.ids.right_content.text = 'Falha na leitura do QRcode, abra novamente o Web Whats\n\nCaso a falha persista feche e abra o app novamente, e mantenha seu celular conectado à internet'
                 return
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self._popup1.dismiss()
             Clock.unschedule(self.verifica_data)
             WebDriverWait(self.worker.envio_msg.driver, 20).until(
@@ -1386,7 +1424,7 @@ class Whats(App, ProgBar):
             self._popup1.open()
             self.update()
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             Clock.schedule_once(self.code, 2)
 
     def next(self, dt):
@@ -1483,7 +1521,7 @@ class Whats(App, ProgBar):
                 self.mensagem = leia_texto('vencimento')
                 self.root.ids.left_content.text = self.mensagem
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 # self.mensagem = None
                 self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão"
         elif comando == 'Margem':
@@ -1493,7 +1531,7 @@ class Whats(App, ProgBar):
                 self.root.ids.left_content.text = self.mensagem
 
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 # self.mensagem = None
                 self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão"
         elif comando == 'Vencidos':
@@ -1502,7 +1540,7 @@ class Whats(App, ProgBar):
                 self.mensagem = leia_texto('vencidos')
                 self.root.ids.left_content.text = self.mensagem
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 # self.mensagem = None
                 self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão"
         elif comando == 'Leilao':
@@ -1512,7 +1550,7 @@ class Whats(App, ProgBar):
                 self.root.ids.left_content.text = self.mensagem
 
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 # self.mensagem = None
                 self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão"
         elif comando == 'msg2':
@@ -1521,7 +1559,7 @@ class Whats(App, ProgBar):
                 self.mensagem = leia_texto('msg2')
                 self.root.ids.left_content.text = self.mensagem
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
 
                 # self.mensagem = None
                 self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão"
@@ -1535,7 +1573,7 @@ class Whats(App, ProgBar):
             salva_texto(texto, self.nome_arquivo)
             self.root.ids.right_content.text = "Mensagem salva com sucesso"
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
 
             self.root.ids.right_content.text = 'Selecione uma opção em *Mensagem* antes de salvar, esta mensagem será salva para utlização futura'
 
@@ -1556,7 +1594,7 @@ class Whats(App, ProgBar):
         try:
             self.worker.clientes = clientes
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = "Escolha um arquivo com base de clientes"
             return
         if self.worker.envio_msg.driver == None:
@@ -1581,7 +1619,7 @@ class Whats(App, ProgBar):
         try:
             self.lista_sem_whats = lista_Telefones(0)
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = 'Ainda não existe lista de telefones sem Whatsapp'
             return
         if self.worker.envio_msg.driver == None:
@@ -1609,7 +1647,7 @@ class Whats(App, ProgBar):
             # self.qtd_teste = len(self.clientes)
             # self.it_importados = iter(self.clientes)
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Importe um arquivo csv do APP Bezel com os clientes para testar se os telefones tem Whatsapp antes! {e}"
             return
         if self.worker.envio_msg.driver == None:
@@ -1625,6 +1663,35 @@ class Whats(App, ProgBar):
 
         self.worker.start_teste_telefone()
 
+
+    def cria_iter_atualizacao(self, clientes, dt=None):
+        """Cria um iterável a partir da lista de clientes, e inicializa as váriaveis entes do envio da mensagens"""
+        if not self.worker.msg:
+            self.set_atalho()
+            self.root.ids.right_content.text = "Salve uma mensagem, você pode salvar até 5 mensagens padrão antes de enviar"
+            return
+
+        try:
+            self.worker.clientes = clientes
+        except Exception as e:
+            self.logger.exception(str(e))
+            self.root.ids.right_content.text = "Escolha um arquivo com base de clientes"
+            return
+        if self.worker.envio_msg.driver == None:
+            self.worker.envio_msg.chama_driver(False)
+
+        self.evento4 = True
+        self.puopen()
+        self.progress_bar.value = 0
+        self.value = 100 / len(clientes)
+        self.contador = 0
+        self.inicio = time.time()
+        self.qtd = len(clientes)
+        self.worker.envio_msg.sem_whats = []
+        try:
+            self.worker.start()
+        except AssertionError as e:
+            self.root.ids.right_content.text = "Processo iniciado aguarde"
     def somente_teste(self, dt=None):
         """Faz o teste dos telefones importados verificando se o número possui whatsapp pelo campo de envia mensagem, caso o número não possua whatsapp é apresentado
         mensagem de número inválido"""
@@ -1644,7 +1711,7 @@ class Whats(App, ProgBar):
             self.root.ids.progbar.value += self.value
             self.root.ids.right_content.text = f"Testando telefone {self.cliente['Telefones']} do cliente {self.cliente['Nome']}\n AGUARDE!!!\n{self.contador} / {len(self.clientes)}"
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.worker.envio_msg.is_connected()
 
         if self.evento4 is False:
@@ -1665,7 +1732,7 @@ class Whats(App, ProgBar):
             self.cria_iter(self.clientes_hoje)
             # self.clientes_hoje
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = "Selecione um arquivo do APP Bezel antes de tentar enviar, esta opção " \
                                                "filtra os clientes com contratos vencendo no dia, para funcionar é " \
                                                "necessária a importação de um relatório com todos os clientes, " \
@@ -1685,7 +1752,7 @@ class Whats(App, ProgBar):
             clientes_importados = unique_list
             self.root.ids.right_content.text = f"{len(clientes_importados)} clientes com contratos vencendo hoje"
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Erro na filtragem {e}"
 
     @threaded
@@ -1697,7 +1764,7 @@ class Whats(App, ProgBar):
                 self.clientes_hoje = None
                 self.clientes_hoje = listar_Clientes_telefone_envio()
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
                 return
             global clientes_importados
@@ -1707,7 +1774,7 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos'
 
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Erro na filtragem {e}"
 
     @threaded
@@ -1718,7 +1785,7 @@ class Whats(App, ProgBar):
                 self.clientes_hoje = None
                 self.clientes_hoje = filtra_calculo_margem()
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 self.root.ids.right_content.text = f'Data em Formato desconhecido {e}'
                 return
             global clientes_importados
@@ -1728,7 +1795,7 @@ class Whats(App, ProgBar):
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com margem maior que os juros para 30 dias\n\nEsta opção filtra apenas os contratos em que o valor da margem é superior ao valor dos juros com valor líquido maior que R$ 500,00\nCaso queira pode importar um relatório de margem da bezel'
 
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Erro ao filtrar clientes com margem {e}"
 
     def filtra_licitacao(self):
@@ -1738,7 +1805,7 @@ class Whats(App, ProgBar):
                 self.clientes_hoje = None
                 self.clientes_hoje = listar_Contratos_licitacao()
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
                 return
             global clientes_importados
@@ -1747,7 +1814,7 @@ class Whats(App, ProgBar):
             # self.imprime_importados()
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos em licitação'
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Banco de dados ainda não existe, importe um arquivo primeiro {e}"
     def filtra_vencidos_30dias(self):
         try:
@@ -1757,7 +1824,7 @@ class Whats(App, ProgBar):
                 self.clientes_hoje = None
                 self.clientes_hoje = listar_Clientes_telefone_envio()
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 self.root.ids.right_content.text = 'Data em Formato desconhecido, digite uma data no formato dd/mm/aaaa'
                 return
             global clientes_importados
@@ -1766,7 +1833,7 @@ class Whats(App, ProgBar):
             # self.imprime_importados()
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com contratos vencidos há mais de 30 dias'
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = f"Banco de dados ainda não existe, importe um arquivo primeiro {e}"
 
     def filtra_data(self):
@@ -1778,13 +1845,13 @@ class Whats(App, ProgBar):
                 clientes_importados = self.clientes_hoje
                 # self.imprime_importados()
             except Exception as e:
-                logging.exception(str(e))
+                self.logger.exception(str(e))
                 self.root.ids.right_content.text = 'Nada encontrado'
                 return
             self.root.ids.right_content.text = f'{len(self.clientes_hoje)} clientes com nome/data  {self.root.ids.middle_content.text}\nEsta opção filtra contratos com vencimento no dia digitado, use o formato DD/MM/AAAA, ou pelo NOME do cliente\nPode clicar enter com o campo de pesquisa em branco para mostrar todos os clientes.\n\nCliente em exibir para mostrar os clientes'
 
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = "Base de dados ainda não existe, importe uma base de dados primeiro"
 
     def parar(self):
@@ -1814,7 +1881,7 @@ class Whats(App, ProgBar):
 
             self.dismiss_popup()
         except Exception as e:
-            logging.exception(str(e))
+            self.logger.exception(str(e))
             return
 
     def on_stop(self):
@@ -1822,7 +1889,7 @@ class Whats(App, ProgBar):
         # try:
         #     remove('qrcode.jpg')
         # except Exception as e:
-        #     logging.exception(str(e))
+        #     self.logger.exception(str(e))
 
     def atualiza_sync(self, login, senha):
         asyncio.run(self.atualiza(login, senha))
@@ -1857,7 +1924,7 @@ class Whats(App, ProgBar):
 
             self.root.ids.right_content.text = "Contratos atualizados com sucesso"
         except Exception as e:
-            logging.basicConfig(filename='erro.log', level=logging.ERROR, errors=str(e))
+            self.logger.exception(str(e))
             self.root.ids.right_content.text = str(e)
 
         finally:
@@ -1898,6 +1965,5 @@ class BoxLogin(BoxLayout):
 
 
 if __name__ == '__main__':
-    logging.info("Starting")
     whats = Whats()
     whats.run()

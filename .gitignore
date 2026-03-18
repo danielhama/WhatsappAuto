@@ -1,5 +1,7 @@
 models/__pycache__/
 .idea
+profile/
+log/
 geckodriver
 geckodriver.log
 qrcode.jpg
@@ -7,5 +9,5 @@ app.log
 erro.log
 teste.py
 models/app.log
-profile/
-
+*.pyc
+*.log

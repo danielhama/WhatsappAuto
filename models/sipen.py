@@ -1,14 +1,12 @@
 import os
+import tempfile
 import pathlib
 from time import sleep
 import pyautogui as pa
 import holidays
 from selenium import webdriver
 from selenium.webdriver import FirefoxProfile
-# from selenium.webdriver.chrome.webdriver import *
 from selenium.webdriver.firefox.webdriver import *
-# from selenium.common import TimeoutException
-# from selenium.common import TimeoutException, NoSuchWindowException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,9 +15,8 @@ import models.SeletoresRelatorios as s
 from models.Seletores import data_inventario, usuario, contratos_ativos, confirma_inventario, cpf_selector, \
     situacao, modalidade, vencimento_seletor, vencimento_seletor2
 from models.utils import *
+import datetime
 
-
-# import undetected_chromedriver as uc
 
 
 class Sipen:
@@ -39,6 +36,8 @@ class Sipen:
         self.sipen = "http://sipen.caixa/sipen"
         self.pesquisa_cliente = "/CarregarManterPesquisaCliente.do?"
         self.consulta_contrato = "https://sipen.caixa/sipen/ListarInformacaoContrato.do?method=carregar&numeroContrato="
+        self._logger_configure()
+
 
     def login(self) -> bool:
         if self.matricula is not None and self.senha is not None:
@@ -67,36 +66,92 @@ class Sipen:
         except:
             return False
 
-    # @threaded
-    def chama_driver(self, head: bool = False) -> None:
-        profile = os.path.join(r'C:\Users\c084029\PycharmProjects\WhatsappAuto', "profile", "firefox")
-        options = webdriver.FirefoxOptions()
-        # options.add_argument("-profile")
-        # options.add_argument(profile)
-        firefox_profile = FirefoxProfile()
-        # firefox_profile.set_preference("browser.download.folderList", 2)
-        # firefox_profile.set_preference("browser.download.dir", downloaddir)
-        # firefox_profile.set_preference("browser.download.useDownloadDir", True)
-        firefox_profile.set_preference("browser.download.viewableInternally.enabledTypes", "")
-        firefox_profile.set_preference("browser.download.manager.useWindow", False)
-        firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
-        firefox_profile.set_preference("browser.download.manager.closeWhenDone", True);
-        firefox_profile.set_preference('browser.helperApps.neverAsk.openFile', "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        # firefox_profile.set_preference()
-        # firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk",
-        #                       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    def _logger_configure(self):
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-        options.profile = firefox_profile
-            # r"user-data-dir={}".format(profile))
-        # options.headless = False
-        # options.browser_version = "107"
-        # options.add_argument("disable-infobars")
-        # options.add_argument("start-maximized")
-        if head:
-            options = webdriver.FirefoxOptions()
+        LOG_DIR = os.path.join(BASE_DIR, "logs")
+
+        if not os.path.exists(LOG_DIR):
+            os.makedirs(LOG_DIR)
+
+        log_filename = os.path.join(
+            LOG_DIR,
+            datetime.datetime.now().strftime("%Y-%m-%d.log")
+        )
+
+        self.logger = logging.getLogger("chamafila")
+        self.logger.setLevel(logging.INFO)
+
+        # evita duplicação de handlers
+        if not self.logger.handlers:
+            formatter = logging.Formatter(
+                "%(asctime)s - %(levelname)s - %(message)s"
+            )
+
+            # arquivo
+            file_handler = logging.FileHandler(
+                log_filename, encoding="utf-8"
+            )
+            file_handler.setFormatter(formatter)
+
+            # terminal
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+
+            self.logger.addHandler(file_handler)
+            self.logger.addHandler(console_handler)
+
+        self.logger.info("=" * 60)
+        self.logger.info("Iniciando Sipen")
+        self.logger.info("=" * 60)
+
+    # @threaded
+    def chama_driver(self, head: bool = True) -> None:
+        options = webdriver.FirefoxOptions()
+        profile_dir = r"C:\Users\c084029\PycharmProjects\WhatsappAuto\profile\firefox"
+        MIME_TYPES = ",".join([
+            "application/vnd.ms-excel",
+            "application/msexcel",
+            "application/x-msexcel",
+            "application/x-ms-excel",
+            "application/x-excel",
+            "application/x-dos_ms_excel",
+            "application/xls",
+            "application/x-xls",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ])
+
+        prefs = {
+            "browser.download.folderList": 2,
+            "browser.download.dir": "downloaddir",
+            "browser.download.useDownloadDir": True,
+            "browser.download.viewableInternally.enabledTypes": "",
+            "browser.download.manager.useWindow": False,
+            "browser.download.manager.showWhenStarting": False,
+            "browser.download.manager.closeWhenDone": True,
+            "browser.download.panel.shown": False,
+            "browser.helperApps.alwaysAsk.force": False,
+            "browser.helperApps.neverAsk.openFile": MIME_TYPES,
+            "browser.helperApps.neverAsk.saveToDisk": MIME_TYPES,
+        }
+
+        # Grava user.js manualmente no disco
+        user_js_path = os.path.join(profile_dir, "user.js")
+        with open(user_js_path, "w") as f:
+            for key, value in prefs.items():
+                if isinstance(value, bool):
+                    f.write(f'user_pref("{key}", {"true" if value else "false"});\n')
+                elif isinstance(value, int):
+                    f.write(f'user_pref("{key}", {value});\n')
+                else:
+                    f.write(f'user_pref("{key}", "{value}");\n')
+
+        options.add_argument("-profile")
+        options.add_argument(profile_dir)
+
+        if not head:
             options.add_argument("-headless")
-        # self.driver = uc.Chrome(driver_executable_path=r"C:\Users\c084029\Downloads\chromedriver_win32\chromedriver.exe", options=options)
+
         self.driver = webdriver.Firefox(
             service=Service(
             executable_path=r"C:\Users\c084029\.wdm\drivers\chromedriver\win64\129.0.6668.71\chromedriver-win32\geckodriver.exe",
@@ -137,10 +192,47 @@ class Sipen:
         self.driver.find_element(By.CSS_SELECTOR, confirma_inventario).click()
         self.driver.switch_to.window(self.driver.window_handles[1])
         sleep(0.5)
-        self.driver.find_element(By.CSS_SELECTOR, "#btnExportar").click()
-        sleep(3)
-        pa.press('enter')
+        # self.driver.find_element(By.CSS_SELECTOR, "#btnExportar").click()
+        # sleep(3)
+        # pa.press('enter')
+        # sleep(1)
+        # 1. Intercepta a URL que o botão geraria
+        url_download = self.driver.execute_script("""
+            // Sobrescreve o window.open temporariamente para capturar a URL
+            var captured_url = null;
+            var original_open = window.open;
+            window.open = function(url) { captured_url = url; };
+
+            // Dispara o clique normalmente
+            document.querySelector('#btnExportar').click();
+
+            // Restaura o window.open original
+            window.open = original_open;
+
+            return captured_url;
+        """)
+
         sleep(1)
+        url_base = "https://sipen.caixa"
+        url_download = url_base + url_download
+
+
+        # 2. Navega direto na URL — sem nova janela, sem diálogo
+        self.driver.get(url_download)
+        timeout = 15
+        start = datetime.time()
+        while datetime.time() - start < timeout:
+            # Tenta localizar o botão "Salvar arquivo" na tela
+            btn = pa.locateOnScreen('salvar_btn.png', confidence=0.8)
+            if btn:
+                pa.click(btn)
+                break
+            sleep(0.5)
+        else:
+            # Fallback: só pressiona Enter (botão padrão já é Salvar)
+            pa.press('enter')
+
+        sleep(3)
 
         self.download_wait()
         self.driver.close()
@@ -189,11 +281,11 @@ class Sipen:
 
         try:
             if self.driver.find_element(By.CSS_SELECTOR, s.menu) is not None: 
-                self.login()
+                self.login() 
         except:
             self.login()
         inventarioDF = pd.read_excel(self.inventario_path,
-                                     header=3)
+                                     header=3, engine='xlrd')
         hoje = datetime.datetime.today()
         hoje = datetime.datetime(year=hoje.year,
                                  month=hoje.month,
@@ -244,7 +336,10 @@ class Sipen:
                 selector=vencimento_seletor2,
                 tempo=5
             ).text
-        vencimento = datetime.datetime.strptime(vencimento, '%d/%m/%Y')
+        try:
+            vencimento = datetime.datetime.strptime(vencimento, '%d/%m/%Y')
+        except:
+            vencimento = datetime.datetime.today()
 
         emissao = datetime.datetime.strptime(emissao, '%d/%m/%Y')
         try:

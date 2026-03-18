@@ -143,6 +143,7 @@ class GuardaPenhor(ConsultaSipen):
                                             s_Confirmar()
                                             """)
                 sleep(3)
+
                 alerta = self.driver.switch_to.alert.text
                 self.driver.switch_to.alert.accept()
                 if "SUCESSO" in alerta:

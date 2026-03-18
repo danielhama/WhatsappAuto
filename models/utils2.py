@@ -51,6 +51,8 @@ def filtra_data(pesquisa):
                         Clientes1.append(cliente)
                 return Clientes1
             except Exception as e:
+
+
                 logging.exception(str(e))
                 Clientes1 = []
                 for cliente in Clientes:
